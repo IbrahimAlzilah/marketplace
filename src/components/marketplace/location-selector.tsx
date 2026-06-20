@@ -48,7 +48,7 @@ export function LocationSelector({ open, onOpenChange }: LocationSelectorProps) 
               key={addr.id}
               onClick={() => handleSelect(addr.label, addr.city, addr.district)}
               className={cn(
-                "flex w-full items-start gap-3 rounded-lg border p-3 text-start transition-colors hover:bg-accent",
+                "flex w-full items-start gap-3 rounded-lg border p-3 text-start transition-colors hover:bg-primary/5",
                 district === addr.district && city === addr.city && "border-primary bg-primary/5"
               )}
             >

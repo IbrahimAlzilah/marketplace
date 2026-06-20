@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
-import { ArrowRight, Star, Wallet } from "lucide-react";
+import { ChevronRight, Star, Wallet } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -52,7 +52,7 @@ export function HomePage() {
               <Button asChild className="mt-4 w-fit" size="lg">
                 <Link href={banners[activeBanner].link}>
                   {tc("viewAll")}
-                  <ArrowRight className="h-4 w-4" />
+                  <ChevronRight className="size-4 rtl:rotate-180" />
                 </Link>
               </Button>
             </div>
@@ -117,7 +117,7 @@ export function HomePage() {
             <Link
               key={cat.id}
               href={`/products?category=${cat.slug}`}
-              className="flex flex-col items-center gap-2 rounded-xl border bg-card p-3 transition-shadow hover:shadow-md lg:p-4"
+              className="flex flex-col items-center gap-2 rounded-xl border bg-card p-3 transition-shadow hover:shadow-xs lg:p-4"
             >
               <span className="text-2xl lg:text-3xl">{cat.icon}</span>
               <span className="text-center text-xs font-medium leading-tight lg:text-sm">
@@ -211,6 +211,66 @@ export function HomePage() {
           />
         </section>
       )}
+
+      {/* Download App Section */}
+      <section className="container-marketplace my-8 md:my-12">
+        <div className="relative overflow-visible rounded-3xl bg-secondary/90 px-6 py-12 sm:px-12 md:px-16 md:py-20 lg:py-24 text-white">
+          {/* Main flex container for layout */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 md:pe-[280px] lg:pe-[320px]">
+            <div className="max-w-xl text-center md:text-start rtl:md:text-start">
+              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
+                {t("downloadTitle")}
+              </h2>
+              <p className="mt-4 text-base opacity-90 leading-relaxed md:text-lg">
+                {t("downloadSubtitle")}
+              </p>
+              <div className="flex flex-wrap gap-4 mt-8 justify-center md:justify-start">
+                <Link href="#" className="hover:opacity-90 transition-opacity">
+                  <Image
+                    src="/images/app-store.svg?v=1"
+                    alt={t("appStore")}
+                    width={162}
+                    height={48}
+                    className="h-12 w-auto"
+                  />
+                </Link>
+                <Link href="#" className="hover:opacity-90 transition-opacity">
+                  <Image
+                    src="/images/google-play.svg?v=1"
+                    alt={t("googlePlay")}
+                    width={162}
+                    height={48}
+                    className="h-12 w-auto"
+                  />
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* 3D phone mockup overlay for desktop */}
+          <div className="absolute hidden md:block -top-10 -bottom-10 end-8 lg:end-16 w-[260px] lg:w-[300px] pointer-events-none drop-shadow-2xl">
+            <Image
+              src="/images/mockup-app.png?v=1"
+              alt="Yusur App Mockup"
+              fill
+              className="object-contain"
+              sizes="(max-width: 1024px) 260px, 300px"
+              priority
+            />
+          </div>
+
+          {/* Mobile phone mockup inside regular layout flow */}
+          <div className="md:hidden flex justify-center mt-8 w-full max-w-[200px] mx-auto aspect-[9/18.5] relative drop-shadow-xl h-96">
+            <Image
+              src="/images/mockup-app.png?v=1"
+              alt="Yusur App Mockup"
+              fill
+              className="object-contain"
+              sizes="200px"
+            />
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

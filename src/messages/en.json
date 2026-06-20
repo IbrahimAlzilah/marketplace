@@ -66,7 +66,11 @@
     "loyaltyHighlight": "Earn points with every order",
     "walletHighlight": "Wallet balance available",
     "points": "{count} points",
-    "balance": "Balance: {amount}"
+    "balance": "Balance: {amount}",
+    "downloadTitle": "Download YUSUR App Now",
+    "downloadSubtitle": "Order and schedule all your pharmacy needs — prescriptions, general medicines, personal care, and beauty products — to be delivered from the nearest certified pharmacy right to your doorstep.",
+    "appStore": "Download on the App Store",
+    "googlePlay": "Get it on Google Play"
   },
   "products": {
     "title": "All Products",

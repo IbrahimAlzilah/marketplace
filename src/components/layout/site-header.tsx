@@ -112,7 +112,7 @@ export function SiteHeader() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t("search")}
-                className="h-11 ps-10 pe-4"
+                className="h-10 ps-10 pe-4"
               />
             </div>
           </form>
@@ -230,15 +230,15 @@ export function SiteHeader() {
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className="block rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-accent"
+                className="block rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-primary/5"
               >
                 {link.label}
               </Link>
             ))}
-            <Link href="/profile" onClick={() => setMobileMenuOpen(false)} className="block rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-accent">
+            <Link href="/profile" onClick={() => setMobileMenuOpen(false)} className="block rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-primary/5">
               {t("profile")}
             </Link>
-            <button onClick={switchLocale} className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-accent">
+            <button onClick={switchLocale} className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-primary/5">
               <Globe className="size-4" />
               {locale === "en" ? "العربية" : "English"}
             </button>
