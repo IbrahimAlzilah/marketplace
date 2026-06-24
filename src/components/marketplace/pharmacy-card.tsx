@@ -25,8 +25,8 @@ export function PharmacyCard({ pharmacy, className, variant = "grid" }: Pharmacy
       <Link href={`/pharmacies/${pharmacy.slug}`}>
         <Card className={cn("overflow-hidden transition-shadow hover:shadow-sm", className)}>
           <div className="flex items-center gap-4 p-4">
-            <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg">
-              <Image src={pharmacy.logo} alt={name} fill className="object-cover" />
+            <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border bg-white">
+              <Image src={pharmacy.logo} alt={name} fill className="object-contain p-1" />
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-start justify-between gap-2">
@@ -58,14 +58,14 @@ export function PharmacyCard({ pharmacy, className, variant = "grid" }: Pharmacy
 
   return (
     <Link href={`/pharmacies/${pharmacy.slug}`}>
-      <Card className={cn("group overflow-hidden transition-shadow hover:shadow-md", className)}>
-        <div className="relative h-32 overflow-hidden">
+      <Card className={cn("group h-full overflow-hidden transition-shadow hover:shadow-md", className)}>
+        <div className="relative aspect-[16/10] overflow-hidden bg-muted">
           <Image
             src={pharmacy.cover}
             alt={name}
             fill
-            className="object-cover transition-transform group-hover:scale-105"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover object-center transition-transform duration-300 group-hover:scale-[1.03]"
+            sizes="(max-width: 640px) 85vw, (max-width: 1024px) 48vw, 25vw"
           />
           <div className="absolute start-3 top-3">
             <Badge variant={pharmacy.isOpen ? "success" : "destructive"}>
@@ -75,8 +75,8 @@ export function PharmacyCard({ pharmacy, className, variant = "grid" }: Pharmacy
         </div>
         <CardContent className="p-4">
           <div className="flex items-start gap-3">
-            <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border">
-              <Image src={pharmacy.logo} alt={name} fill className="object-cover" />
+            <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border bg-white">
+              <Image src={pharmacy.logo} alt={name} fill className="object-contain p-1" />
             </div>
             <div className="min-w-0 flex-1">
               <h3 className="font-semibold leading-tight">{name}</h3>

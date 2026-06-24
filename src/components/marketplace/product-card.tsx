@@ -41,15 +41,15 @@ export function ProductCard({ product, className }: ProductCardProps) {
           : "default";
 
   return (
-    <Card className={cn("group overflow-hidden transition-shadow hover:shadow-md", className)}>
-      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-        <Link href={`/products/${product.slug}`}>
+    <Card className={cn("group h-full overflow-hidden transition-shadow hover:shadow-md", className)}>
+      <div className="relative aspect-square overflow-hidden bg-white dark:bg-muted/30">
+        <Link href={`/products/${product.slug}`} className="block h-full">
           <Image
             src={product.image}
             alt={name}
             fill
-            className="object-cover transition-transform group-hover:scale-105"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            className="object-contain p-3 transition-transform duration-300 group-hover:scale-105 sm:p-4"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
           />
         </Link>
         <div className="absolute start-2 top-2 flex flex-col gap-1">
@@ -78,7 +78,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
       <CardContent className="p-3">
         <Link href={`/products/${product.slug}`} className="block space-y-0.5">
           <p className="text-xs text-muted-foreground">{product.brand}</p>
-          <h3 className="line-clamp-2 text-sm font-medium leading-snug">{name}</h3>
+          <h3 className="line-clamp-2 text-sm font-medium leading-snug truncate">{name}</h3>
         </Link>
         <div className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
           <Star className="h-3 w-3 fill-warning text-warning" />
@@ -116,7 +116,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
 export function ProductCardSkeleton() {
   return (
     <Card className="overflow-hidden">
-      <div className="aspect-[4/3] animate-pulse bg-muted" />
+      <div className="aspect-square animate-pulse bg-muted" />
       <CardContent className="space-y-2 p-3">
         <div className="h-3 w-16 animate-pulse rounded bg-muted" />
         <div className="h-4 w-full animate-pulse rounded bg-muted" />

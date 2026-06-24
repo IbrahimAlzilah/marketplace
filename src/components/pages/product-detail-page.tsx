@@ -62,8 +62,18 @@ export function ProductDetailPage({ slug }: { slug: string }) {
       {/* Desktop: 3-column Amazon-style layout */}
       <div className="grid gap-8 lg:grid-cols-12">
         {/* Left: Images */}
-        <div className="lg:col-span-5">
-          <div className="flex gap-4">
+        <div className="lg:col-span-4">
+          <div className="flex flex-col gap-4">
+            <div className="relative aspect-square flex-1 overflow-hidden rounded-xl border bg-white dark:bg-muted/30">
+              <Image
+                src={product.images[activeImage]}
+                alt={name}
+                fill
+                className="object-contain p-4 sm:p-6"
+                priority
+                sizes="(max-width: 1024px) 100vw, 40vw"
+              />
+            </div>
             <div className="hidden flex-col gap-2 sm:flex">
               {product.images.map((img, i) => (
                 <button
@@ -74,25 +84,15 @@ export function ProductDetailPage({ slug }: { slug: string }) {
                     activeImage === i ? "border-primary" : "border-transparent"
                   )}
                 >
-                  <Image src={img} alt="" fill className="object-cover" />
+                  <Image src={img} alt="" fill className="object-contain p-1" />
                 </button>
               ))}
-            </div>
-            <div className="relative aspect-square flex-1 overflow-hidden rounded-xl border bg-muted">
-              <Image
-                src={product.images[activeImage]}
-                alt={name}
-                fill
-                className="object-cover"
-                priority
-                sizes="(max-width: 1024px) 100vw, 40vw"
-              />
             </div>
           </div>
         </div>
 
         {/* Center: Info */}
-        <div className="lg:col-span-4">
+        <div className="lg:col-span-5">
           <div className="space-y-4">
             <div>
               <p className="text-sm text-muted-foreground">{product.brand}</p>

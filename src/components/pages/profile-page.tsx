@@ -19,7 +19,7 @@ export function ProfilePage() {
   return (
     <ProfileLayout title={t("title")}>
       <div className="grid gap-6 sm:grid-cols-2">
-        <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+        <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent shadow-none">
           <CardContent className="flex items-center gap-4 p-5">
             <Wallet className="h-8 w-8 text-primary" />
             <div>
@@ -31,7 +31,7 @@ export function ProfilePage() {
             </Button>
           </CardContent>
         </Card>
-        <Card className="border-secondary/20 bg-gradient-to-br from-secondary/5 to-transparent">
+        <Card className="border-secondary/20 bg-gradient-to-br from-secondary/5 to-transparent shadow-none">
           <CardContent className="flex items-center gap-4 p-5">
             <Star className="h-8 w-8 text-secondary" />
             <div>

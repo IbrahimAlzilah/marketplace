@@ -14,6 +14,7 @@ import { useRecentlyViewedStore } from "@/stores/recently-viewed-store";
 import { getProductById } from "@/lib/mock-data";
 import { formatPrice } from "@/lib/utils";
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 export function HomePage() {
   const t = useTranslations("home");
@@ -27,42 +28,47 @@ export function HomePage() {
   const recommendedProducts = products.slice(4, 12);
   const nearbyPharmacies = pharmacies.slice(0, 6);
 
+  const activeHero = banners[activeBanner];
+
   return (
     <div className="space-y-8 pb-8 lg:space-y-12">
       {/* Hero Banner */}
       <section className="container-marketplace pt-4 lg:pt-6">
-        <div className="relative overflow-hidden rounded-2xl">
-          <div className="relative aspect-[21/9] min-h-[180px] sm:aspect-[21/7] lg:aspect-[21/6]">
+        <div className="relative overflow-hidden rounded-2xl bg-muted shadow-sm">
+          <div className="relative aspect-[16/9] min-h-[200px] sm:aspect-[21/9] md:aspect-[2.8/1] lg:aspect-[3/1] lg:max-h-[400px]">
             <Image
-              src={banners[activeBanner].image}
-              alt={locale === "ar" ? banners[activeBanner].titleAr : banners[activeBanner].title}
+              src={activeHero.image}
+              alt={locale === "ar" ? activeHero.titleAr : activeHero.title}
               fill
-              className="object-cover"
               priority
-              sizes="100vw"
+              sizes="(max-width: 768px) 100vw, (max-width: 1280px) 90vw, 1440px"
+              className="object-cover object-center md:object-[75%_center]"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent" />
-            <div className="absolute inset-0 flex flex-col justify-center p-6 sm:p-10 lg:p-16">
-              <h1 className="max-w-lg text-2xl font-bold text-white sm:text-3xl lg:text-4xl">
-                {locale === "ar" ? banners[activeBanner].titleAr : banners[activeBanner].title}
+            <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/45 to-transparent md:from-black/70 md:via-black/35 md:to-transparent" />
+            <div className="absolute inset-0 flex flex-col justify-center p-5 sm:p-8 md:max-w-[55%] lg:p-12">
+              <h1 className="text-xl font-bold text-white sm:text-2xl md:text-3xl lg:text-4xl">
+                {locale === "ar" ? activeHero.titleAr : activeHero.title}
               </h1>
-              <p className="mt-2 max-w-md text-sm text-white/80 sm:text-base">
-                {locale === "ar" ? banners[activeBanner].subtitleAr : banners[activeBanner].subtitle}
+              <p className="mt-2 max-w-md text-sm text-white/90 sm:text-base">
+                {locale === "ar" ? activeHero.subtitleAr : activeHero.subtitle}
               </p>
               <Button asChild className="mt-4 w-fit" size="lg">
-                <Link href={banners[activeBanner].link}>
+                <Link href={activeHero.link}>
                   {tc("viewAll")}
                   <ChevronRight className="size-4 rtl:rotate-180" />
                 </Link>
               </Button>
             </div>
           </div>
-          <div className="absolute bottom-4 start-1/2 flex -translate-x-1/2 gap-2">
+          <div className="absolute bottom-4 start-1/2 z-10 flex -translate-x-1/2 gap-2">
             {banners.map((_, i) => (
               <button
                 key={i}
                 onClick={() => setActiveBanner(i)}
-                className={`h-2 rounded-full transition-all ${i === activeBanner ? "w-6 bg-white" : "w-2 bg-white/50"}`}
+                className={cn(
+                  "h-2 rounded-full transition-all",
+                  i === activeBanner ? "w-6 bg-white" : "w-2 bg-white/50 hover:bg-white/70"
+                )}
                 aria-label={`Banner ${i + 1}`}
               />
             ))}
@@ -70,7 +76,7 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* Wallet & Loyalty highlights - desktop row */}
+      {/* Wallet & Loyalty highlights */}
       <section className="container-marketplace">
         <div className="grid gap-4 sm:grid-cols-2">
           <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10 shadow-none">
@@ -117,7 +123,7 @@ export function HomePage() {
             <Link
               key={cat.id}
               href={`/products?category=${cat.slug}`}
-              className="flex flex-col items-center gap-2 rounded-xl border bg-card p-3 transition-shadow hover:shadow-xs lg:p-4"
+              className="flex flex-col items-center gap-2 rounded-xl border bg-card p-3 transition-shadow hover:shadow-sm lg:p-4"
             >
               <span className="text-2xl lg:text-3xl">{cat.icon}</span>
               <span className="text-center text-xs font-medium leading-tight lg:text-sm">
@@ -143,28 +149,26 @@ export function HomePage() {
         />
       </section>
 
-      {/* Promotions */}
+      {/* Special Offers */}
       <section className="container-marketplace">
         <div className="mb-4 flex items-center justify-between lg:mb-4">
           <h2 className="text-xl font-bold lg:text-2xl">{t("promotions")}</h2>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {banners.map((banner) => (
-            <Link key={banner.id} href={banner.link} className="group relative overflow-hidden rounded-xl">
-              <div className="relative aspect-[16/7]">
+            <Link
+              key={banner.id}
+              href={banner.link}
+              className="group block overflow-hidden rounded-xl border bg-muted shadow-sm transition-shadow hover:shadow-md"
+            >
+              <div className="relative aspect-[2/1] w-full sm:aspect-[5/2]">
                 <Image
                   src={banner.image}
                   alt={locale === "ar" ? banner.titleAr : banner.title}
                   fill
-                  className="object-cover transition-transform group-hover:scale-105"
-                  sizes="(max-width: 1024px) 50vw, 33vw"
+                  className="object-cover object-center transition-transform duration-300 group-hover:scale-[1.02]"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 />
-                <div className="absolute inset-0 bg-black/30" />
-                <div className="absolute inset-0 flex items-end p-4">
-                  <p className="font-semibold text-white">
-                    {locale === "ar" ? banner.titleAr : banner.title}
-                  </p>
-                </div>
               </div>
             </Link>
           ))}
@@ -182,7 +186,7 @@ export function HomePage() {
         <SectionCarousel
           items={featuredProducts}
           renderItem={(product) => <ProductCard product={product} />}
-          itemClassName="basis-[46%] sm:basis-[46%] md:basis-[31%] lg:basis-[20%]"
+          itemClassName="basis-[46%] sm:basis-[46%] md:basis-[31%] lg:basis-[20%] xl:basis-[18%]"
         />
       </section>
 
@@ -194,7 +198,7 @@ export function HomePage() {
         <SectionCarousel
           items={recommendedProducts}
           renderItem={(product) => <ProductCard product={product} />}
-          itemClassName="basis-[46%] sm:basis-[46%] md:basis-[31%] lg:basis-[20%]"
+          itemClassName="basis-[46%] sm:basis-[46%] md:basis-[31%] lg:basis-[20%] xl:basis-[18%]"
         />
       </section>
 
@@ -207,15 +211,14 @@ export function HomePage() {
           <SectionCarousel
             items={recentlyViewed.filter(Boolean) as typeof products}
             renderItem={(product) => <ProductCard product={product} />}
-            itemClassName="basis-[46%] sm:basis-[46%] md:basis-[31%] lg:basis-[20%]"
+            itemClassName="basis-[46%] sm:basis-[46%] md:basis-[31%] lg:basis-[20%] xl:basis-[18%]"
           />
         </section>
       )}
 
       {/* Download App Section */}
       <section className="container-marketplace my-8 md:my-12">
-        <div className="relative overflow-visible rounded-3xl bg-secondary/90 px-6 py-12 sm:px-12 md:px-16 md:py-20 lg:py-24 text-white">
-          {/* Main flex container for layout */}
+        <div className="relative overflow-hidden rounded-3xl bg-secondary/90 px-6 py-12 sm:px-12 md:px-16 md:py-20 lg:py-24 text-white">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 md:pe-[280px] lg:pe-[320px]">
             <div className="max-w-xl text-center md:text-start rtl:md:text-start">
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
@@ -247,26 +250,26 @@ export function HomePage() {
             </div>
           </div>
 
-          {/* 3D phone mockup overlay for desktop */}
-          <div className="absolute hidden md:block -top-10 -bottom-10 end-8 lg:end-16 w-[260px] lg:w-[300px] pointer-events-none drop-shadow-2xl">
-            <Image
-              src="/images/mockup-app.png?v=1"
-              alt="Yusur App Mockup"
-              fill
-              className="object-contain"
-              sizes="(max-width: 1024px) 260px, 300px"
-              priority
-            />
+          <div className="pointer-events-none absolute -top-6 -bottom-6 end-4 hidden w-[220px] md:block lg:end-12 lg:w-[260px]">
+            <div className="relative h-full w-full">
+              <Image
+                src="/images/mockup-app.png?v=1"
+                alt="Yusur App Mockup"
+                fill
+                className="object-contain object-bottom drop-shadow-2xl"
+                sizes="260px"
+                priority
+              />
+            </div>
           </div>
 
-          {/* Mobile phone mockup inside regular layout flow */}
-          <div className="md:hidden flex justify-center mt-8 w-full max-w-[200px] mx-auto aspect-[9/18.5] relative drop-shadow-xl h-96">
+          <div className="relative mx-auto mt-8 aspect-[9/18] w-full max-w-[180px] md:hidden">
             <Image
               src="/images/mockup-app.png?v=1"
               alt="Yusur App Mockup"
               fill
-              className="object-contain"
-              sizes="200px"
+              className="object-contain drop-shadow-xl"
+              sizes="180px"
             />
           </div>
         </div>
