@@ -26,7 +26,7 @@ export function PharmacyCard({ pharmacy, className, variant = "grid" }: Pharmacy
         <Card className={cn("overflow-hidden transition-shadow hover:shadow-sm", className)}>
           <div className="flex items-center gap-4 p-4">
             <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border bg-white">
-              <Image src={pharmacy.logo} alt={name} fill className="object-contain p-1" />
+              <Image src={pharmacy.logo} alt={name} fill className="object-contain p-1" sizes="64px" />
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-start justify-between gap-2">
@@ -76,7 +76,7 @@ export function PharmacyCard({ pharmacy, className, variant = "grid" }: Pharmacy
         <CardContent className="p-4">
           <div className="flex items-start gap-3">
             <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border bg-white">
-              <Image src={pharmacy.logo} alt={name} fill className="object-contain p-1" />
+              <Image src={pharmacy.logo} alt={name} fill className="object-contain p-1" sizes="48px" />
             </div>
             <div className="min-w-0 flex-1">
               <h3 className="font-semibold leading-tight">{name}</h3>

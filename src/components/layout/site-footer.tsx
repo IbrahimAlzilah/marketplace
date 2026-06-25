@@ -21,6 +21,7 @@ export function SiteFooter() {
                 width={120}
                 height={32}
                 className="h-8 w-auto object-contain dark:brightness-0 dark:invert"
+                style={{ width: "auto" }}
               />
             </Link>
             <p className="text-sm text-muted-foreground">{t("aboutText")}</p>

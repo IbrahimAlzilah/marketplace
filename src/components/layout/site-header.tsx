@@ -100,6 +100,7 @@ export function SiteHeader() {
               width={120}
               height={36}
               className="h-9 w-auto object-contain dark:brightness-0 dark:invert"
+              style={{ width: "auto" }}
               priority
             />
           </Link>

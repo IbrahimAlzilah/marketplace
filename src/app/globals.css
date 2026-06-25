@@ -1,8 +1,47 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Arab Kufi";
+  src: url("../../public/fonts/ArbFontsArabicKufiRegular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Arab Kufi";
+  src: url("../../public/fonts/ArbFontsArabicKufiMedium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Arab Kufi";
+  src: url("../../public/fonts/ArbFontsArabicKufiBold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Co Headline";
+  src: url("../../public/fonts/CoHeadlineTrial-Light.ttf") format("truetype");
+  font-weight: 300;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Co Headline";
+  src: url("../../public/fonts/CoHeadlineTrial-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Co Headline";
+  src: url("../../public/fonts/CoHeadlineTrial-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --font-sans: var(--font-family);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -32,6 +71,7 @@
 }
 
 :root {
+  --font-family: "Co Headline", system-ui, -apple-system, sans-serif;
   --radius: 0.75rem;
   --background: #f8fafc;
   --foreground: #0f172a;
@@ -55,6 +95,10 @@
   --success: #16a34a;
   --warning: #f59e0b;
   --info: #0284c7;
+}
+
+html[dir="rtl"] {
+  --font-family: "Arab Kufi", system-ui, -apple-system, sans-serif;
 }
 
 .dark {
@@ -85,6 +129,9 @@
 @layer base {
   * {
     @apply border-border;
+  }
+  body, input, button, select, textarea {
+    font-family: var(--font-family);
   }
   body {
     @apply bg-background text-foreground antialiased;

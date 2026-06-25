@@ -41,9 +41,9 @@ export function ProductCard({ product, className }: ProductCardProps) {
           : "default";
 
   return (
-    <Card className={cn("group h-full overflow-hidden transition-shadow hover:shadow-md", className)}>
+    <Card className={cn("group h-full overflow-hidden shadow-none", className)}>
       <div className="relative aspect-square overflow-hidden bg-white dark:bg-muted/30">
-        <Link href={`/products/${product.slug}`} className="block h-full">
+        <Link href={`/products/${product.slug}`} className="relative block h-full">
           <Image
             src={product.image}
             alt={name}

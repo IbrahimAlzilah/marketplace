@@ -218,7 +218,7 @@ export function HomePage() {
 
       {/* Download App Section */}
       <section className="container-marketplace my-8 md:my-12">
-        <div className="relative overflow-hidden rounded-3xl bg-secondary/90 px-6 py-12 sm:px-12 md:px-16 md:py-20 lg:py-24 text-white">
+        <div className="relative rounded-3xl bg-secondary/90 px-6 py-12 sm:px-12 md:px-16 md:py-20 lg:py-20 text-white">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 md:pe-[280px] lg:pe-[320px]">
             <div className="max-w-xl text-center md:text-start rtl:md:text-start">
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
@@ -230,7 +230,7 @@ export function HomePage() {
               <div className="flex flex-wrap gap-4 mt-8 justify-center md:justify-start">
                 <Link href="#" className="hover:opacity-90 transition-opacity">
                   <Image
-                    src="/images/app-store.svg?v=1"
+                    src="/images/app-store.svg"
                     alt={t("appStore")}
                     width={162}
                     height={48}
@@ -239,7 +239,7 @@ export function HomePage() {
                 </Link>
                 <Link href="#" className="hover:opacity-90 transition-opacity">
                   <Image
-                    src="/images/google-play.svg?v=1"
+                    src="/images/google-play.svg"
                     alt={t("googlePlay")}
                     width={162}
                     height={48}
@@ -253,7 +253,7 @@ export function HomePage() {
           <div className="pointer-events-none absolute -top-6 -bottom-6 end-4 hidden w-[220px] md:block lg:end-12 lg:w-[260px]">
             <div className="relative h-full w-full">
               <Image
-                src="/images/mockup-app.png?v=1"
+                src="/images/mockup-app.png"
                 alt="Yusur App Mockup"
                 fill
                 className="object-contain object-bottom drop-shadow-2xl"
@@ -265,7 +265,7 @@ export function HomePage() {
 
           <div className="relative mx-auto mt-8 aspect-[9/18] w-full max-w-[180px] md:hidden">
             <Image
-              src="/images/mockup-app.png?v=1"
+              src="/images/mockup-app.png"
               alt="Yusur App Mockup"
               fill
               className="object-contain drop-shadow-xl"
