@@ -35,14 +35,14 @@ export function HomePage() {
       {/* Hero Banner */}
       <section className="container-marketplace pt-4 lg:pt-6">
         <div className="relative overflow-hidden rounded-2xl bg-muted shadow-sm">
-          <div className="relative aspect-[16/9] min-h-[200px] sm:aspect-[21/9] md:aspect-[2.8/1] lg:aspect-[3/1] lg:max-h-[400px]">
+          <div className="relative aspect-[2.5/1] w-full min-h-[160px] md:min-h-[200px] lg:max-h-[400px]">
             <Image
               src={activeHero.image}
               alt={locale === "ar" ? activeHero.titleAr : activeHero.title}
               fill
               priority
               sizes="(max-width: 768px) 100vw, (max-width: 1280px) 90vw, 1440px"
-              className="object-cover object-center md:object-[75%_center]"
+              className="object-cover object-center"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/45 to-transparent md:from-black/70 md:via-black/35 md:to-transparent" />
             <div className="absolute inset-0 flex flex-col justify-center p-5 sm:p-8 md:max-w-[55%] lg:p-12">
@@ -77,7 +77,7 @@ export function HomePage() {
       </section>
 
       {/* Wallet & Loyalty highlights */}
-      <section className="container-marketplace">
+      {/* <section className="container-marketplace">
         <div className="grid gap-4 sm:grid-cols-2">
           <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10 shadow-none">
             <CardContent className="flex items-center gap-4 p-5">
@@ -108,7 +108,7 @@ export function HomePage() {
             </CardContent>
           </Card>
         </div>
-      </section>
+      </section> */}
 
       {/* Categories */}
       <section className="container-marketplace">

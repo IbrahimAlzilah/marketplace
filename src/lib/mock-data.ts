@@ -90,14 +90,110 @@ export type LoyaltyTransaction = {
 };
 
 export const categories: Category[] = [
-  { id: "1", name: "Medicines", nameAr: "أدوية", slug: "medicines", icon: "💊" },
-  { id: "2", name: "Vitamins", nameAr: "فيتامينات", slug: "vitamins", icon: "🧴" },
-  { id: "3", name: "Baby Care", nameAr: "العناية بالطفل", slug: "baby-care", icon: "👶" },
-  { id: "4", name: "Skin Care", nameAr: "العناية بالبشرة", slug: "skin-care", icon: "✨" },
-  { id: "5", name: "Medical Devices", nameAr: "أجهزة طبية", slug: "medical-devices", icon: "🩺" },
-  { id: "6", name: "Personal Care", nameAr: "العناية الشخصية", slug: "personal-care", icon: "🧼" },
-  { id: "7", name: "Fitness", nameAr: "لياقة", slug: "fitness", icon: "💪" },
-  { id: "8", name: "Herbal", nameAr: "أعشاب", slug: "herbal", icon: "🌿" },
+  {
+    id: "1",
+    name: "Medicines",
+    nameAr: "أدوية",
+    slug: "medicines",
+    icon: "💊",
+    subcategories: [
+      { id: "1-1", name: "Pain Relief", nameAr: "مسكنات الألم", slug: "pain-relief", icon: "" },
+      { id: "1-2", name: "Cold & Flu", nameAr: "البرد والإنفلونزا", slug: "cold-flu", icon: "" },
+      { id: "1-3", name: "Chronic Diseases", nameAr: "الأمراض المزمنة", slug: "chronic-diseases", icon: "" },
+      { id: "1-4", name: "First Aid", nameAr: "الإسعافات الأولية", slug: "first-aid", icon: "" },
+    ],
+  },
+  {
+    id: "2",
+    name: "Vitamins",
+    nameAr: "فيتامينات",
+    slug: "vitamins",
+    icon: "🧴",
+    subcategories: [
+      { id: "2-1", name: "Multivitamins", nameAr: "الفيتامينات المتعددة", slug: "multivitamins", icon: "" },
+      { id: "2-2", name: "Minerals", nameAr: "المعادن", slug: "minerals", icon: "" },
+      { id: "2-3", name: "Immunity Boosters", nameAr: "مقويات المناعة", slug: "immunity-boosters", icon: "" },
+      { id: "2-4", name: "Fish Oil", nameAr: "زيت السمك", slug: "fish-oil", icon: "" },
+    ],
+  },
+  {
+    id: "3",
+    name: "Baby Care",
+    nameAr: "العناية بالطفل",
+    slug: "baby-care",
+    icon: "👶",
+    subcategories: [
+      { id: "3-1", name: "Baby Milk", nameAr: "حليب الأطفال", slug: "baby-milk", icon: "" },
+      { id: "3-2", name: "Diapers", nameAr: "حفاضات الأطفال", slug: "diapers", icon: "" },
+      { id: "3-3", name: "Baby Skincare", nameAr: "العناية ببشرة الأطفال", slug: "baby-skincare", icon: "" },
+      { id: "3-4", name: "Feeding Accessories", nameAr: "مستلزمات التغذية", slug: "feeding-accessories", icon: "" },
+    ],
+  },
+  {
+    id: "4",
+    name: "Skin Care",
+    nameAr: "العناية بالبشرة",
+    slug: "skin-care",
+    icon: "✨",
+    subcategories: [
+      { id: "4-1", name: "Skincare", nameAr: "العناية بالبشرة", slug: "skincare-face", icon: "" },
+      { id: "4-2", name: "Suncare", nameAr: "واقيات الشمس", slug: "suncare", icon: "" },
+      { id: "4-3", name: "Moisturizers", nameAr: "المرطبات", slug: "moisturizers", icon: "" },
+      { id: "4-4", name: "Serums", nameAr: "السيروم", slug: "serums", icon: "" },
+    ],
+  },
+  {
+    id: "5",
+    name: "Medical Devices",
+    nameAr: "أجهزة طبية",
+    slug: "medical-devices",
+    icon: "🩺",
+    subcategories: [
+      { id: "5-1", name: "Blood Pressure", nameAr: "قياس ضغط الدم", slug: "blood-pressure", icon: "" },
+      { id: "5-2", name: "Thermometers", nameAr: "أجهزة قياس الحرارة", slug: "thermometers", icon: "" },
+      { id: "5-3", name: "Glucose Monitors", nameAr: "أجهزة قياس السكر", slug: "glucose-monitors", icon: "" },
+      { id: "5-4", name: "Nebulizers", nameAr: "أجهزة الاستنشاق", slug: "nebulizers", icon: "" },
+    ],
+  },
+  {
+    id: "6",
+    name: "Personal Care",
+    nameAr: "العناية الشخصية",
+    slug: "personal-care",
+    icon: "🧼",
+    subcategories: [
+      { id: "6-1", name: "Body Wash", nameAr: "غسول الجسم", slug: "body-wash", icon: "" },
+      { id: "6-2", name: "Deodorants", nameAr: "مزيلات العرق", slug: "deodorants", icon: "" },
+      { id: "6-3", name: "Oral Care", nameAr: "العناية بالفم", slug: "oral-care", icon: "" },
+      { id: "6-4", name: "Hair Care", nameAr: "العناية بالشعر", slug: "hair-care", icon: "" },
+    ],
+  },
+  {
+    id: "7",
+    name: "Fitness & Nutrition",
+    nameAr: "اللياقة والتغذية",
+    slug: "fitness",
+    icon: "💪",
+    subcategories: [
+      { id: "7-1", name: "Protein Powder", nameAr: "بودرة البروتين", slug: "protein-powder", icon: "" },
+      { id: "7-2", name: "Energy Bars", nameAr: "ألواح الطاقة", slug: "energy-bars", icon: "" },
+      { id: "7-3", name: "Shakers", nameAr: "شيكر / خافق", slug: "shakers", icon: "" },
+      { id: "7-4", name: "Fat Burners", nameAr: "حوارق الدهون", slug: "fat-burners", icon: "" },
+    ],
+  },
+  {
+    id: "8",
+    name: "Herbal Remedies",
+    nameAr: "العلاجات العشبية",
+    slug: "herbal",
+    icon: "🌿",
+    subcategories: [
+      { id: "8-1", name: "Herbal Tea", nameAr: "شاي أعشاب", slug: "herbal-tea", icon: "" },
+      { id: "8-2", name: "Natural Oils", nameAr: "زيوت طبيعية", slug: "natural-oils", icon: "" },
+      { id: "8-3", name: "Honey", nameAr: "العسل", slug: "honey", icon: "" },
+      { id: "8-4", name: "Organic Herbs", nameAr: "أعشاب عضوية", slug: "organic-herbs", icon: "" },
+    ],
+  },
 ];
 
 export const pharmacies: Pharmacy[] = [
