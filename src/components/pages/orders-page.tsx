@@ -70,7 +70,7 @@ export function OrdersPage() {
 
   return (
     <div className="container-marketplace py-6 lg:py-6">
-      <h1 className="mb-6 text-2xl font-bold lg:text-3xl">{t("title")}</h1>
+      <h1 className="mb-6 text-xl font-bold">{t("title")}</h1>
       <Tabs defaultValue="active">
         <TabsList>
           <TabsTrigger value="active">{t("active")} ({activeOrders.length})</TabsTrigger>

@@ -108,12 +108,16 @@ export function OrderSummary({
 
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
-            <span className="text-muted-foreground">{t("subtotal")}</span>
+            <span className="text-muted-foreground">{tc("subtotal")}</span>
             <span>{formatPrice(subtotal)}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">{t("deliveryFees")}</span>
             <span>{formatPrice(deliveryFees)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">{t("vat15")}</span>
+            <span>{formatPrice(total * 0.15)}</span>
           </div>
           {discount > 0 && (
             <div className="flex justify-between text-success">
@@ -138,13 +142,13 @@ export function OrderSummary({
         <Separator />
 
         <div className="flex justify-between text-lg font-bold">
-          <span>{t("total")}</span>
+          <span>{t("totalAmount")}</span>
           <span className="text-primary">{formatPrice(total)}</span>
         </div>
 
         {showCheckoutButton && (
           <Button className="w-full" size="lg" onClick={onCheckout}>
-            {tCheckout("checkout")}
+            {tc("checkout")}
           </Button>
         )}
       </CardContent>

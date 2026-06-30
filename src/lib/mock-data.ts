@@ -318,6 +318,9 @@ export const products: Product[] = [
     image: "/images/products/product-1.jpg",
     images: [
       "/images/products/product-1.jpg",
+      "/images/products/product-2.jpg",
+      "/images/products/product-3.jpg",
+      "/images/products/product-4.jpg",
     ],
     categoryId: "6",
     pharmacyId: "p1",
@@ -338,7 +341,12 @@ export const products: Product[] = [
     descriptionAr: "شامبو كيون ساتين أويل للشعر الجاف والباهت.",
     price: 95.0,
     image: "/images/products/product-2.jpg",
-    images: ["/images/products/product-2.jpg"],
+    images: [
+      "/images/products/product-2.jpg",
+      "/images/products/product-3.jpg",
+      "/images/products/product-4.jpg",
+      "/images/products/product-1.jpg",
+    ],
     categoryId: "6",
     pharmacyId: "p1",
     rating: 4.5,
@@ -358,7 +366,12 @@ export const products: Product[] = [
     descriptionAr: "غسول لطيف للبشرة الحساسة.",
     price: 62.0,
     image: "/images/products/product-3.jpg",
-    images: ["/images/products/product-3.jpg"],
+    images: [
+      "/images/products/product-3.jpg",
+      "/images/products/product-4.jpg",
+      "/images/products/product-1.jpg",
+      "/images/products/product-2.jpg",
+    ],
     categoryId: "4",
     pharmacyId: "p2",
     rating: 4.8,
@@ -378,7 +391,12 @@ export const products: Product[] = [
     price: 78.0,
     originalPrice: 95.0,
     image: "/images/products/product-4.jpg",
-    images: ["/images/products/product-4.jpg"],
+    images: [
+      "/images/products/product-4.jpg",
+      "/images/products/product-1.jpg",
+      "/images/products/product-2.jpg",
+      "/images/products/product-3.jpg",
+    ],
     categoryId: "3",
     pharmacyId: "p2",
     rating: 4.6,
@@ -399,7 +417,12 @@ export const products: Product[] = [
     price: 18.5,
     originalPrice: 22.0,
     image: "/images/products/product-5.jpg",
-    images: ["/images/products/product-5.jpg"],
+    images: [
+      "/images/products/product-5.jpg",
+      "/images/products/product-6.jpg",
+      "/images/products/product-7.jpg",
+      "/images/products/product-8.jpg",
+    ],
     categoryId: "1",
     pharmacyId: "p3",
     rating: 4.9,
@@ -419,7 +442,12 @@ export const products: Product[] = [
     descriptionAr: "تخفيف سريع لاحتقان الجيوب الأنفية والبرد.",
     price: 25.0,
     image: "/images/products/product-6.jpg",
-    images: ["/images/products/product-6.jpg"],
+    images: [
+      "/images/products/product-6.jpg",
+      "/images/products/product-7.jpg",
+      "/images/products/product-8.jpg",
+      "/images/products/product-5.jpg",
+    ],
     categoryId: "1",
     pharmacyId: "p1",
     rating: 4.2,
@@ -439,7 +467,12 @@ export const products: Product[] = [
     price: 55.0,
     originalPrice: 70.0,
     image: "/images/products/product-7.jpg",
-    images: ["/images/products/product-7.jpg"],
+    images: [
+      "/images/products/product-7.jpg",
+      "/images/products/product-8.jpg",
+      "/images/products/product-5.jpg",
+      "/images/products/product-6.jpg",
+    ],
     categoryId: "2",
     pharmacyId: "p4",
     rating: 4.4,
@@ -459,7 +492,12 @@ export const products: Product[] = [
     descriptionAr: "بلسم مغذي بعمق لشعر ناعم وصحي.",
     price: 110.0,
     image: "/images/products/product-2.jpg",
-    images: ["/images/products/product-2.jpg"],
+    images: [
+      "/images/products/product-2.jpg",
+      "/images/products/product-3.jpg",
+      "/images/products/product-4.jpg",
+      "/images/products/product-1.jpg",
+    ],
     categoryId: "6",
     pharmacyId: "p4",
     rating: 4.7,
@@ -478,7 +516,12 @@ export const products: Product[] = [
     descriptionAr: "لوشن خفيف الوزن وخالي من الزيوت يمنح ترطيباً فورياً للبشرة.",
     price: 89.0,
     image: "/images/products/product-3.jpg",
-    images: ["/images/products/product-3.jpg"],
+    images: [
+      "/images/products/product-3.jpg",
+      "/images/products/product-4.jpg",
+      "/images/products/product-1.jpg",
+      "/images/products/product-2.jpg",
+    ],
     categoryId: "4",
     pharmacyId: "p5",
     rating: 4.5,
@@ -497,7 +540,12 @@ export const products: Product[] = [
     descriptionAr: "كبسولات سائلة سريعة لتسكين آلام العضلات والصداع.",
     price: 35.0,
     image: "/images/products/product-6.jpg",
-    images: ["/images/products/product-6.jpg"],
+    images: [
+      "/images/products/product-6.jpg",
+      "/images/products/product-7.jpg",
+      "/images/products/product-8.jpg",
+      "/images/products/product-5.jpg",
+    ],
     categoryId: "1",
     pharmacyId: "p5",
     rating: 4.3,
@@ -516,7 +564,12 @@ export const products: Product[] = [
     descriptionAr: "يساعد في دعم صحة الجهاز المناعي ونمو العظام.",
     price: 48.0,
     image: "/images/products/product-7.jpg",
-    images: ["/images/products/product-7.jpg"],
+    images: [
+      "/images/products/product-7.jpg",
+      "/images/products/product-8.jpg",
+      "/images/products/product-5.jpg",
+      "/images/products/product-6.jpg",
+    ],
     categoryId: "2",
     pharmacyId: "p6",
     rating: 4.1,
@@ -667,3 +720,59 @@ export function getProductsByPharmacy(pharmacyId: string) {
 export function getProductsByCategory(categoryId: string) {
   return products.filter((p) => p.categoryId === categoryId);
 }
+
+export type Vendor = {
+  id: string;
+  name: string;
+  nameAr: string;
+  slug: string;
+  logo: string;
+  rating: number;
+  distance: string;
+  eta: string;
+  etaAr: string;
+  deliveryFee: number;
+  price: number;
+};
+
+export const mockVendors: Vendor[] = [
+  {
+    id: "vendor-whites",
+    name: "Whites Pharmacy",
+    nameAr: "صيدلية وايتس",
+    slug: "whites-pharmacy",
+    logo: "W",
+    rating: 4.7,
+    distance: "3.5 km",
+    eta: "30-40 mins",
+    etaAr: "٣٠-٤٠ دقيقة",
+    deliveryFee: 12,
+    price: 349.00,
+  },
+  {
+    id: "vendor-aldawaa",
+    name: "Al-Dawaa Pharmacy",
+    nameAr: "صيدلية الدواء",
+    slug: "al-dawaa-pharmacy",
+    logo: "A",
+    rating: 4.8,
+    distance: "1.2 km",
+    eta: "20-30 mins",
+    etaAr: "٢٠-٣٠ دقيقة",
+    deliveryFee: 10,
+    price: 338.53,
+  },
+  {
+    id: "vendor-nahdi",
+    name: "Nahdi Pharmacy",
+    nameAr: "صيدلية النهدي",
+    slug: "nahdi-pharmacy",
+    logo: "N",
+    rating: 4.9,
+    distance: "2.1 km",
+    eta: "15-25 mins",
+    etaAr: "١٥-٢٥ دقيقة",
+    deliveryFee: 5,
+    price: 321.08,
+  }
+];

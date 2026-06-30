@@ -51,7 +51,7 @@ export function NotificationsPage() {
 
   return (
     <div className="container-marketplace py-6 lg:py-6">
-      <h1 className="mb-6 text-2xl font-bold lg:text-3xl">{t("title")}</h1>
+      <h1 className="mb-6 text-xl font-bold">{t("title")}</h1>
       <div className="mx-auto max-w-2xl space-y-3">
         {notifications.map((n) => {
           const Icon = iconMap[n.type as keyof typeof iconMap] || Bell;

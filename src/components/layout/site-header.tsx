@@ -192,7 +192,7 @@ export function SiteHeader() {
         onMouseLeave={() => setMegaMenuOpen(false)}
       >
         <div className="container-marketplace relative flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4 overflow-x-auto">
+          <div className="flex items-center gap-3 overflow-x-auto">
             {/* All Categories trigger */}
             <button
               onClick={() => setMegaMenuOpen(!megaMenuOpen)}

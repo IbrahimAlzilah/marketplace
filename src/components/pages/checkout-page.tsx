@@ -1,254 +1,588 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import { Check, MapPin, CreditCard, Truck, ClipboardCheck } from "lucide-react";
+import {
+  Check,
+  CheckCircle,
+  XCircle,
+  ChevronLeft,
+  Loader2,
+  Wallet,
+  Tag,
+  Award,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
-import { OrderSummary } from "@/components/marketplace/order-summary";
-import { addresses, getProductById, getPharmacyById } from "@/lib/mock-data";
-import { useCartStore } from "@/stores/cart-store";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn, formatPrice } from "@/lib/utils";
+import { useCartStore } from "@/stores/cart-store";
 
-const steps = [
-  { key: "address", icon: MapPin },
-  { key: "delivery", icon: Truck },
-  { key: "payment", icon: CreditCard },
-  { key: "review", icon: ClipboardCheck },
-] as const;
-
-export function CheckoutPage() {
+function CheckoutPageContent() {
   const t = useTranslations("checkout");
   const tc = useTranslations("common");
   const locale = useLocale();
   const router = useRouter();
-  const { items, clearCart } = useCartStore();
-  const [currentStep, setCurrentStep] = useState(0);
-  const [selectedAddress, setSelectedAddress] = useState(addresses[0]?.id ?? "");
-  const [deliveryType, setDeliveryType] = useState("standard");
-  const [paymentMethod, setPaymentMethod] = useState("mada");
 
-  const subtotal = items.reduce((sum, item) => {
-    const product = getProductById(item.productId);
-    return sum + (product ? product.price * item.quantity : 0);
-  }, 0);
+  // Workflow starts at payment loader: "payment_loading" | "payment_method" | "confirmation"
+  const [phase, setPhase] = useState<"payment_loading" | "payment_method" | "confirmation">("payment_loading");
 
-  const pharmacyIds = [...new Set(items.map((i) => getProductById(i.productId)?.pharmacyId).filter(Boolean))];
-  const deliveryFees = pharmacyIds.reduce((sum, id) => {
-    const pharmacy = getPharmacyById(id!);
-    return sum + (pharmacy?.deliveryFee ?? 0);
-  }, 0);
+  // Store Pickup vs Delivery Gap State
+  const [deliveryMethod, setDeliveryMethod] = useState<"delivery" | "pickup">("delivery");
 
-  const handlePlaceOrder = () => {
-    clearCart();
-    router.push("/checkout/success");
+  // Refund & Cancellation Gap States
+  const [cancelledByUser, setCancelledByUser] = useState(false);
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const [refundChoice, setRefundChoice] = useState<"wallet" | "card">("wallet");
+
+  // Payment states for Phase 4
+  const [walletApplied, setWalletApplied] = useState(true);
+  const [selectedPayment, setSelectedPayment] = useState("apple-pay");
+  const [promoCode, setPromoCode] = useState("WELCOME20");
+  const [isPromoApplied, setIsPromoApplied] = useState(true);
+  const [promoError, setPromoError] = useState("");
+
+  // Loyalty states
+  const [loyaltyApplied, setLoyaltyApplied] = useState(false);
+  const [redeemPoints, setRedeemPoints] = useState(1000);
+
+  // Receipt Modal State
+  const [receiptOpen, setReceiptOpen] = useState(false);
+
+  // Cart store actions
+  const clearCart = useCartStore((s) => s.clearCart);
+
+  // Translators helpers for mock details
+  const getPharmacyTranslation = (name: string) => {
+    if (name.includes("Nahdi")) return t("nahdiPharmacy");
+    if (name.includes("Avnzor")) return t("avnzorPharmacy");
+    if (name.includes("Whites")) return t("whitesPharmacy");
+    return name;
   };
 
+  const getProductTranslation = (name: string) => {
+    if (name.includes("Aspirin")) return t("aspirin");
+    if (name.includes("Vitamin")) return t("vitaminD");
+    if (name.includes("Ibuprofen")) return t("ibuprofen");
+    if (name.includes("Cough")) return t("coughSyrup");
+    if (name.includes("First Aid")) return t("firstAidKit");
+    if (name.includes("Omega-3")) return t("omega3");
+    if (name.includes("Multivitamin")) return t("multivitamin");
+    if (name.includes("Accu-Chek")) return t("glucoseMonitor");
+    if (name.includes("Megamind")) return t("omegaLiquid");
+    if (name.includes("Smilepen")) return t("whiteningStrips");
+    return name;
+  };
+
+  // Auto-advance from payment loading state to payment methods selection
   useEffect(() => {
-    if (items.length === 0) {
-      router.push("/cart");
+    if (phase === "payment_loading") {
+      const timer = setTimeout(() => {
+        setPhase("payment_method");
+      }, 1500);
+      return () => clearTimeout(timer);
     }
-  }, [items.length, router]);
+  }, [phase]);
 
-  if (items.length === 0) {
-    return null;
-  }
+  // Handler to apply promo code
+  const handleApplyPromo = () => {
+    if (promoCode.trim().toUpperCase() === "WELCOME20") {
+      setIsPromoApplied(true);
+      setPromoError("");
+    } else {
+      setPromoError(t("invalidPromo"));
+      setIsPromoApplied(false);
+    }
+  };
 
-  return (
-    <div className="container-marketplace py-6 lg:py-6">
-      <h1 className="mb-8 text-2xl font-bold lg:text-3xl">{t("title")}</h1>
+  // Handler to place order
+  const handlePlaceOrder = () => {
+    clearCart();
+    setPhase("confirmation");
+  };
 
-      {/* Stepper */}
-      <div className="mb-8 flex items-center justify-center gap-2 sm:gap-4">
-        {steps.map((step, i) => {
-          const Icon = step.icon;
-          const isActive = i === currentStep;
-          const isDone = i < currentStep;
-          return (
-            <div key={step.key} className="flex items-center gap-2 sm:gap-4">
-              <button
-                onClick={() => i < currentStep && setCurrentStep(i)}
-                className={cn(
-                  "flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors",
-                  isActive && "bg-primary/10 text-primary font-medium",
-                  isDone && "text-primary cursor-pointer",
-                  !isActive && !isDone && "text-muted-foreground"
-                )}
-              >
-                <div className={cn(
-                  "flex h-8 w-8 items-center justify-center rounded-full border-2",
-                  isActive && "border-primary bg-primary text-primary-foreground",
-                  isDone && "border-primary bg-primary text-primary-foreground",
-                  !isActive && !isDone && "border-muted-foreground/30"
-                )}>
-                  {isDone ? <Check className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
+  // Dynamic pricing breakdown values
+  const productPrice = 260;
+  const promoDiscount = isPromoApplied ? 52 : 0; // 20% discount
+  const balancePayment = walletApplied ? 79 : 0; // use exact wallet balance
+  const loyaltyDiscount = loyaltyApplied ? redeemPoints * 0.01 : 0; // rate conversion
+  const deliveryFee = 0; // free delivery
+
+  // Final Total matches dynamic calculations
+  const checkoutTotal = Math.max(0, productPrice - promoDiscount + deliveryFee - balancePayment - loyaltyDiscount);
+
+  // Phase 5: Final Confirmation (Wireframe 1)
+  if (phase === "confirmation") {
+    return (
+      <div className="1container-marketplace py-8 max-w-xl mx-auto text-center space-y-6">
+        {/* Receipt Details Dialog */}
+        <Dialog open={receiptOpen} onOpenChange={setReceiptOpen}>
+          <DialogContent className="sm:max-w-md p-6 rounded-2xl bg-card">
+            <DialogHeader className="pb-2 border-b">
+              <DialogTitle className="text-lg font-bold text-center text-foreground">{t("electronicInvoice")}</DialogTitle>
+            </DialogHeader>
+            <div className="py-4 space-y-3 text-xs">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">{t("invoiceOrderId")}</span>
+                <span className="font-bold text-foreground">ORD-1779273580909</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">{t("paymentMode")}</span>
+                <span className="font-bold text-foreground capitalize">{t(selectedPayment)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">{t("vat15")}</span>
+                <span className="font-semibold">{formatPrice(checkoutTotal * 0.15)}</span>
+              </div>
+              <Separator />
+              <div className="space-y-2 text-start">
+                <p className="font-semibold text-muted-foreground uppercase tracking-wide text-[10px]">{t("approvedShipments")}</p>
+                <div className="space-y-1 text-muted-foreground">
+                  <p className="font-bold text-foreground text-xs">{getPharmacyTranslation("Nahdi Pharmacy")}</p>
+                  <p>• {getProductTranslation("Aspirin 100mg")} (1 {t("item")}) - {formatPrice(129.35)}</p>
+                  <p>• {getProductTranslation("Vitamin D3")} (1 {t("item")}) - {formatPrice(129.35)}</p>
+                  <p>• {getProductTranslation("Ibuprofen 200mg")} (1 {t("item")}) - {formatPrice(129.35)}</p>
                 </div>
-                <span className="hidden sm:inline">{t(step.key)}</span>
-              </button>
-              {i < steps.length - 1 && (
-                <div className={cn("h-px w-8 sm:w-16", isDone ? "bg-primary" : "bg-border")} />
-              )}
+                <div className="space-y-1 text-muted-foreground pt-2">
+                  <p className="font-bold text-foreground text-xs">{getPharmacyTranslation("Avnzor Pharmacy")}</p>
+                  <p>• {getProductTranslation("Cough Syrup")} (1 {t("item")}) - {formatPrice(129.35)}</p>
+                  <p>• {getProductTranslation("First Aid Kit")} (1 {t("item")}) - {formatPrice(129.35)}</p>
+                </div>
+              </div>
+              <Separator />
+              <div className="flex justify-between font-bold text-sm text-primary">
+                <span>{t("totalCharged")}</span>
+                <span>{formatPrice(checkoutTotal)}</span>
+              </div>
             </div>
-          );
-        })}
-      </div>
-
-      <div className="grid gap-8 lg:grid-cols-12">
-        <div className="lg:col-span-8 space-y-6">
-          {currentStep === 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("address")}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {addresses.map((addr) => (
-                  <label
-                    key={addr.id}
-                    className={cn(
-                      "flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors",
-                      selectedAddress === addr.id && "border-primary bg-primary/5"
-                    )}
-                  >
-                    <input
-                      type="radio"
-                      name="address"
-                      value={addr.id}
-                      checked={selectedAddress === addr.id}
-                      onChange={() => setSelectedAddress(addr.id)}
-                      className="mt-1"
-                    />
-                    <div>
-                      <p className="font-medium">{addr.label} {addr.isDefault && <span className="text-xs text-primary">(Default)</span>}</p>
-                      <p className="text-sm text-muted-foreground">{addr.street}, {addr.district}, {addr.city}</p>
-                    </div>
-                  </label>
-                ))}
-                <Button variant="outline">Add new address</Button>
-              </CardContent>
-            </Card>
-          )}
-
-          {currentStep === 1 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("delivery")}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {pharmacyIds.map((id) => {
-                  const pharmacy = getPharmacyById(id!);
-                  if (!pharmacy) return null;
-                  const name = locale === "ar" ? pharmacy.nameAr : pharmacy.name;
-                  return (
-                    <div key={id} className="rounded-lg border p-4 space-y-3">
-                      <p className="font-medium">{name}</p>
-                      <RadioGroup value={deliveryType} onValueChange={setDeliveryType}>
-                        <div className="flex items-center gap-2">
-                          <RadioGroupItem value="standard" id={`std-${id}`} />
-                          <Label htmlFor={`std-${id}`}>{t("standardDelivery")} — {pharmacy.eta} {tc("min")}</Label>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <RadioGroupItem value="express" id={`exp-${id}`} />
-                          <Label htmlFor={`exp-${id}`}>{t("expressDelivery")} — {Math.max(15, pharmacy.eta - 10)} {tc("min")}</Label>
-                        </div>
-                      </RadioGroup>
-                    </div>
-                  );
-                })}
-                <div>
-                  <Label>{t("deliveryNotes")}</Label>
-                  <Input placeholder="Apartment number, landmarks..." className="mt-1" />
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {currentStep === 2 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("paymentMethods")}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
-                  {["mada", "apple-pay", "visa"].map((method) => (
-                    <label
-                      key={method}
-                      className={cn(
-                        "flex cursor-pointer items-center gap-3 rounded-lg border p-4",
-                        paymentMethod === method && "border-primary bg-primary/5"
-                      )}
-                    >
-                      <RadioGroupItem value={method} />
-                      <span className="capitalize">{method.replace("-", " ")}</span>
-                    </label>
-                  ))}
-                </RadioGroup>
-                {paymentMethod === "visa" && (
-                  <div className="space-y-3 pt-2">
-                    <Input placeholder="Card number" />
-                    <div className="grid grid-cols-2 gap-3">
-                      <Input placeholder="MM/YY" />
-                      <Input placeholder="CVV" />
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
-
-          {currentStep === 3 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("review")}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {items.map((item) => {
-                  const product = getProductById(item.productId);
-                  if (!product) return null;
-                  return (
-                    <div key={item.productId} className="flex justify-between text-sm">
-                      <span>{locale === "ar" ? product.nameAr : product.name} × {item.quantity}</span>
-                      <span>{formatPrice(product.price * item.quantity)}</span>
-                    </div>
-                  );
-                })}
-                <Separator />
-                <div className="text-sm text-muted-foreground">
-                  <p>Payment: {paymentMethod}</p>
-                  <p>Address: {addresses.find((a) => a.id === selectedAddress)?.label}</p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          <div className="flex justify-between">
-            <Button
-              variant="outline"
-              onClick={() => currentStep > 0 ? setCurrentStep(currentStep - 1) : router.push("/cart")}
-            >
-              Back
+            <Button className="w-full rounded-xl" onClick={() => setReceiptOpen(false)}>
+              {t("close")}
             </Button>
-            {currentStep < steps.length - 1 ? (
-              <Button onClick={() => setCurrentStep(currentStep + 1)}>Continue</Button>
+          </DialogContent>
+        </Dialog>
+
+        {/* Cancellation and Refund Choice Modal (Flowchart gap) */}
+        <Dialog open={cancelModalOpen} onOpenChange={setCancelModalOpen}>
+          <DialogContent 
+            className="sm:max-w-md p-6 rounded-3xl bg-card border space-y-5"
+            onPointerDownOutside={(e) => e.preventDefault()}
+            onEscapeKeyDown={(e) => e.preventDefault()}
+          >
+            <DialogHeader>
+              <DialogTitle className="text-base font-bold text-foreground">{t("cancelOrderPrompt")}</DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-4 text-start">
+              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("refundMethod")}</h4>
+              <RadioGroup value={refundChoice} onValueChange={(v) => setRefundChoice(v as "wallet" | "card")} className="space-y-3">
+                <label
+                  className={cn(
+                    "flex cursor-pointer items-center justify-between rounded-xl border p-4 transition-all hover:bg-muted/30",
+                    refundChoice === "wallet" ? "border-primary bg-primary/5" : "border-border"
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <RadioGroupItem value="wallet" />
+                    <span className="text-xs font-semibold text-foreground">{t("refundToWallet")}</span>
+                  </div>
+                </label>
+                <label
+                  className={cn(
+                    "flex cursor-pointer items-center justify-between rounded-xl border p-4 transition-all hover:bg-muted/30",
+                    refundChoice === "card" ? "border-primary bg-primary/5" : "border-border"
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <RadioGroupItem value="card" />
+                    <span className="text-xs font-semibold text-foreground">{t("refundToCard")}</span>
+                  </div>
+                </label>
+              </RadioGroup>
+            </div>
+
+            <div className="flex gap-3 border-t pt-3">
+              <Button
+                className="flex-1 py-4 rounded-xl text-xs font-bold text-white bg-primary hover:bg-primary/95"
+                onClick={() => {
+                  setCancelledByUser(true);
+                  setCancelModalOpen(false);
+                }}
+              >
+                {t("viewAlternatives").includes("Alternatives") ? "Confirm" : "تأكيد"}
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1 py-4 rounded-xl text-xs font-bold"
+                onClick={() => setCancelModalOpen(false)}
+              >
+                {tc("cancel")}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <div className="flex justify-center pt-4">
+          <div className={cn(
+            "flex h-20 w-20 items-center justify-center rounded-full border-4",
+            cancelledByUser 
+              ? "bg-red-500/10 border-red-500/20" 
+              : "bg-primary/10 border-primary/20"
+          )}>
+            {cancelledByUser ? (
+              <XCircle className="h-10 w-10 text-red-500" />
             ) : (
-              <Button size="lg" onClick={handlePlaceOrder}>{t("placeOrder")}</Button>
+              <Check className="h-10 w-10 text-primary" />
             )}
           </div>
         </div>
 
+        <div className="space-y-2">
+          {cancelledByUser ? (
+            <h1 className="text-2xl font-bold text-red-500">{t("orderCancelledStatus")}</h1>
+          ) : deliveryMethod === "pickup" ? (
+            <h1 className="text-2xl font-bold text-green-600">{t("pickupNotice")}</h1>
+          ) : (
+            <h1 className="text-2xl font-bold text-foreground">{t("orderPlacedSuccess")}</h1>
+          )}
+          <p className="text-muted-foreground text-sm">{t("orderId", { id: "ORD-1779273580909" })}</p>
+        </div>
+
+        <div className="space-y-4 text-start">
+          {/* Available Items */}
+          <Card className="rounded-2xl border p-4 space-y-3">
+            <div className="flex items-center gap-2 text-success text-sm font-semibold">
+              <CheckCircle className="h-4 w-4" />
+              <span>{t("availableItems")}</span>
+            </div>
+            <div className="space-y-2">
+              {[
+                { name: "Accu-Chek Instant Blood Glucose Monitor", qty: 2, price: 79.00 },
+                { name: "Megamind Omega-3 227 ml Peach & Mango Liquid", qty: 2, price: 99.00 },
+                { name: "Smilepen Night Whitening 14 Strips", qty: 2, price: 79.00 }
+              ].map((item, idx) => (
+                <div key={idx} className="flex justify-between items-center bg-green-500/5 p-3 rounded-xl border border-green-500/10 text-xs">
+                  <div>
+                    <h4 className="font-semibold text-foreground">{getProductTranslation(item.name)}</h4>
+                    <span className="text-muted-foreground text-[10px]">{tc("cart")} Qty: {item.qty}</span>
+                  </div>
+                  <span className="font-bold text-primary shrink-0">{formatPrice(item.price)}</span>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          {/* Unavailable Items */}
+          <Card className="rounded-2xl border p-4 space-y-3 bg-muted/20 border-dashed">
+            <div className="flex items-center gap-2 text-destructive text-sm font-semibold">
+              <XCircle className="h-4 w-4" />
+              <div>
+                <span>{t("unavailableItems")}</span>
+                <p className="text-[10px] text-muted-foreground font-normal mt-0.5">{t("refundedToWallet")}</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              {[
+                { name: "Smilepen Night Whitening 14 Strips", qty: 2, price: 79.00 },
+                { name: "Accu-Chek Instant Blood Glucose Monitor", qty: 2, price: 79.00 }
+              ].map((item, idx) => (
+                <div key={idx} className="flex justify-between items-center bg-red-500/5 p-3 rounded-xl border border-red-500/10 text-xs opacity-80">
+                  <div>
+                    <h4 className="font-semibold text-foreground">{getProductTranslation(item.name)}</h4>
+                    <span className="text-muted-foreground text-[10px]">{tc("cart")} Qty: {item.qty}</span>
+                  </div>
+                  <span className="font-bold text-red-500 shrink-0">{formatPrice(item.price)}</span>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          {/* Final Total */}
+          <div className="flex justify-between items-center p-4 border-t border-b">
+            <span className="font-bold text-foreground">{t("total")}</span>
+            <span className="text-xl font-bold text-primary">{formatPrice(checkoutTotal)}</span>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2 pt-4">
+          {!cancelledByUser && (
+            <Button
+              className="w-full py-6 rounded-2xl text-base font-bold bg-destructive hover:bg-destructive/90 text-white"
+              onClick={() => setCancelModalOpen(true)}
+            >
+              {t("cancelOrder")}
+            </Button>
+          )}
+          <Button variant="outline" className="w-full py-6 rounded-2xl text-base font-bold" onClick={() => setReceiptOpen(true)}>
+            {t("viewReceipt")}
+          </Button>
+          <Button variant="ghost" className="w-full py-6 rounded-2xl text-base font-bold text-muted-foreground" onClick={() => router.push("/orders")}>
+            {t("viewOrderStatus")}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Modals visibility toggles
+  const showPaymentLoading = phase === "payment_loading";
+
+  return (
+    <div className="container-marketplace py-6 lg:py-6 relative">
+      {/* 3. Preparing Payment Session Loader (Phase 3) */}
+      <Dialog open={showPaymentLoading} onOpenChange={() => {}}>
+        <DialogContent 
+          className="sm:max-w-xs p-6 rounded-3xl bg-card border text-center flex flex-col items-center justify-center space-y-4"
+          onPointerDownOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
+        >
+          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          <DialogTitle className="text-base font-bold text-foreground">{t("preparingPayment")}</DialogTitle>
+        </DialogContent>
+      </Dialog>
+
+      <div className="flex items-center gap-3 mb-8">
+        <Button variant="ghost" size="icon" onClick={() => router.push("/cart")} className="rounded-full">
+          <ChevronLeft className="h-6 w-6" />
+        </Button>
+        <h1 className="text-2xl font-bold text-foreground">{t("paymentMethod")}</h1>
+      </div>
+
+      <div className={cn("grid gap-8 lg:grid-cols-12 transition-all duration-300", showPaymentLoading && "filter blur-[2px] select-none pointer-events-none")}>
+        {/* Left Column: Form Settings */}
+        <div className="lg:col-span-8 space-y-6">
+          {/* Delivery Method Selector (Store Pickup Gap) */}
+          <Card className="rounded-2xl border p-5 space-y-4">
+            <h3 className="font-bold text-sm text-foreground">{t("deliveryMethod")}</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                type="button"
+                className={cn(
+                  "flex flex-col items-center justify-center p-4 rounded-xl border transition-all text-xs font-semibold gap-1.5",
+                  deliveryMethod === "delivery" ? "border-primary bg-primary/5 text-primary" : "border-border hover:bg-muted/30"
+                )}
+                onClick={() => setDeliveryMethod("delivery")}
+              >
+                <span>{t("homeDelivery")}</span>
+              </button>
+              <button
+                type="button"
+                className={cn(
+                  "flex flex-col items-center justify-center p-4 rounded-xl border transition-all text-xs font-semibold gap-1.5",
+                  deliveryMethod === "pickup" ? "border-primary bg-primary/5 text-primary" : "border-border hover:bg-muted/30"
+                )}
+                onClick={() => setDeliveryMethod("pickup")}
+              >
+                <span>{t("storePickup")}</span>
+              </button>
+            </div>
+
+            {deliveryMethod === "pickup" && (
+              <div className="space-y-3 pt-3 border-t text-xs">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">{t("selectPickupBranch")}</span>
+                  <span className="font-bold text-foreground">Nahdi Al-Malaz Branch</span>
+                </div>
+                <p className="text-[10px] text-green-600 font-semibold bg-green-500/5 px-2 py-1 rounded-lg">
+                  {t("readyIn", { time: 15 })}
+                </p>
+              </div>
+            )}
+          </Card>
+
+          {/* Wallet Toggle */}
+          <Card className="rounded-2xl border p-5 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 bg-primary/5 rounded-full flex items-center justify-center text-primary">
+                <Wallet className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-foreground">{t("walletBalance")}</p>
+                <p className="text-sm font-semibold text-primary">{formatPrice(79.00)}</p>
+              </div>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={walletApplied}
+                onChange={() => setWalletApplied(!walletApplied)}
+                disabled={showPaymentLoading}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary" />
+            </label>
+          </Card>
+
+          {/* Loyalty Points Option (Directly under Wallet Balance card) */}
+          <Card className="rounded-2xl border p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 bg-secondary/5 rounded-full flex items-center justify-center text-secondary">
+                  <Award className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-foreground">{t("loyaltyPoints")}</p>
+                  <p className="text-xs text-muted-foreground">{t("ptsAvailable", { count: "2,400" })}</p>
+                </div>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={loyaltyApplied}
+                  onChange={() => setLoyaltyApplied(!loyaltyApplied)}
+                  disabled={showPaymentLoading}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary" />
+              </label>
+            </div>
+
+            {loyaltyApplied && (
+              <div className="space-y-3 pt-3 border-t text-xs">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">{t("redeemPoints")}</span>
+                  <span className="font-semibold text-foreground">{redeemPoints} pts</span>
+                </div>
+                <input
+                  type="range"
+                  min="100"
+                  max="2400"
+                  step="100"
+                  value={redeemPoints}
+                  onChange={(e) => setRedeemPoints(Number(e.target.value))}
+                  disabled={showPaymentLoading}
+                  className="w-full h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-secondary"
+                />
+                <p className="text-[10px] text-muted-foreground leading-normal">
+                  {t("redemptionRate", { pts: redeemPoints, amount: formatPrice(redeemPoints * 0.01) })}
+                </p>
+              </div>
+            )}
+          </Card>
+
+          {/* Payment List Options */}
+          <Card className="rounded-2xl border p-6 space-y-4">
+            <h2 className="text-base font-bold text-foreground mb-2">{t("selectPaymentMethod")}</h2>
+            <RadioGroup value={selectedPayment} onValueChange={setSelectedPayment} className="space-y-3">
+              {[
+                { id: "visa", label: t("visa"), sub: "**** 4209" },
+                { id: "apple-pay", label: t("applePay") },
+                { id: "tabby", label: t("tabby"), sub: t("tabbySub") },
+                { id: "stc-pay", label: t("stcPay") },
+                { id: "cash", label: t("cash") },
+                { id: "mada", label: t("mada") }
+              ].map((method) => (
+                <label
+                  key={method.id}
+                  className={cn(
+                    "flex cursor-pointer items-center justify-between rounded-xl border p-4 transition-all hover:bg-muted/30",
+                    selectedPayment === method.id ? "border-primary bg-primary/5" : "border-border"
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <RadioGroupItem value={method.id} disabled={showPaymentLoading} />
+                    <div>
+                      <span className="text-sm font-semibold text-foreground">{method.label}</span>
+                      {method.sub && <p className="text-xs text-muted-foreground mt-0.5">{method.sub}</p>}
+                    </div>
+                  </div>
+                </label>
+              ))}
+            </RadioGroup>
+          </Card>
+        </div>
+
+        {/* Right Column: Sticky Summary Sheet containing Promo Code nesting */}
         <div className="lg:col-span-4">
-          <OrderSummary
-            subtotal={subtotal}
-            deliveryFees={deliveryFees}
-            showCheckoutButton={false}
-            className="sticky top-36"
-          />
+          <Card className="rounded-2xl border p-5 space-y-5 sticky top-36">
+            <h3 className="font-bold text-base text-foreground">{t("orderSummary")}</h3>
+
+            {/* Nested Promo Code block */}
+            <div className="space-y-2.5 pb-3 border-b">
+              <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
+                <Tag className="h-3.5 w-3.5 text-primary" />
+                <span>{t("promoCode")}</span>
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  placeholder={t("enterPromoCode")}
+                  value={promoCode}
+                  onChange={(e) => setPromoCode(e.target.value)}
+                  disabled={isPromoApplied || showPaymentLoading}
+                  className="rounded-xl h-9 text-xs"
+                />
+                {isPromoApplied ? (
+                  <Button variant="outline" size="sm" disabled={showPaymentLoading} className="shrink-0 text-destructive border-destructive rounded-xl text-xs h-9 px-3" onClick={() => setIsPromoApplied(false)}>
+                    {t("remove")}
+                  </Button>
+                ) : (
+                  <Button size="sm" disabled={showPaymentLoading} className="shrink-0 bg-primary rounded-xl text-white hover:bg-primary/95 text-xs h-9 px-3" onClick={handleApplyPromo}>
+                    {t("apply")}
+                  </Button>
+                )}
+              </div>
+              {isPromoApplied && (
+                <p className="text-[10px] font-semibold text-green-600 bg-green-500/5 border border-green-500/10 px-2 py-1 rounded-lg">
+                  {t("promoApplied")}
+                </p>
+              )}
+              {promoError && <p className="text-[10px] font-semibold text-destructive">{promoError}</p>}
+            </div>
+
+            {/* Dynamic summary rows */}
+            <div className="space-y-3 text-xs">
+              <div className="flex justify-between text-muted-foreground">
+                <span>{t("productPrice")}</span>
+                <span className="font-semibold text-foreground">{formatPrice(productPrice)}</span>
+              </div>
+              {isPromoApplied && (
+                <div className="flex justify-between text-destructive">
+                  <span>{t("additionalDiscount")}</span>
+                  <span className="font-semibold">-{formatPrice(promoDiscount)}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-muted-foreground">
+                <span>{t("deliveryFees")}</span>
+                <span className="text-green-600 font-semibold">{t("free")}</span>
+              </div>
+              {walletApplied && (
+                <div className="flex justify-between text-primary">
+                  <span>{t("paymentFromBalance")}</span>
+                  <span className="font-semibold">-{formatPrice(balancePayment)}</span>
+                </div>
+              )}
+              {loyaltyApplied && (
+                <div className="flex justify-between text-secondary">
+                  <span>{t("loyaltyApplied")}</span>
+                  <span className="font-semibold">-{formatPrice(loyaltyDiscount)}</span>
+                </div>
+              )}
+              <Separator />
+              <div className="flex justify-between text-sm font-bold text-foreground">
+                <span>{t("total")}</span>
+                <span>{formatPrice(checkoutTotal)}</span>
+              </div>
+              <p className="text-[10px] text-muted-foreground">{t("includesVat")}</p>
+            </div>
+
+            {/* Confirm Payment Trigger */}
+            <Button disabled={showPaymentLoading} className="w-full py-6 rounded-2xl text-base font-bold bg-primary hover:bg-primary/90 text-white mt-2" onClick={handlePlaceOrder}>
+              {t("confirmPayment")}
+            </Button>
+          </Card>
         </div>
       </div>
     </div>
+  );
+}
+
+export function CheckoutPage() {
+  return (
+    <Suspense fallback={<div className="container-marketplace py-20 text-center">Loading workflow...</div>}>
+      <CheckoutPageContent />
+    </Suspense>
   );
 }
