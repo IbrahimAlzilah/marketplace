@@ -22,7 +22,7 @@ export function FaqPage() {
 
   return (
     <div className="container-marketplace py-6 lg:py-6">
-      <h1 className="mb-8 text-2xl font-bold lg:text-3xl">{t("faqTitle")}</h1>
+      <h1 className="mb-7 text-xl font-bold lg:text-2xl">{t("faqTitle")}</h1>
       <div className="mx-auto max-w-3xl">
         <Accordion type="single" collapsible className="space-y-2">
           {faqs.map((faq, i) => (

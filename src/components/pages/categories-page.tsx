@@ -11,7 +11,7 @@ export function CategoriesPage() {
 
   return (
     <div className="container-marketplace py-6 lg:py-6">
-      <h1 className="mb-8 text-2xl font-bold lg:text-3xl">{t("categories")}</h1>
+      <h1 className="mb-7 text-xl font-bold lg:text-2xl">{t("categories")}</h1>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {categories.map((cat) => (
           <Link key={cat.id} href={`/products?category=${cat.slug}`}>

@@ -24,7 +24,7 @@ export function LegalPage({ type }: { type: "terms" | "privacy" }) {
 
   return (
     <div className="container-marketplace py-6 lg:py-6">
-      <h1 className="mb-8 text-2xl font-bold lg:text-3xl">
+      <h1 className="mb-7 text-xl font-bold lg:text-2xl">
         {type === "terms" ? t("termsTitle") : t("privacyTitle")}
       </h1>
       <div className="prose prose-slate dark:prose-invert mx-auto max-w-3xl space-y-6">

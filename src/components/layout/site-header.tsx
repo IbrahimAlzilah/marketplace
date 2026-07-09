@@ -6,7 +6,6 @@ import {
   Bell,
   ChevronDown,
   Globe,
-  Heart,
   Home,
   MapPin,
   Menu,
@@ -181,11 +180,6 @@ export function SiteHeader() {
               <Search className="size-5" />
             </Button>
             <Button variant="ghost" size="icon" className="hidden sm:flex" asChild>
-              <Link href="/profile/wishlist">
-                <Heart className="size-5" />
-              </Link>
-            </Button>
-            <Button variant="ghost" size="icon" className="hidden sm:flex" asChild>
               <Link href="/notifications">
                 <Bell className="size-5" />
               </Link>
@@ -221,10 +215,10 @@ export function SiteHeader() {
               </Link>
             </Button>
             {isAuthenticated ? (
-              <Button variant="ghost" size="sm" className="hidden sm:flex gap-2" asChild>
+              <Button variant="ghost" size="sm" className="hidden sm:flex gap-2 w-10 h-10 rounded-full" asChild>
                 <Link href="/profile">
-                  <User className="size-4" />
-                  <span className="max-w-[100px] truncate">{user?.name.split(" ")[0]}</span>
+                  <User className="size-5" />
+                  {/* <span className="max-w-[100px] truncate">{user?.name.split(" ")[0]}</span> */}
                 </Link>
               </Button>
             ) : (

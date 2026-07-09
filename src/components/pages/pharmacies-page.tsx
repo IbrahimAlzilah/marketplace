@@ -3,11 +3,16 @@
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { PharmacyCard } from "@/components/marketplace/pharmacy-card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { pharmacies } from "@/lib/mock-data";
+import { ChevronDown, SlidersHorizontal } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 
 export function PharmaciesPage() {
   const t = useTranslations("pharmacies");
@@ -24,58 +29,83 @@ export function PharmaciesPage() {
     return result;
   }, [openNow, freeDelivery, topRated]);
 
-  const FiltersSidebar = () => (
-    <aside className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Checkbox id="open" checked={openNow} onCheckedChange={(c) => setOpenNow(!!c)} />
-        <Label htmlFor="open" className="cursor-pointer text-sm">{t("openNow")}</Label>
-      </div>
-      <div className="flex items-center gap-2">
-        <Checkbox id="free" checked={freeDelivery} onCheckedChange={(c) => setFreeDelivery(!!c)} />
-        <Label htmlFor="free" className="cursor-pointer text-sm">{t("freeDeliveryFilter")}</Label>
-      </div>
-      <div className="flex items-center gap-2">
-        <Checkbox id="rated" checked={topRated} onCheckedChange={(c) => setTopRated(!!c)} />
-        <Label htmlFor="rated" className="cursor-pointer text-sm">{t("topRated")}</Label>
-      </div>
-      <Separator />
-      <Button variant="outline" className="w-full" onClick={() => { setOpenNow(false); setFreeDelivery(false); setTopRated(false); }}>
-        Clear filters
-      </Button>
-    </aside>
-  );
+  const activeFiltersCount = [openNow, freeDelivery, topRated].filter(Boolean).length;
 
   return (
     <div className="container-marketplace py-6 lg:py-6">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold lg:text-3xl">{t("title")}</h1>
-        <span className="text-sm text-muted-foreground">
-          {t("results", { count: filtered.length })}
-        </span>
-      </div>
-
-      <div className="mb-4 lg:hidden">
-        <details className="rounded-xl border bg-card">
-          <summary className="cursor-pointer px-4 py-3 font-semibold">{t("filters")}</summary>
-          <div className="border-t p-4"><FiltersSidebar /></div>
-        </details>
-      </div>
-
-      <div className="flex gap-8">
-        <div className="hidden w-56 shrink-0 lg:block xl:w-64">
-          <div className="sticky top-36 rounded-xl border bg-card p-5">
-            <h2 className="mb-4 font-semibold">{t("filters")}</h2>
-            <FiltersSidebar />
-          </div>
+      {/* Title Row with Filter Dropdown */}
+      <div className="mb-5 flex items-center justify-between relative">
+        <div className="flex items-baseline gap-2">
+          <h1 className="text-2xl font-bold lg:text-3xl">{t("title")}</h1>
         </div>
 
-        <div className="min-w-0 flex-1">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((pharmacy) => (
-              <PharmacyCard key={pharmacy.id} pharmacy={pharmacy} />
-            ))}
-          </div>
-        </div>
+        <DropdownMenu dir={locale === "ar" ? "rtl" : "ltr"}>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              className="flex items-center gap-2 rounded-xl cursor-pointer"
+            >
+              <SlidersHorizontal className="size-4" />
+              <span className="hidden sm:inline">{t("filters")}</span>
+              {activeFiltersCount > 0 && (
+                <span className="flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-white">
+                  {activeFiltersCount}
+                </span>
+              )}
+              <ChevronDown className="size-4 transition-transform duration-200" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56 p-2 rounded-xl">
+            <DropdownMenuCheckboxItem
+              checked={openNow}
+              onCheckedChange={(c) => setOpenNow(!!c)}
+              onSelect={(e) => e.preventDefault()}
+              className="cursor-pointer py-2 rounded-lg"
+            >
+              {t("openNow")}
+            </DropdownMenuCheckboxItem>
+            <DropdownMenuCheckboxItem
+              checked={freeDelivery}
+              onCheckedChange={(c) => setFreeDelivery(!!c)}
+              onSelect={(e) => e.preventDefault()}
+              className="cursor-pointer py-2 rounded-lg"
+            >
+              {t("freeDeliveryFilter")}
+            </DropdownMenuCheckboxItem>
+            <DropdownMenuCheckboxItem
+              checked={topRated}
+              onCheckedChange={(c) => setTopRated(!!c)}
+              onSelect={(e) => e.preventDefault()}
+              className="cursor-pointer py-2 rounded-lg"
+            >
+              {t("topRated")}
+            </DropdownMenuCheckboxItem>
+            {(openNow || freeDelivery || topRated) && (
+              <>
+                <DropdownMenuSeparator />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full text-xs text-muted-foreground hover:text-foreground mt-1 cursor-pointer"
+                  onClick={() => {
+                    setOpenNow(false);
+                    setFreeDelivery(false);
+                    setTopRated(false);
+                  }}
+                >
+                  Clear filters
+                </Button>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      {/* Grid of Pharmacy Cards */}
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        {filtered.map((pharmacy) => (
+          <PharmacyCard key={pharmacy.id} pharmacy={pharmacy} />
+        ))}
       </div>
     </div>
   );
