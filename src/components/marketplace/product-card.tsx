@@ -68,7 +68,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
         </div>
         <button
           onClick={() => toggleItem(product.id)}
-          className="absolute end-2 top-2 rounded-full bg-background/80 p-2 backdrop-blur-sm transition-colors hover:bg-background"
+          className="absolute end-2 top-2 rounded-full bg-background/80 p-1.5 backdrop-blur-sm transition-colors hover:bg-background"
           aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
         >
           <Heart className={cn("size-4", inWishlist && "fill-secondary text-secondary")} />

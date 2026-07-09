@@ -2,11 +2,11 @@
 
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
-import { Clock, MapPin, Star, Truck } from "lucide-react";
+import { Clock, MapPin } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { cn, formatPrice, formatRating } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import type { Pharmacy } from "@/lib/mock-data";
 
 type PharmacyCardProps = {
@@ -25,7 +25,7 @@ export function PharmacyCard({ pharmacy, className, variant = "grid" }: Pharmacy
       <Link href={`/pharmacies/${pharmacy.slug}`}>
         <Card className={cn("overflow-hidden transition-shadow hover:shadow-sm", className)}>
           <div className="flex items-center gap-4 p-4">
-            <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border bg-white">
+            <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border bg-white">
               <Image src={pharmacy.logo} alt={name} fill className="object-contain p-1" sizes="64px" />
             </div>
             <div className="min-w-0 flex-1">
@@ -36,10 +36,6 @@ export function PharmacyCard({ pharmacy, className, variant = "grid" }: Pharmacy
                 </Badge>
               </div>
               <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <Star className="h-3.5 w-3.5 fill-warning text-warning" />
-                  {formatRating(pharmacy.rating)} ({pharmacy.reviewCount})
-                </span>
                 <span className="flex items-center gap-1">
                   <MapPin className="h-3.5 w-3.5" />
                   {pharmacy.distance} {t("km")}
@@ -58,8 +54,8 @@ export function PharmacyCard({ pharmacy, className, variant = "grid" }: Pharmacy
 
   return (
     <Link href={`/pharmacies/${pharmacy.slug}`}>
-      <Card className={cn("group h-full overflow-hidden transition-shadow hover:shadow-md", className)}>
-        <div className="relative aspect-[16/10] overflow-hidden bg-muted">
+      <Card className={cn("group h-full overflow-hidden transition-shadow hover:shadow-xs", className)}>
+        <div className="relative aspect-[16/6] overflow-hidden bg-muted">
           <Image
             src={pharmacy.cover}
             alt={name}
@@ -75,41 +71,23 @@ export function PharmacyCard({ pharmacy, className, variant = "grid" }: Pharmacy
         </div>
         <CardContent className="p-4">
           <div className="flex items-start gap-3">
-            <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border bg-white">
-              <Image src={pharmacy.logo} alt={name} fill className="object-contain p-1" sizes="48px" />
+            <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border bg-white">
+              <Image src={pharmacy.logo} alt={name} fill className="object-contain p-1 rounded-full" sizes="48px" />
             </div>
             <div className="min-w-0 flex-1">
               <h3 className="font-semibold leading-tight">{name}</h3>
-              {pharmacy.licensed && (
-                <p className="text-xs text-primary">{t("licensed")}</p>
-              )}
+              <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <MapPin className="size-3" />
+                  {pharmacy.distance} {t("km")}
+                </span>
+                <span>·</span>
+                <span className="flex items-center gap-1">
+                  <Clock className="size-3" />
+                  {pharmacy.eta} {t("min")}
+                </span>
+              </div>
             </div>
-          </div>
-          <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <Star className="h-3 w-3 fill-warning text-warning" />
-              {formatRating(pharmacy.rating)}
-            </span>
-            <span>·</span>
-            <span className="flex items-center gap-1">
-              <MapPin className="h-3 w-3" />
-              {pharmacy.distance} {t("km")}
-            </span>
-            <span>·</span>
-            <span className="flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              {pharmacy.eta} {t("min")}
-            </span>
-          </div>
-          <div className="mt-2 flex items-center gap-1 text-xs">
-            <Truck className="h-3 w-3 text-primary" />
-            {pharmacy.deliveryFee === 0 ? (
-              <span className="text-success font-medium">{t("freeDelivery")}</span>
-            ) : (
-              <span className="text-muted-foreground">
-                {formatPrice(pharmacy.deliveryFee)} {t("delivery")}
-              </span>
-            )}
           </div>
         </CardContent>
       </Card>

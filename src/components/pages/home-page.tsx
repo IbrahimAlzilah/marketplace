@@ -159,14 +159,14 @@ export function HomePage() {
             <Link
               key={banner.id}
               href={banner.link}
-              className="group block overflow-hidden rounded-xl border bg-muted shadow-sm transition-shadow hover:shadow-md"
+              className="group block overflow-hidden rounded-xl border bg-muted transition-shadow hover:shadow-xs"
             >
               <div className="relative aspect-[2/1] w-full sm:aspect-[5/2]">
                 <Image
                   src={banner.image}
                   alt={locale === "ar" ? banner.titleAr : banner.title}
                   fill
-                  className="object-cover object-center transition-transform duration-300 group-hover:scale-[1.02]"
+                  className="object-cover object-center transition-transform duration-300 group-hover:scale-[1.01]"
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 />
               </div>
@@ -250,7 +250,7 @@ export function HomePage() {
             </div>
           </div>
 
-          <div className="pointer-events-none absolute -top-6 -bottom-6 end-4 hidden w-[220px] md:block lg:end-12 lg:w-[260px]">
+          <div className="pointer-events-none absolute -top-16 bottom-6 end-10 hidden w-[240px] md:block lg:w-[380px] z-10">
             <div className="relative h-full w-full">
               <Image
                 src="/images/mockup-app.png"

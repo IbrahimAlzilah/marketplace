@@ -49,7 +49,7 @@ function SearchResults() {
           {matchedProducts.length > 0 && (
             <div>
               <h2 className="mb-4 font-semibold">{t("products")}</h2>
-              <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
                 {matchedProducts.map((p) => (
                   <ProductCard key={p.id} product={p} />
                 ))}
@@ -61,7 +61,7 @@ function SearchResults() {
           )}
         </TabsContent>
         <TabsContent value="products" className="mt-6">
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
             {matchedProducts.map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}
