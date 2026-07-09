@@ -23,7 +23,7 @@ import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { categories } from "@/lib/mock-data";
+import { categories, addresses } from "@/lib/mock-data";
 import { useCartStore } from "@/stores/cart-store";
 import { useLocationStore } from "@/stores/location-store";
 import { useAuthStore } from "@/stores/auth-store";
@@ -44,6 +44,50 @@ export function SiteHeader() {
   const itemCount = useCartStore((s) => s.getItemCount());
   const { city, district } = useLocationStore();
   const { isAuthenticated, user } = useAuthStore();
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const getCategoryFromUrl = () => {
+        const params = new URLSearchParams(window.location.search);
+        return params.get("category");
+      };
+
+      setActiveCategory(getCategoryFromUrl());
+
+      const originalPush = window.history.pushState;
+      const originalReplace = window.history.replaceState;
+
+      window.history.pushState = function (...args) {
+        originalPush.apply(this, args);
+        setActiveCategory(getCategoryFromUrl());
+      };
+
+      window.history.replaceState = function (...args) {
+        originalReplace.apply(this, args);
+        setActiveCategory(getCategoryFromUrl());
+      };
+
+      const handlePopState = () => {
+        setActiveCategory(getCategoryFromUrl());
+      };
+
+      window.addEventListener("popstate", handlePopState);
+
+      return () => {
+        window.history.pushState = originalPush;
+        window.history.replaceState = originalReplace;
+        window.removeEventListener("popstate", handlePopState);
+      };
+    }
+  }, [pathname]);
+
+  const matchedAddress = addresses.find(
+    (addr) => addr.district === district && addr.city === city
+  );
+  const locationLabel = matchedAddress
+    ? `${matchedAddress.label}: ${matchedAddress.street}, ${matchedAddress.city}`
+    : `${district}, ${city}`;
 
   useEffect(() => setMounted(true), []);
 
@@ -91,15 +135,42 @@ export function SiteHeader() {
             />
           </Link>
 
+          {/* Delivery Location - desktop */}
+          <button
+            onClick={() => setLocationOpen(true)}
+            className="hidden md:flex shrink-0 items-center gap-2.5 text-start cursor-pointer hover:opacity-90 transition-opacity py-1"
+          >
+            <Image
+              src="/images/flag-sa.webp"
+              alt="SA Flag"
+              width={22}
+              height={15}
+              className="rounded-sm object-contain"
+              style={{ width: "auto", height: "auto" }}
+            />
+            <div className="flex flex-col text-xs leading-tight">
+              <span className="text-[10px] text-muted-foreground font-medium">
+                {t("deliveryTo")}:
+              </span>
+              <span className="font-bold text-foreground/90 flex items-center gap-1">
+                <span className="truncate max-w-[160px]">{locationLabel}</span>
+                <ChevronDown className="size-3.5 text-muted-foreground shrink-0" />
+              </span>
+            </div>
+          </button>
+
+          {/* Divider */}
+          <div className="hidden md:block h-8 w-px bg-border/80 shrink-0 mx-1" />
+
           {/* Search - desktop */}
           <form onSubmit={handleSearch} className="hidden flex-1 md:flex max-w-lg">
             <div className="relative w-full">
-              <Search className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-secondary" />
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t("search")}
-                className="h-10 ps-10 pe-4"
+                className="h-10 ps-9 pe-4 rounded-full"
               />
             </div>
           </form>
@@ -180,7 +251,7 @@ export function SiteHeader() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t("search")}
-              className="h-10 ps-10"
+              className="h-10 ps-10 rounded-full"
             />
           </div>
         </form>
@@ -235,36 +306,25 @@ export function SiteHeader() {
             >
               {t("offers")}
             </Link>
-            <Link
-              href="/prescription"
-              className={cn(
-                "rounded-lg px-3 py-1.5 text-sm transition-colors hover:bg-primary/5 shrink-0",
-                pathname === "/prescription" ? "text-primary bg-primary/5" : "text-foreground/80"
-              )}
-            >
-              {t("prescription")}
-            </Link>
+            {categories.slice(0, 7).map((cat) => {
+              const catName = locale === "ar" ? cat.nameAr : cat.name;
+              const isActive = pathname.startsWith("/products") && activeCategory === cat.slug;
+              return (
+                <Link
+                  key={cat.id}
+                  href={`/products?category=${cat.slug}`}
+                  className={cn(
+                    "rounded-lg px-3 py-1.5 text-sm transition-colors hover:bg-primary/5 shrink-0",
+                    isActive ? "text-primary bg-primary/5" : "text-foreground/80"
+                  )}
+                >
+                  {catName}
+                </Link>
+              );
+            })}
           </div>
 
-          {/* Delivery Location badge/button */}
-          <button
-            onClick={() => setLocationOpen(true)}
-            className="flex shrink-0 items-center gap-2 rounded-md border bg-muted/40 px-3 py-1 text-xs text-foreground/90 hover:bg-primary/5 hover:text-primary transition-all duration-200 border-border cursor-pointer"
-          >
-            <Image
-              src="/images/flag-sa.webp"
-              alt="SA Flag"
-              width={18}
-              height={12}
-              className="rounded-sm object-contain"
-              style={{ width: "auto", height: "auto" }}
-            />
-            <span className="flex items-center gap-1">
-              <span className="text-muted-foreground font-medium">{t("deliveryTo")}:</span>
-              <span className="font-semibold text-primary truncate max-w-[150px]">{district}, {city}</span>
-            </span>
-            <ChevronDown className="size-3 text-muted-foreground" />
-          </button>
+
 
           {/* Mega Menu Dropdown Panel */}
           {megaMenuOpen && (
