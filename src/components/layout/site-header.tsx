@@ -269,7 +269,7 @@ export function SiteHeader() {
               onClick={() => setMegaMenuOpen(!megaMenuOpen)}
               onMouseEnter={() => setMegaMenuOpen(true)}
               className={cn(
-                "flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm hover:bg-primary/5 transition-colors cursor-pointer",
+                "flex shrink-0 items-center gap-1.5 rounded-lg pe-3 py-1.5 text-sm hover:bg-primary/5 transition-colors cursor-pointer",
                 megaMenuOpen ? "text-primary bg-primary/5" : "text-foreground"
               )}
             >
@@ -282,7 +282,7 @@ export function SiteHeader() {
             <Link
               href="/"
               className={cn(
-                "rounded-lg px-3 py-1.5 text-sm transition-colors hover:bg-primary/5 shrink-0",
+                "rounded-md px-2 py-1 text-sm transition-colors hover:bg-primary/5 shrink-0",
                 pathname === "/" ? "text-primary bg-primary/5" : "text-foreground/80"
               )}
             >
@@ -291,7 +291,7 @@ export function SiteHeader() {
             <Link
               href="/pharmacies"
               className={cn(
-                "rounded-lg px-3 py-1.5 text-sm transition-colors hover:bg-primary/5 shrink-0",
+                "rounded-md px-2 py-1 text-sm transition-colors hover:bg-primary/5 shrink-0",
                 pathname === "/pharmacies" ? "text-primary bg-primary/5" : "text-foreground/80"
               )}
             >
@@ -300,7 +300,7 @@ export function SiteHeader() {
             <Link
               href="/offers"
               className={cn(
-                "rounded-lg px-3 py-1.5 text-sm transition-colors hover:bg-primary/5 shrink-0",
+                "rounded-md px-2 py-1 text-sm transition-colors hover:bg-primary/5 shrink-0",
                 pathname === "/offers" ? "text-primary bg-primary/5" : "text-foreground/80"
               )}
             >
@@ -314,7 +314,7 @@ export function SiteHeader() {
                   key={cat.id}
                   href={`/products?category=${cat.slug}`}
                   className={cn(
-                    "rounded-lg px-3 py-1.5 text-sm transition-colors hover:bg-primary/5 shrink-0",
+                    "rounded-md px-2 py-1 text-sm transition-colors hover:bg-primary/5 shrink-0",
                     isActive ? "text-primary bg-primary/5" : "text-foreground/80"
                   )}
                 >

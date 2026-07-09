@@ -605,29 +605,22 @@ export const products: Product[] = [
 export const banners = [
   {
     id: "b1",
-    title: "20% Off Vitamins",
-    titleAr: "خصم 20% على الفيتامينات",
-    subtitle: "Boost your immunity this season",
-    subtitleAr: "عزز مناعتك هذا الموسم",
     image: "/images/deals/deal_5.webp",
     link: "/products?category=vitamins",
   },
   {
     id: "b2",
-    title: "Free Delivery",
-    titleAr: "توصيل مجاني",
-    subtitle: "On orders over SAR 100",
-    subtitleAr: "للطلبات فوق 100 ريال",
     image: "/images/deals/deal_4.webp",
     link: "/pharmacies",
   },
   {
     id: "b3",
-    title: "Baby Care Essentials",
-    titleAr: "أساسيات العناية بالطفل",
-    subtitle: "Trusted brands for your little ones",
-    subtitleAr: "علامات تجارية موثوقة لأطفالك",
     image: "/images/deals/deal_3.webp",
+    link: "/products?category=baby-care",
+  },
+  {
+    id: "b4",
+    image: "/images/deals/deal_4.webp",
     link: "/products?category=baby-care",
   },
 ];
