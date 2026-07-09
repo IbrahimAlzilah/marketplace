@@ -248,7 +248,14 @@
     "pickupNotice": "جاهز للاستلام الذاتي من فرع النهدي - الملز",
     "sevenSeas": "زيت كبد السمك سفن سيز",
     "centrum": "سنتروم فيتامينات متعددة للبالغين",
-    "item": "عنصر"
+    "item": "عنصر",
+    "acceptPartial": "قبول الكمية المتاحة",
+    "acceptSubstitute": "قبول البديل",
+    "removeLine": "حذف المنتج",
+    "partiallyAvailable": "متوفر جزئياً",
+    "partiallyAvailableNotice": "يتوفر {allocated} فقط من أصل {requested} مطلوبة",
+    "suggestedSubstitute": "البديل المقترح",
+    "pendingAllocation": "بانتظار توزيع الكمية"
   },
   "orders": {
     "title": "طلباتي",

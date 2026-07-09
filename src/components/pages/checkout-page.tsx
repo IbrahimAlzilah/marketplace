@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
+import Image from "next/image";
 import {
   Check,
   CheckCircle,
@@ -21,6 +22,9 @@ import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn, formatPrice } from "@/lib/utils";
 import { useCartStore } from "@/stores/cart-store";
+import { AllocationStatus } from "@/lib/allocation-evaluator";
+import { getProductById, pharmacies } from "@/lib/mock-data";
+import { Clock } from "lucide-react";
 
 function CheckoutPageContent() {
   const t = useTranslations("checkout");
@@ -28,8 +32,13 @@ function CheckoutPageContent() {
   const locale = useLocale();
   const router = useRouter();
 
-  // Workflow starts at payment loader: "payment_loading" | "payment_method" | "confirmation"
-  const [phase, setPhase] = useState<"payment_loading" | "payment_method" | "confirmation">("payment_loading");
+  // Retrieve checkout states and actions from the store
+  const checkoutLines = useCartStore((s) => s.checkoutLines);
+  const resolvePartialLine = useCartStore((s) => s.resolvePartialLine);
+  const resolveRejectedLine = useCartStore((s) => s.resolveRejectedLine);
+
+  // Workflow starts at "review" (Order Approval Status) and moves to "payment_loading" | "payment_method" | "confirmation"
+  const [phase, setPhase] = useState<"review" | "payment_loading" | "payment_method" | "confirmation">("review");
 
   // Store Pickup vs Delivery Gap State
   const [deliveryMethod, setDeliveryMethod] = useState<"delivery" | "pickup">("delivery");
@@ -105,15 +114,345 @@ function CheckoutPageContent() {
     setPhase("confirmation");
   };
 
-  // Dynamic pricing breakdown values
-  const productPrice = 260;
-  const promoDiscount = isPromoApplied ? 52 : 0; // 20% discount
-  const balancePayment = walletApplied ? 79 : 0; // use exact wallet balance
+  // Dynamic pricing breakdown values based on resolved checkout lines
+  const activeLines = checkoutLines.filter(line => line.resolution !== "removed");
+  const productPrice = activeLines.reduce((sum, line) => sum + (line.price * line.requestedQty), 0);
+
+  // Group active lines by pharmacy to calculate delivery fee
+  const activePharmacies = Array.from(new Set(activeLines.map(line => line.pharmacyId)));
+  const deliveryFee = activePharmacies.reduce((sum, pId) => {
+    const pharmacy = pharmacies.find(p => p.id === pId);
+    return sum + (pharmacy?.deliveryFee ?? 0);
+  }, 0);
+
+  const promoDiscount = isPromoApplied ? productPrice * 0.20 : 0; // 20% discount
+  const balancePayment = walletApplied ? Math.min(79, productPrice - promoDiscount + deliveryFee) : 0; // use wallet balance up to remaining
   const loyaltyDiscount = loyaltyApplied ? redeemPoints * 0.01 : 0; // rate conversion
-  const deliveryFee = 0; // free delivery
 
   // Final Total matches dynamic calculations
   const checkoutTotal = Math.max(0, productPrice - promoDiscount + deliveryFee - balancePayment - loyaltyDiscount);
+
+  if (phase === "review") {
+    const approvedLines = checkoutLines.filter(line => line.status === AllocationStatus.APPROVED);
+    const partialLines = checkoutLines.filter(line => line.status === AllocationStatus.PARTIAL);
+    const rejectedLines = checkoutLines.filter(line => line.status === AllocationStatus.REJECTED);
+
+    const hasUnresolved = checkoutLines.some(line => line.resolution === "pending");
+
+    return (
+      <div className="container-marketplace py-6 lg:py-6 relative">
+        <div className="flex items-center gap-3 mb-8">
+          <Button variant="ghost" size="icon" onClick={() => router.push("/cart")} className="rounded-full">
+            <ChevronLeft className="h-6 w-6" />
+          </Button>
+          <h1 className="text-2xl font-bold text-foreground">{t("orderApprovalStatus")}</h1>
+        </div>
+
+        <div className="grid gap-8 lg:grid-cols-12">
+          {/* Left Column: Decision Cards */}
+          <div className="lg:col-span-8 space-y-6">
+            
+            {/* 1. Approved Section */}
+            {approvedLines.length > 0 && (
+              <Card className="rounded-2xl border p-5 space-y-4 shadow-none">
+                <div className="flex items-center gap-2 text-green-600">
+                  <CheckCircle className="h-5 w-5 fill-green-50" />
+                  <h3 className="text-base font-bold">{t("approvedOrders", { count: approvedLines.length })}</h3>
+                </div>
+                <p className="text-xs text-green-600 bg-green-500/5 px-3 py-2 rounded-lg border border-green-500/10">
+                  {t("approvedNotice")}
+                </p>
+                <div className="space-y-3">
+                  {approvedLines.map((line) => {
+                    const name = locale === "ar" ? line.productNameAr : line.productName;
+                    return (
+                      <div key={line.productId} className="flex justify-between items-center bg-card border rounded-xl p-3 text-sm">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="relative h-12 w-12 shrink-0 border rounded-lg bg-white overflow-hidden flex items-center justify-center">
+                            <Image src={line.image} alt={name} fill className="object-contain p-1 rounded-lg" />
+                          </div>
+                          <div className="min-w-0">
+                            <h4 className="font-semibold text-foreground truncate">{name}</h4>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              {getPharmacyTranslation(line.pharmacyName)}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-end shrink-0 pl-3">
+                          <span className="font-bold text-primary block">{formatPrice(line.price)}</span>
+                          <span className="text-xs text-muted-foreground">Qty: {line.requestedQty}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </Card>
+            )}
+
+            {/* 2. Partially Available Section */}
+            {partialLines.length > 0 && (
+              <Card className="rounded-2xl border p-5 space-y-4 border-orange-200 bg-orange-50/10 shadow-none">
+                <div className="flex items-center gap-2 text-orange-600">
+                  <Clock className="h-5 w-5 text-orange-500" />
+                  <h3 className="text-base font-bold">{t("partiallyAvailable")}</h3>
+                </div>
+                <div className="space-y-4">
+                  {partialLines.map((line) => {
+                    const name = locale === "ar" ? line.productNameAr : line.productName;
+                    const allocated = line.allocatedQty;
+                    const isPending = line.resolution === "pending";
+                    const isAccepted = line.resolution === "accepted_partial";
+
+                    return (
+                      <div key={line.productId} className="bg-card border rounded-2xl p-4 space-y-3 shadow-none">
+                        <div className="flex justify-between items-start gap-4">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="relative h-12 w-12 shrink-0 border rounded-lg bg-white overflow-hidden flex items-center justify-center">
+                              <Image src={line.image} alt={name} fill className="object-contain p-1 rounded-lg" />
+                            </div>
+                            <div className="min-w-0">
+                              <h4 className="font-semibold text-foreground truncate">{name}</h4>
+                              <p className="text-xs text-muted-foreground">
+                                {getPharmacyTranslation(line.pharmacyName)}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-end shrink-0 pl-3">
+                            <span className="font-bold text-primary block">{formatPrice(line.price)}</span>
+                            <span className="text-xs text-muted-foreground">Requested: {line.requestedQty}</span>
+                          </div>
+                        </div>
+
+                        <p className="text-xs text-orange-600 bg-orange-500/5 px-3 py-2 rounded-lg border border-orange-500/10">
+                          {t("partiallyAvailableNotice", { allocated, requested: line.requestedQty })}
+                        </p>
+
+                        <div className="flex gap-2.5 pt-2">
+                          {isPending ? (
+                            <>
+                              <Button
+                                variant="outline"
+                                className="flex-1 text-xs py-5 rounded-xl text-green-600 border-green-600 hover:bg-green-500/5 bg-white font-bold"
+                                onClick={() => resolvePartialLine(line.productId, true)}
+                              >
+                                {t("acceptPartial")} ({allocated})
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                className="flex-1 text-xs py-5 rounded-xl text-destructive hover:bg-destructive/5 font-bold"
+                                onClick={() => resolvePartialLine(line.productId, false)}
+                              >
+                                {t("removeLine")}
+                              </Button>
+                            </>
+                          ) : (
+                            <div className="w-full flex justify-between items-center text-xs py-2 px-1">
+                              <span className={cn(
+                                "font-bold flex items-center gap-1.5",
+                                isAccepted ? "text-green-600" : "text-destructive"
+                              )}>
+                                {isAccepted ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
+                                {isAccepted ? `${t("acceptPartial")} (${allocated})` : t("removeLine")}
+                              </span>
+                              <Button
+                                variant="link"
+                                className="text-[11px] h-auto p-0 font-semibold text-primary"
+                                onClick={() => {
+                                  // Reset resolution state
+                                  const currentLines = useCartStore.getState().checkoutLines;
+                                  const updated = currentLines.map(l => l.productId === line.productId ? { ...l, resolution: "pending" as const } : l);
+                                  useCartStore.getState().setCheckoutLines(updated);
+                                }}
+                              >
+                                {locale === "ar" ? "تغيير" : "Change"}
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </Card>
+            )}
+
+            {/* 3. Rejected Section */}
+            {rejectedLines.length > 0 && (
+              <Card className="rounded-2xl border p-5 space-y-4 border-destructive/20 bg-destructive/5 shadow-none">
+                <div className="flex items-center gap-2 text-destructive">
+                  <XCircle className="h-5 w-5" />
+                  <h3 className="text-base font-bold">{t("rejectedOrders", { count: rejectedLines.length })}</h3>
+                </div>
+                <div className="space-y-4">
+                  {rejectedLines.map((line) => {
+                    const name = locale === "ar" ? line.productNameAr : line.productName;
+                    const isPending = line.resolution === "pending";
+                    const isSubstitute = line.resolution === "accepted_substitute";
+                    const reason = locale === "ar" ? line.rejectionReasonAr : line.rejectionReason;
+
+                    return (
+                      <div key={line.productId} className="bg-card border border-destructive/10 rounded-2xl p-4 space-y-3 shadow-none">
+                        <div className="flex justify-between items-start gap-4">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="relative h-12 w-12 shrink-0 border rounded-lg bg-white overflow-hidden flex items-center justify-center opacity-70">
+                              <Image src={line.image} alt={name} fill className="object-contain p-1 rounded-lg" />
+                            </div>
+                            <div className="min-w-0">
+                              <h4 className="font-semibold text-foreground line-through truncate">{name}</h4>
+                              <p className="text-xs text-muted-foreground">
+                                {getPharmacyTranslation(line.pharmacyName)}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-end shrink-0 pl-3">
+                            <span className="font-bold text-muted-foreground line-through block">{formatPrice(line.price)}</span>
+                            <span className="text-xs text-muted-foreground">Qty: {line.requestedQty}</span>
+                          </div>
+                        </div>
+
+                        <p className="text-xs font-semibold text-red-600 bg-red-500/5 px-2.5 py-1.5 rounded-lg border border-red-500/10">
+                          {reason === "Out of stock" ? t("outOfStockNotice") : reason}
+                        </p>
+
+                        {/* Suggested Substitute Panel */}
+                        {line.substitute && (
+                          <div className="p-3.5 rounded-xl border border-dashed border-primary/20 bg-primary/5 mt-3 space-y-2 text-start">
+                            <span className="text-[10px] font-bold text-primary uppercase tracking-wider block">{t("suggestedSubstitute")}</span>
+                            <div className="flex items-center gap-3">
+                              <div className="h-10 w-10 shrink-0 rounded-lg border bg-white overflow-hidden flex items-center justify-center relative">
+                                <Image src={line.substitute.image} alt={line.substitute.name} fill className="object-contain p-0.5 rounded-lg" />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <h5 className="text-xs font-bold text-foreground truncate">
+                                  {locale === "ar" ? line.substitute.nameAr : line.substitute.name}
+                                </h5>
+                                <span className="text-xs font-semibold text-primary">{formatPrice(line.substitute.price)}</span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="flex gap-2.5 pt-2">
+                          {isPending ? (
+                            <>
+                              {line.substitute && (
+                                <Button
+                                  variant="outline"
+                                  className="flex-1 text-xs py-5 rounded-xl text-primary border-primary hover:bg-primary/5 bg-white font-bold"
+                                  onClick={() => resolveRejectedLine(line.productId, true)}
+                                >
+                                  {t("acceptSubstitute")}
+                                </Button>
+                              )}
+                              <Button
+                                variant="ghost"
+                                className="flex-1 text-xs py-5 rounded-xl text-destructive hover:bg-destructive/5 font-bold"
+                                onClick={() => resolveRejectedLine(line.productId, false)}
+                              >
+                                {t("removeLine")}
+                              </Button>
+                            </>
+                          ) : (
+                            <div className="w-full flex justify-between items-center text-xs py-2 px-1">
+                              <span className={cn(
+                                "font-bold flex items-center gap-1.5",
+                                isSubstitute ? "text-green-600" : "text-destructive"
+                              )}>
+                                {isSubstitute ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
+                                {isSubstitute ? `${t("acceptSubstitute")} (${locale === "ar" ? line.substitute?.nameAr : line.substitute?.name})` : t("removeLine")}
+                              </span>
+                              <Button
+                                variant="link"
+                                className="text-[11px] h-auto p-0 font-semibold text-primary"
+                                onClick={() => {
+                                  // Restore to original product details and pending resolution
+                                  const currentLines = useCartStore.getState().checkoutLines;
+                                  const updated = currentLines.map(l => {
+                                    const match = l.productId === line.productId || (l.substitute && l.productId === l.substitute.productId);
+                                    if (match) {
+                                      const origProduct = getProductById(line.productId);
+                                      return {
+                                        ...l,
+                                        productId: line.productId,
+                                        productName: origProduct?.name ?? line.productName,
+                                        productNameAr: origProduct?.nameAr ?? line.productNameAr,
+                                        price: origProduct?.price ?? line.price,
+                                        image: origProduct?.image ?? line.image,
+                                        requestedQty: line.requestedQty,
+                                        allocatedQty: line.allocatedQty,
+                                        status: line.status,
+                                        resolution: "pending" as const
+                                      };
+                                    }
+                                    return l;
+                                  });
+                                  useCartStore.getState().setCheckoutLines(updated);
+                                }}
+                              >
+                                {locale === "ar" ? "تغيير" : "Change"}
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </Card>
+            )}
+          </div>
+
+          {/* Right Column: Sticky Summary Sheet */}
+          <div className="lg:col-span-4">
+            <Card className="rounded-2xl border p-5 space-y-5 sticky top-36 shadow-none">
+              <h3 className="font-bold text-base text-foreground">{t("orderSummary")}</h3>
+              
+              {/* Dynamic summary rows */}
+              <div className="space-y-3 text-xs">
+                <div className="flex justify-between text-muted-foreground">
+                  <span>{t("productPrice")}</span>
+                  <span className="font-semibold text-foreground">{formatPrice(productPrice)}</span>
+                </div>
+                {isPromoApplied && (
+                  <div className="flex justify-between text-destructive">
+                    <span>{t("additionalDiscount")}</span>
+                    <span className="font-semibold">-{formatPrice(promoDiscount)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-muted-foreground">
+                  <span>{t("deliveryFees")}</span>
+                  <span className="text-green-600 font-semibold">
+                    {deliveryFee > 0 ? formatPrice(deliveryFee) : t("free")}
+                  </span>
+                </div>
+                <Separator />
+                <div className="flex justify-between text-sm font-bold text-foreground">
+                  <span>{t("total")}</span>
+                  <span>{formatPrice(checkoutTotal)}</span>
+                </div>
+                <p className="text-[10px] text-muted-foreground">{t("includesVat")}</p>
+              </div>
+
+              {/* Action Trigger */}
+              <Button
+                disabled={hasUnresolved}
+                className="w-full py-6 rounded-2xl text-base font-bold bg-primary hover:bg-primary/90 text-white mt-2"
+                onClick={() => setPhase("payment_loading")}
+              >
+                {t("continueToPayment")}
+              </Button>
+
+              {hasUnresolved && (
+                <p className="text-[10px] text-center font-semibold text-destructive mt-1">
+                  {locale === "ar" ? "يرجى حل جميع القرارات المعلقة للمتابعة للدفع" : "Please resolve all pending decisions to continue to payment"}
+                </p>
+              )}
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Phase 5: Final Confirmation (Wireframe 1)
   if (phase === "confirmation") {
@@ -141,17 +480,32 @@ function CheckoutPageContent() {
               <Separator />
               <div className="space-y-2 text-start">
                 <p className="font-semibold text-muted-foreground uppercase tracking-wide text-[10px]">{t("approvedShipments")}</p>
-                <div className="space-y-1 text-muted-foreground">
-                  <p className="font-bold text-foreground text-xs">{getPharmacyTranslation("Nahdi Pharmacy")}</p>
-                  <p>• {getProductTranslation("Aspirin 100mg")} (1 {t("item")}) - {formatPrice(129.35)}</p>
-                  <p>• {getProductTranslation("Vitamin D3")} (1 {t("item")}) - {formatPrice(129.35)}</p>
-                  <p>• {getProductTranslation("Ibuprofen 200mg")} (1 {t("item")}) - {formatPrice(129.35)}</p>
-                </div>
-                <div className="space-y-1 text-muted-foreground pt-2">
-                  <p className="font-bold text-foreground text-xs">{getPharmacyTranslation("Avnzor Pharmacy")}</p>
-                  <p>• {getProductTranslation("Cough Syrup")} (1 {t("item")}) - {formatPrice(129.35)}</p>
-                  <p>• {getProductTranslation("First Aid Kit")} (1 {t("item")}) - {formatPrice(129.35)}</p>
-                </div>
+                {Object.values(
+                  activeLines.reduce<Record<string, { name: string; nameAr: string; lines: typeof activeLines }>>((acc, line) => {
+                    if (!acc[line.pharmacyId]) {
+                      acc[line.pharmacyId] = {
+                        name: line.pharmacyName,
+                        nameAr: line.pharmacyNameAr,
+                        lines: [],
+                      };
+                    }
+                    acc[line.pharmacyId].lines.push(line);
+                    return acc;
+                  }, {})
+                ).map((group, idx) => {
+                  const pharmName = locale === "ar" ? group.nameAr : group.name;
+                  return (
+                    <div key={idx} className="space-y-1 text-muted-foreground pt-2 first:pt-0">
+                      <p className="font-bold text-foreground text-xs">{pharmName}</p>
+                      {group.lines.map((line, pIdx) => {
+                        const pName = locale === "ar" ? line.productNameAr : line.productName;
+                        return (
+                          <p key={pIdx}>• {pName} ({line.requestedQty} {t("item")}) - {formatPrice(line.price * line.requestedQty)}</p>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
               </div>
               <Separator />
               <div className="flex justify-between font-bold text-sm text-primary">
@@ -253,52 +607,55 @@ function CheckoutPageContent() {
 
         <div className="space-y-4 text-start">
           {/* Available Items */}
-          <Card className="rounded-2xl border p-4 space-y-3">
-            <div className="flex items-center gap-2 text-success text-sm font-semibold">
-              <CheckCircle className="h-4 w-4" />
-              <span>{t("availableItems")}</span>
-            </div>
-            <div className="space-y-2">
-              {[
-                { name: "Accu-Chek Instant Blood Glucose Monitor", qty: 2, price: 79.00 },
-                { name: "Megamind Omega-3 227 ml Peach & Mango Liquid", qty: 2, price: 99.00 },
-                { name: "Smilepen Night Whitening 14 Strips", qty: 2, price: 79.00 }
-              ].map((item, idx) => (
-                <div key={idx} className="flex justify-between items-center bg-green-500/5 p-3 rounded-xl border border-green-500/10 text-xs">
-                  <div>
-                    <h4 className="font-semibold text-foreground">{getProductTranslation(item.name)}</h4>
-                    <span className="text-muted-foreground text-[10px]">{tc("cart")} Qty: {item.qty}</span>
-                  </div>
-                  <span className="font-bold text-primary shrink-0">{formatPrice(item.price)}</span>
-                </div>
-              ))}
-            </div>
-          </Card>
+          {activeLines.length > 0 && (
+            <Card className="rounded-2xl border p-4 space-y-3 shadow-none">
+              <div className="flex items-center gap-2 text-success text-sm font-semibold">
+                <CheckCircle className="h-4 w-4" />
+                <span>{t("availableItems")}</span>
+              </div>
+              <div className="space-y-2">
+                {activeLines.map((line, idx) => {
+                  const name = locale === "ar" ? line.productNameAr : line.productName;
+                  return (
+                    <div key={idx} className="flex justify-between items-center bg-green-500/5 p-3 rounded-xl border border-green-500/10 text-xs">
+                      <div>
+                        <h4 className="font-semibold text-foreground">{name}</h4>
+                        <span className="text-muted-foreground text-[10px]">{tc("cart")} Qty: {line.requestedQty}</span>
+                      </div>
+                      <span className="font-bold text-primary shrink-0">{formatPrice(line.price * line.requestedQty)}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </Card>
+          )}
 
           {/* Unavailable Items */}
-          <Card className="rounded-2xl border p-4 space-y-3 bg-muted/20 border-dashed">
-            <div className="flex items-center gap-2 text-destructive text-sm font-semibold">
-              <XCircle className="h-4 w-4" />
-              <div>
-                <span>{t("unavailableItems")}</span>
-                <p className="text-[10px] text-muted-foreground font-normal mt-0.5">{t("refundedToWallet")}</p>
-              </div>
-            </div>
-            <div className="space-y-2">
-              {[
-                { name: "Smilepen Night Whitening 14 Strips", qty: 2, price: 79.00 },
-                { name: "Accu-Chek Instant Blood Glucose Monitor", qty: 2, price: 79.00 }
-              ].map((item, idx) => (
-                <div key={idx} className="flex justify-between items-center bg-red-500/5 p-3 rounded-xl border border-red-500/10 text-xs opacity-80">
-                  <div>
-                    <h4 className="font-semibold text-foreground">{getProductTranslation(item.name)}</h4>
-                    <span className="text-muted-foreground text-[10px]">{tc("cart")} Qty: {item.qty}</span>
-                  </div>
-                  <span className="font-bold text-red-500 shrink-0">{formatPrice(item.price)}</span>
+          {checkoutLines.filter(line => line.status === AllocationStatus.REJECTED || line.resolution === "removed").length > 0 && (
+            <Card className="rounded-2xl border p-4 space-y-3 bg-muted/20 border-dashed shadow-none">
+              <div className="flex items-center gap-2 text-destructive text-sm font-semibold">
+                <XCircle className="h-4 w-4" />
+                <div>
+                  <span>{t("unavailableItems")}</span>
+                  <p className="text-[10px] text-muted-foreground font-normal mt-0.5">{t("refundedToWallet")}</p>
                 </div>
-              ))}
-            </div>
-          </Card>
+              </div>
+              <div className="space-y-2">
+                {checkoutLines.filter(line => line.status === AllocationStatus.REJECTED || line.resolution === "removed").map((line, idx) => {
+                  const name = locale === "ar" ? line.productNameAr : line.productName;
+                  return (
+                    <div key={idx} className="flex justify-between items-center bg-red-500/5 p-3 rounded-xl border border-red-500/10 text-xs opacity-80">
+                      <div>
+                        <h4 className="font-semibold text-foreground">{name}</h4>
+                        <span className="text-muted-foreground text-[10px]">{tc("cart")} Qty: {line.requestedQty}</span>
+                      </div>
+                      <span className="font-bold text-red-500 shrink-0">{formatPrice(line.price * line.requestedQty)}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </Card>
+          )}
 
           {/* Final Total */}
           <div className="flex justify-between items-center p-4 border-t border-b">

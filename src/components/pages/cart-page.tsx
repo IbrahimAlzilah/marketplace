@@ -15,6 +15,7 @@ import { QuantityStepper } from "@/components/marketplace/product-card";
 import { getProductById, getPharmacyById } from "@/lib/mock-data";
 import { useCartStore } from "@/stores/cart-store";
 import { cn, formatPrice } from "@/lib/utils";
+import { getMockAllocations, AllocationStatus, AllocationItem } from "@/lib/allocation-evaluator";
 
 const mockAddresses = [
   { id: "addr-1", label: "the home", isMain: true, address: "Samaya Furnished Apartments, Room 260, Al Quds, Riyadh, Saudi Arabia" },
@@ -60,7 +61,7 @@ export function CartPage() {
   const tCheckout = useTranslations("checkout");
   const locale = useLocale();
   const router = useRouter();
-  const { items, removeItem, updateQuantity } = useCartStore();
+  const { items, removeItem, updateQuantity, checkoutLines, setCheckoutLines, setCheckoutAddressId } = useCartStore();
 
   // Address dialog state
   const [addressModalOpen, setAddressModalOpen] = useState(false);
@@ -78,6 +79,9 @@ export function CartPage() {
   const [approvedPharmacies, setApprovedPharmacies] = useState(mockApprovedPharmacies);
   const [rejectedPharmacies, setRejectedPharmacies] = useState(mockRejectedPharmacies);
   const [alternativesOpen, setAlternativesOpen] = useState(false);
+
+  // Allocation Simulation
+  const [finalAllocations, setFinalAllocations] = useState<AllocationItem[]>([]);
 
   // Translators helpers for mock details
   const getAddressLabelTranslation = (label: string) => {
@@ -110,24 +114,50 @@ export function CartPage() {
 
     const interval = setInterval(() => {
       setTimeLeft((prev) => {
-        if (prev <= 1) {
+        const nextTime = prev - 1;
+
+        if (nextTime <= 0) {
           clearInterval(interval);
           setProcessingOpen(false);
-          setStatusOpen(true);
+          router.push("/checkout");
           return 0;
         }
 
-        const nextTime = prev - 1;
-        if (nextTime === 50) setAvnzorStatus("Approve");
-        if (nextTime === 30) setNahdiStatus("Approve");
-        if (nextTime === 10) setWhitesStatus("Reject");
+        // Transition allocations
+        let pharmacyIdToUnlock = "";
+        if (nextTime === 50) {
+          pharmacyIdToUnlock = "p1"; // Nahdi
+        } else if (nextTime === 30) {
+          pharmacyIdToUnlock = "p4"; // United / Avnzor equivalents
+        } else if (nextTime === 10) {
+          pharmacyIdToUnlock = "ALL_REMAINING"; // Whites etc.
+        }
+
+        if (pharmacyIdToUnlock) {
+          const currentLines = useCartStore.getState().checkoutLines;
+          const updated = currentLines.map(line => {
+            const final = finalAllocations.find(f => f.productId === line.productId);
+            if (!final) return line;
+
+            if (pharmacyIdToUnlock === "ALL_REMAINING" || line.pharmacyId === pharmacyIdToUnlock) {
+              return {
+                ...line,
+                allocatedQty: final.allocatedQty,
+                status: final.status,
+                resolution: final.status === AllocationStatus.APPROVED ? ("approved" as const) : ("pending" as const),
+              };
+            }
+            return line;
+          });
+          setCheckoutLines(updated);
+        }
 
         return nextTime;
       });
-    }, 100); // 100ms per simulated second = 6 seconds total review
+    }, 100);
 
     return () => clearInterval(interval);
-  }, [processingOpen]);
+  }, [processingOpen, finalAllocations, router, setCheckoutLines]);
 
   const cartGroups = items.reduce<
     Record<string, { pharmacyId: string; lines: { productId: string; quantity: number }[] }>
@@ -333,13 +363,21 @@ export function CartPage() {
             <Button
               className="w-full py-6 rounded-xl text-base font-bold text-white bg-primary hover:bg-primary/95"
               onClick={() => {
+                // Simulate checkoutSubmit mutation success
+                const allocations = getMockAllocations(items);
+                setFinalAllocations(allocations);
+
+                const initialLines = allocations.map(line => ({
+                  ...line,
+                  allocatedQty: "?",
+                  status: AllocationStatus.PENDING,
+                  resolution: "pending" as const,
+                }));
+
+                setCheckoutLines(initialLines);
+                setCheckoutAddressId(selectedAddrId);
                 setAddressModalOpen(false);
-                setApprovedPharmacies(mockApprovedPharmacies);
-                setRejectedPharmacies(mockRejectedPharmacies);
                 setTimeLeft(60);
-                setNahdiStatus("Pending");
-                setAvnzorStatus("Pending");
-                setWhitesStatus("Pending");
                 setProcessingOpen(true);
               }}
             >
@@ -395,65 +433,72 @@ export function CartPage() {
           <div className="space-y-3 pt-4 border-t text-start">
             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{tCheckout("pendingApprovalFrom")}</p>
 
-            {/* Pharmacy 1 */}
-            <div className="flex items-center justify-between p-3 rounded-2xl bg-muted/40 border">
-              <div className="flex items-center gap-3">
-                <div className="h-9 w-9 bg-white rounded-full border flex items-center justify-center font-bold text-primary text-xs">N</div>
-                <div>
-                  <h4 className="font-semibold text-xs text-foreground">{getPharmacyTranslation("Nahdi Pharmacy")}</h4>
-                  <p className="text-[10px] text-muted-foreground">{t("items", { count: 3 })}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-1 text-[10px] font-medium">
-                <span className={cn(
-                  "h-2 w-2 rounded-full",
-                  nahdiStatus === "Approve" ? "bg-green-500 animate-pulse" : "bg-yellow-500"
-                )} />
-                <span className={nahdiStatus === "Approve" ? "text-green-500 font-semibold" : "text-muted-foreground"}>
-                  {nahdiStatus === "Approve" ? tCheckout("approve") : tCheckout("pending")}
-                </span>
-              </div>
-            </div>
+            {/* Group checkoutLines by pharmacy */}
+            {Object.values(
+              checkoutLines.reduce<Record<string, { pharmacyId: string; name: string; nameAr: string; lines: typeof checkoutLines }>>((acc, line) => {
+                if (!acc[line.pharmacyId]) {
+                  acc[line.pharmacyId] = {
+                    pharmacyId: line.pharmacyId,
+                    name: line.pharmacyName,
+                    nameAr: line.pharmacyNameAr,
+                    lines: [],
+                  };
+                }
+                acc[line.pharmacyId].lines.push(line);
+                return acc;
+              }, {})
+            ).map((group) => {
+              // Determine group status:
+              // - "Pending" if any line is PENDING
+              // - "Reject" if any line is REJECTED
+              // - "Partial" if any line is PARTIAL
+              // - "Approve" otherwise
+              let groupStatus: "Pending" | "Approve" | "Partial" | "Reject" = "Approve";
+              if (group.lines.some(l => l.status === AllocationStatus.PENDING)) {
+                groupStatus = "Pending";
+              } else if (group.lines.some(l => l.status === AllocationStatus.REJECTED)) {
+                groupStatus = "Reject";
+              } else if (group.lines.some(l => l.status === AllocationStatus.PARTIAL)) {
+                groupStatus = "Partial";
+              }
 
-            {/* Pharmacy 2 */}
-            <div className="flex items-center justify-between p-3 rounded-2xl bg-muted/40 border">
-              <div className="flex items-center gap-3">
-                <div className="h-9 w-9 bg-white rounded-full border flex items-center justify-center font-bold text-primary text-xs">A</div>
-                <div>
-                  <h4 className="font-semibold text-xs text-foreground">{getPharmacyTranslation("Avnzor Pharmacy")}</h4>
-                  <p className="text-[10px] text-muted-foreground">{t("items", { count: 1 })}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-1 text-[10px] font-medium">
-                <span className={cn(
-                  "h-2.5 w-2.5 rounded-full",
-                  avnzorStatus === "Approve" ? "bg-green-500 animate-pulse" : "bg-yellow-500"
-                )} />
-                <span className={avnzorStatus === "Approve" ? "text-green-500 font-semibold" : "text-muted-foreground"}>
-                  {avnzorStatus === "Approve" ? tCheckout("approve") : tCheckout("pending")}
-                </span>
-              </div>
-            </div>
+              const displayName = locale === "ar" ? group.nameAr : group.name;
 
-            {/* Pharmacy 3 */}
-            <div className="flex items-center justify-between p-3 rounded-2xl bg-muted/40 border">
-              <div className="flex items-center gap-3">
-                <div className="h-9 w-9 bg-white rounded-full border flex items-center justify-center font-bold text-primary text-xs">W</div>
-                <div>
-                  <h4 className="font-semibold text-xs text-foreground">{getPharmacyTranslation("Whites Pharmacy")}</h4>
-                  <p className="text-[10px] text-muted-foreground">{t("items", { count: 1 })}</p>
+              return (
+                <div key={group.pharmacyId} className="flex items-center justify-between p-3 rounded-2xl bg-muted/40 border">
+                  <div className="flex items-center gap-3">
+                    <div className="h-9 w-9 bg-white rounded-full border flex items-center justify-center font-bold text-primary text-xs">
+                      {displayName[0]}
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-xs text-foreground">{displayName}</h4>
+                      <p className="text-[10px] text-muted-foreground">{t("items", { count: group.lines.length })}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 text-[10px] font-medium">
+                    <span className={cn(
+                      "h-2 w-2 rounded-full",
+                      groupStatus === "Approve" ? "bg-green-500 animate-pulse" :
+                      groupStatus === "Partial" ? "bg-orange-500" :
+                      groupStatus === "Reject" ? "bg-red-500" :
+                      "bg-yellow-500"
+                    )} />
+                    <span className={cn(
+                      "font-semibold",
+                      groupStatus === "Approve" ? "text-green-500" :
+                      groupStatus === "Partial" ? "text-orange-500" :
+                      groupStatus === "Reject" ? "text-red-500" :
+                      "text-muted-foreground"
+                    )}>
+                      {groupStatus === "Approve" ? tCheckout("approve") :
+                       groupStatus === "Partial" ? tCheckout("partiallyAvailable") :
+                       groupStatus === "Reject" ? tCheckout("rejected") :
+                       tCheckout("pending")}
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-1 text-[10px] font-medium">
-                <span className={cn(
-                  "h-2 w-2 rounded-full",
-                  whitesStatus === "Reject" ? "bg-red-500 animate-pulse" : "bg-yellow-500"
-                )} />
-                <span className={whitesStatus === "Reject" ? "text-red-500 font-semibold" : "text-muted-foreground"}>
-                  {whitesStatus === "Reject" ? tCheckout("rejected") : tCheckout("pending")}
-                </span>
-              </div>
-            </div>
+              );
+            })}
           </div>
         </DialogContent>
       </Dialog>

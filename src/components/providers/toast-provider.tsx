@@ -40,7 +40,7 @@ export function ToastContainer({ children }: { children: React.ReactNode }) {
         {children}
         {toasts.map((t) => (
           <Toast key={t.id} variant={t.variant}>
-            {t.title && <ToastTitle>{t.title}</ToastTitle>}
+            {/* {t.title && <ToastTitle>{t.title}</ToastTitle>} */}
             {t.description && <ToastDescription>{t.description}</ToastDescription>}
             <ToastClose />
           </Toast>

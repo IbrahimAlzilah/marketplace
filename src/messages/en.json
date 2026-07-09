@@ -248,7 +248,14 @@
     "pickupNotice": "Ready for self-pickup at Nahdi Al-Malaz Branch",
     "sevenSeas": "Seven Seas Cod Liver Oil",
     "centrum": "Centrum Adults Multivitamin",
-    "item": "item"
+    "item": "item",
+    "acceptPartial": "Accept Partial Quantity",
+    "acceptSubstitute": "Accept Substitute",
+    "removeLine": "Remove Item",
+    "partiallyAvailable": "Partially Available",
+    "partiallyAvailableNotice": "Only {allocated} of {requested} items are available",
+    "suggestedSubstitute": "Suggested Substitute",
+    "pendingAllocation": "Pending Allocation"
   },
   "orders": {
     "title": "My Orders",

@@ -145,7 +145,8 @@ export function ProductDetailPage({ slug }: { slug: string }) {
               </span>
             </div>
 
-            <h1 className="text-2xl font-bold lg:text-3xl text-foreground">{name}</h1>
+            <p className="text-sm text-muted-foreground mt-1.5">{product.brand}</p>
+            <h1 className="text-2xl font-bold lg:text-3xl text-foreground mt-0.5">{name}</h1>
           </div>
 
           <div className="flex items-center gap-3">
