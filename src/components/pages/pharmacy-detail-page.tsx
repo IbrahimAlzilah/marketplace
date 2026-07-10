@@ -26,25 +26,25 @@ export function PharmacyDetailPage({ slug }: { slug: string }) {
   return (
     <div>
       {/* Cover */}
-      <div className="relative h-48 sm:h-64 lg:h-72">
+      <div className="relative h-32 sm:h-44 lg:h-48">
         <Image src={pharmacy.cover} alt={name} fill className="object-cover" priority />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
       </div>
 
       <div className="container-marketplace -mt-16 relative z-10 pb-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="flex items-end gap-4">
-            <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl border-4 border-background shadow-lg lg:h-28 lg:w-28">
+            <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full border-4 border-background shadow-sm lg:h-26 lg:w-26">
               <Image src={pharmacy.logo} alt={name} fill className="object-cover" />
             </div>
             <div className="pb-1">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-2xl font-bold text-white lg:text-3xl">{name}</h1>
+                <h1 className="text-2xl font-bold text-foreground lg:text-3xl">{name}</h1>
                 <Badge variant={pharmacy.isOpen ? "success" : "destructive"}>
                   {pharmacy.isOpen ? tc("open") : tc("closed")}
                 </Badge>
               </div>
-              <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-white/80">
+              <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <Star className="h-4 w-4 fill-warning text-warning" />
                   {formatRating(pharmacy.rating)} ({pharmacy.reviewCount})
@@ -65,58 +65,72 @@ export function PharmacyDetailPage({ slug }: { slug: string }) {
           </div>
         </div>
 
-        <div className="mt-6 grid gap-6 lg:grid-cols-12">
-          <div className="lg:col-span-8">
-            <Tabs defaultValue="products">
-              <TabsList>
-                <TabsTrigger value="products">{t("products")}</TabsTrigger>
-                <TabsTrigger value="offers">{t("offers")}</TabsTrigger>
-                <TabsTrigger value="reviews">{tc("reviews")}</TabsTrigger>
-                <TabsTrigger value="branches">{t("branches")}</TabsTrigger>
-              </TabsList>
-              <TabsContent value="products" className="mt-6">
-                <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-                  {products.map((product) => (
-                    <ProductCard key={product.id} product={product} />
-                  ))}
-                </div>
-              </TabsContent>
-              <TabsContent value="offers" className="mt-6">
-                <p className="text-muted-foreground">Special offers from {name} coming soon.</p>
-              </TabsContent>
-              <TabsContent value="reviews" className="mt-6">
-                <p className="text-muted-foreground">Customer reviews for {name}.</p>
-              </TabsContent>
-              <TabsContent value="branches" className="mt-6">
-                <div className="rounded-xl border p-4">
-                  <p className="font-medium">{address}</p>
-                  <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
-                    <Clock className="h-4 w-4" />
-                    {pharmacy.eta} {tc("min")} · {pharmacy.distance} {tc("km")}
-                  </p>
-                </div>
-              </TabsContent>
-            </Tabs>
-          </div>
-
-          <div className="lg:col-span-4">
-            <div className="sticky top-36 rounded-xl border bg-card p-5 space-y-3">
-              <h3 className="font-semibold">Delivery Info</h3>
-              <div className="text-sm text-muted-foreground space-y-2">
-                <p className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-primary" />
-                  Est. delivery: {pharmacy.eta} {tc("min")}
-                </p>
-                <p className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-primary" />
-                  {pharmacy.distance} {tc("km")} away
+        <div className="mt-6">
+          <Tabs defaultValue="products" className="w-full">
+            <TabsList>
+              <TabsTrigger value="products">{t("products")}</TabsTrigger>
+              <TabsTrigger value="offers">{t("offers")}</TabsTrigger>
+              <TabsTrigger value="reviews">{tc("reviews")}</TabsTrigger>
+              <TabsTrigger value="branches">{t("branches")}</TabsTrigger>
+              <TabsTrigger value="info">{locale === "ar" ? "معلومات" : "Info"}</TabsTrigger>
+            </TabsList>
+            <TabsContent value="products" className="mt-6">
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
+                {products.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            </TabsContent>
+            <TabsContent value="offers" className="mt-6">
+              <p className="text-muted-foreground">Special offers from {name} coming soon.</p>
+            </TabsContent>
+            <TabsContent value="reviews" className="mt-6">
+              <p className="text-muted-foreground">Customer reviews for {name}.</p>
+            </TabsContent>
+            <TabsContent value="branches" className="mt-6">
+              <div className="rounded-xl border p-4 bg-card">
+                <p className="font-medium">{address}</p>
+                <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
+                  <Clock className="h-4 w-4" />
+                  {pharmacy.eta} {tc("min")} · {pharmacy.distance} {tc("km")}
                 </p>
               </div>
-              {!pharmacy.isOpen && pharmacy.opensAt && (
-                <p className="text-sm text-warning">{tc("opensAt", { time: pharmacy.opensAt })}</p>
-              )}
-            </div>
-          </div>
+            </TabsContent>
+            <TabsContent value="info" className="mt-6">
+              <div className="grid gap-6 sm:grid-cols-2">
+                <div className="rounded-xl border p-5 space-y-4 bg-card">
+                  <h3 className="font-semibold text-lg">{locale === "ar" ? "معلومات التوصيل" : "Delivery Info"}</h3>
+                  <div className="space-y-3 text-sm text-muted-foreground">
+                    <p className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-primary" />
+                      <span>{locale === "ar" ? "وقت التوصيل المتوقع" : "Est. delivery"}: {pharmacy.eta} {tc("min")}</span>
+                    </p>
+                    <p className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-primary" />
+                      <span>{pharmacy.distance} {tc("km")} {locale === "ar" ? "بعيد" : "away"}</span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="rounded-xl border p-5 space-y-4 bg-card">
+                  <h3 className="font-semibold text-lg">{locale === "ar" ? "تفاصيل الصيدلية" : "Pharmacy Details"}</h3>
+                  <div className="space-y-3 text-sm text-muted-foreground">
+                    <p className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-primary" />
+                      <span>{address}</span>
+                    </p>
+                    <p className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-primary" />
+                      <span>
+                        {pharmacy.isOpen ? tc("open") : tc("closed")}
+                        {!pharmacy.isOpen && pharmacy.opensAt && ` · ${tc("opensAt", { time: pharmacy.opensAt })}`}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>
