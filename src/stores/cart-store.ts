@@ -17,10 +17,24 @@ export type CheckoutLine = {
   pharmacyName: string;
   pharmacyNameAr: string;
   requestedQty: number;
-  allocatedQty: string | number;
+  allocatedQty: string | number; // "?", "*", or number
   status: AllocationStatus;
-  resolution: "pending" | "accepted_partial" | "accepted_substitute" | "removed" | "approved";
+  resolution: "pending" | "accepted_partial" | "accepted_substitute" | "accepted_partial_and_substitute" | "removed" | "approved";
   substitute?: {
+    productId: string;
+    name: string;
+    nameAr: string;
+    price: number;
+    image: string;
+  } | null;
+  substitutes?: Array<{
+    productId: string;
+    name: string;
+    nameAr: string;
+    price: number;
+    image: string;
+  }>;
+  selectedSubstitute?: {
     productId: string;
     name: string;
     nameAr: string;
@@ -49,7 +63,11 @@ type CartState = {
   setCheckoutAddressId: (id: string | null) => void;
   setCheckoutLines: (lines: CheckoutLine[]) => void;
   resolvePartialLine: (productId: string, accept: boolean) => void;
-  resolveRejectedLine: (productId: string, acceptSubstitute: boolean) => void;
+  resolveRejectedLine: (productId: string, substitute: CheckoutLine["selectedSubstitute"]) => void;
+  resolvePartialWithSubstituteLine: (productId: string, substitute: CheckoutLine["selectedSubstitute"]) => void;
+  resetCheckout: () => void;
+  activeScenarioId: string | null;
+  setActiveScenarioId: (id: string | null) => void;
 };
 
 export const useCartStore = create<CartState>()(
@@ -61,6 +79,8 @@ export const useCartStore = create<CartState>()(
       loyaltyPoints: 0,
       checkoutAddressId: null,
       checkoutLines: [],
+      activeScenarioId: null,
+      setActiveScenarioId: (id) => set({ activeScenarioId: id }),
       addItem: (productId, quantity = 1) => {
         const items = get().items;
         const existing = items.find((i) => i.productId === productId);
@@ -100,51 +120,52 @@ export const useCartStore = create<CartState>()(
       resolvePartialLine: (productId, accept) => {
         const lines = get().checkoutLines.map((line) => {
           if (line.productId !== productId) return line;
-          
-          if (accept) {
-            const finalQty = typeof line.allocatedQty === "number" 
-              ? line.allocatedQty 
-              : parseInt(String(line.allocatedQty), 10) || 1;
-            return {
-              ...line,
-              requestedQty: finalQty,
-              resolution: "accepted_partial" as const,
-            };
-          } else {
-            return {
-              ...line,
-              resolution: "removed" as const,
-            };
-          }
+          return {
+            ...line,
+            resolution: accept ? ("accepted_partial" as const) : ("removed" as const),
+          };
         });
         set({ checkoutLines: lines });
       },
-      resolveRejectedLine: (productId, acceptSubstitute) => {
+      resolveRejectedLine: (productId, substitute) => {
         const lines = get().checkoutLines.map((line) => {
           if (line.productId !== productId) return line;
-
-          if (acceptSubstitute && line.substitute) {
+          if (substitute) {
             return {
               ...line,
-              productId: line.substitute.productId,
-              productName: line.substitute.name,
-              productNameAr: line.substitute.nameAr,
-              price: line.substitute.price,
-              image: line.substitute.image,
-              requestedQty: 1, // Default substitute quantity to 1
-              allocatedQty: 1,
-              status: AllocationStatus.APPROVED,
+              selectedSubstitute: substitute,
               resolution: "accepted_substitute" as const,
             };
           } else {
             return {
               ...line,
+              selectedSubstitute: null,
               resolution: "removed" as const,
             };
           }
         });
         set({ checkoutLines: lines });
       },
+      resolvePartialWithSubstituteLine: (productId, substitute) => {
+        const lines = get().checkoutLines.map((line) => {
+          if (line.productId !== productId) return line;
+          if (substitute) {
+            return {
+              ...line,
+              selectedSubstitute: substitute,
+              resolution: "accepted_partial_and_substitute" as const,
+            };
+          } else {
+            return {
+              ...line,
+              selectedSubstitute: null,
+              resolution: "accepted_partial" as const,
+            };
+          }
+        });
+        set({ checkoutLines: lines });
+      },
+      resetCheckout: () => set({ checkoutLines: [], checkoutAddressId: null }),
     }),
     { name: "yusur-cart" }
   )

@@ -40,7 +40,6 @@ export function OrderSummary({
 }: OrderSummaryProps) {
   const t = useTranslations("cart");
   const tc = useTranslations("common");
-  const tCheckout = useTranslations("checkout");
   const {
     couponCode,
     setCoupon,

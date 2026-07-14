@@ -13,6 +13,8 @@ import {
   Wallet,
   Tag,
   Award,
+  Clock,
+  AlertTriangle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -21,10 +23,162 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn, formatPrice } from "@/lib/utils";
-import { useCartStore } from "@/stores/cart-store";
+import { useCartStore, CheckoutLine } from "@/stores/cart-store";
 import { AllocationStatus } from "@/lib/allocation-evaluator";
 import { getProductById, pharmacies } from "@/lib/mock-data";
-import { Clock } from "lucide-react";
+import { PharmacyHeader } from "@/components/marketplace/pharmacy-header";
+
+// Helpers for line price calculations
+function getLineTotalPrice(line: CheckoutLine): number {
+  if (line.resolution === "removed") return 0;
+  
+  const allocQty = typeof line.allocatedQty === "number" 
+    ? line.allocatedQty 
+    : parseInt(String(line.allocatedQty), 10) || 0;
+  
+  if (line.resolution === "approved") {
+    return line.price * line.requestedQty;
+  }
+  if (line.resolution === "accepted_partial") {
+    return line.price * allocQty;
+  }
+  if (line.resolution === "accepted_substitute" && line.selectedSubstitute) {
+    return line.selectedSubstitute.price * line.requestedQty;
+  }
+  if (line.resolution === "accepted_partial_and_substitute" && line.selectedSubstitute) {
+    const remainingQty = line.requestedQty - allocQty;
+    return (line.price * allocQty) + (line.selectedSubstitute.price * remainingQty);
+  }
+  
+  return line.price * line.requestedQty;
+}
+
+type ResolvedItem = {
+  productId: string;
+  name: string;
+  nameAr: string;
+  qty: number;
+  price: number;
+  image: string;
+  pharmacyName: string;
+  pharmacyNameAr: string;
+};
+
+function getResolvedItems(lines: CheckoutLine[]): ResolvedItem[] {
+  const items: ResolvedItem[] = [];
+  lines.forEach((line) => {
+    if (line.resolution === "removed") return;
+    
+    const allocQty = typeof line.allocatedQty === "number" 
+      ? line.allocatedQty 
+      : parseInt(String(line.allocatedQty), 10) || 0;
+      
+    if (line.resolution === "approved") {
+      items.push({
+        productId: line.productId,
+        name: line.productName,
+        nameAr: line.productNameAr,
+        qty: line.requestedQty,
+        price: line.price,
+        image: line.image,
+        pharmacyName: line.pharmacyName,
+        pharmacyNameAr: line.pharmacyNameAr,
+      });
+    } else if (line.resolution === "accepted_partial") {
+      items.push({
+        productId: line.productId,
+        name: line.productName,
+        nameAr: line.productNameAr,
+        qty: allocQty,
+        price: line.price,
+        image: line.image,
+        pharmacyName: line.pharmacyName,
+        pharmacyNameAr: line.pharmacyNameAr,
+      });
+    } else if (line.resolution === "accepted_substitute" && line.selectedSubstitute) {
+      items.push({
+        productId: line.selectedSubstitute.productId,
+        name: line.selectedSubstitute.name,
+        nameAr: line.selectedSubstitute.nameAr,
+        qty: line.requestedQty,
+        price: line.selectedSubstitute.price,
+        image: line.selectedSubstitute.image,
+        pharmacyName: line.pharmacyName,
+        pharmacyNameAr: line.pharmacyNameAr,
+      });
+    } else if (line.resolution === "accepted_partial_and_substitute" && line.selectedSubstitute) {
+      if (allocQty > 0) {
+        items.push({
+          productId: line.productId,
+          name: line.productName,
+          nameAr: line.productNameAr,
+          qty: allocQty,
+          price: line.price,
+          image: line.image,
+          pharmacyName: line.pharmacyName,
+          pharmacyNameAr: line.pharmacyNameAr,
+        });
+      }
+      const remainingQty = line.requestedQty - allocQty;
+      if (remainingQty > 0) {
+        items.push({
+          productId: line.selectedSubstitute.productId,
+          name: line.selectedSubstitute.name,
+          nameAr: line.selectedSubstitute.nameAr,
+          qty: remainingQty,
+          price: line.selectedSubstitute.price,
+          image: line.selectedSubstitute.image,
+          pharmacyName: line.pharmacyName,
+          pharmacyNameAr: line.pharmacyNameAr,
+        });
+      }
+    }
+  });
+  return items;
+}
+
+type UnavailableItem = {
+  name: string;
+  nameAr: string;
+  qty: number;
+  price: number;
+};
+
+function getUnavailableItems(lines: CheckoutLine[]): UnavailableItem[] {
+  const items: UnavailableItem[] = [];
+  lines.forEach((line) => {
+    const allocQty = typeof line.allocatedQty === "number" 
+      ? line.allocatedQty 
+      : parseInt(String(line.allocatedQty), 10) || 0;
+      
+    if (line.resolution === "removed") {
+      items.push({
+        name: line.productName,
+        nameAr: line.productNameAr,
+        qty: line.requestedQty,
+        price: line.price,
+      });
+    } else if (line.resolution === "accepted_partial") {
+      const missing = line.requestedQty - allocQty;
+      if (missing > 0) {
+        items.push({
+          name: line.productName,
+          nameAr: line.productNameAr,
+          qty: missing,
+          price: line.price,
+        });
+      }
+    } else if (line.status === AllocationStatus.REJECTED && line.resolution === "pending") {
+      items.push({
+        name: line.productName,
+        nameAr: line.productNameAr,
+        qty: line.requestedQty,
+        price: line.price,
+      });
+    }
+  });
+  return items;
+}
 
 function CheckoutPageContent() {
   const t = useTranslations("checkout");
@@ -36,6 +190,19 @@ function CheckoutPageContent() {
   const checkoutLines = useCartStore((s) => s.checkoutLines);
   const resolvePartialLine = useCartStore((s) => s.resolvePartialLine);
   const resolveRejectedLine = useCartStore((s) => s.resolveRejectedLine);
+  const resolvePartialWithSubstituteLine = useCartStore((s) => s.resolvePartialWithSubstituteLine);
+  const resetCheckout = useCartStore((s) => s.resetCheckout);
+
+  // local states for chosen substitutes
+  const [chosenSubstitutes, setChosenSubstitutes] = useState<
+    Record<
+      string,
+      { productId: string; name: string; nameAr: string; price: number; image: string }
+    >
+  >({});
+
+  const [receiptLines, setReceiptLines] = useState<CheckoutLine[]>([]);
+  const [receiptTotal, setReceiptTotal] = useState<number>(0);
 
   // Workflow starts at "review" (Order Approval Status) and moves to "payment_loading" | "payment_method" | "confirmation"
   const [phase, setPhase] = useState<"review" | "payment_loading" | "payment_method" | "confirmation">("review");
@@ -65,25 +232,10 @@ function CheckoutPageContent() {
   // Cart store actions
   const clearCart = useCartStore((s) => s.clearCart);
 
-  // Translators helpers for mock details
   const getPharmacyTranslation = (name: string) => {
     if (name.includes("Nahdi")) return t("nahdiPharmacy");
     if (name.includes("Avnzor")) return t("avnzorPharmacy");
     if (name.includes("Whites")) return t("whitesPharmacy");
-    return name;
-  };
-
-  const getProductTranslation = (name: string) => {
-    if (name.includes("Aspirin")) return t("aspirin");
-    if (name.includes("Vitamin")) return t("vitaminD");
-    if (name.includes("Ibuprofen")) return t("ibuprofen");
-    if (name.includes("Cough")) return t("coughSyrup");
-    if (name.includes("First Aid")) return t("firstAidKit");
-    if (name.includes("Omega-3")) return t("omega3");
-    if (name.includes("Multivitamin")) return t("multivitamin");
-    if (name.includes("Accu-Chek")) return t("glucoseMonitor");
-    if (name.includes("Megamind")) return t("omegaLiquid");
-    if (name.includes("Smilepen")) return t("whiteningStrips");
     return name;
   };
 
@@ -110,18 +262,20 @@ function CheckoutPageContent() {
 
   // Handler to place order
   const handlePlaceOrder = () => {
+    setReceiptLines([...checkoutLines]);
+    setReceiptTotal(checkoutTotal);
     clearCart();
     setPhase("confirmation");
   };
 
   // Dynamic pricing breakdown values based on resolved checkout lines
-  const activeLines = checkoutLines.filter(line => line.resolution !== "removed");
-  const productPrice = activeLines.reduce((sum, line) => sum + (line.price * line.requestedQty), 0);
+  const resolvedItems = getResolvedItems(checkoutLines);
+  const productPrice = checkoutLines.reduce((sum, line) => sum + getLineTotalPrice(line), 0);
 
   // Group active lines by pharmacy to calculate delivery fee
-  const activePharmacies = Array.from(new Set(activeLines.map(line => line.pharmacyId)));
-  const deliveryFee = activePharmacies.reduce((sum, pId) => {
-    const pharmacy = pharmacies.find(p => p.id === pId);
+  const activePharmacies = Array.from(new Set(resolvedItems.map(item => item.pharmacyName)));
+  const deliveryFee = activePharmacies.reduce((sum, pharmName) => {
+    const pharmacy = pharmacies.find(p => p.name === pharmName || p.nameAr === pharmName);
     return sum + (pharmacy?.deliveryFee ?? 0);
   }, 0);
 
@@ -132,12 +286,14 @@ function CheckoutPageContent() {
   // Final Total matches dynamic calculations
   const checkoutTotal = Math.max(0, productPrice - promoDiscount + deliveryFee - balancePayment - loyaltyDiscount);
 
+  // Scenario 7 helper: checking if all lines are resolved and no items remain
+  const hasUnresolved = checkoutLines.some(line => line.resolution === "pending");
+  const hasNoPayableItems = checkoutLines.length > 0 && resolvedItems.length === 0;
+
   if (phase === "review") {
     const approvedLines = checkoutLines.filter(line => line.status === AllocationStatus.APPROVED);
     const partialLines = checkoutLines.filter(line => line.status === AllocationStatus.PARTIAL);
     const rejectedLines = checkoutLines.filter(line => line.status === AllocationStatus.REJECTED);
-
-    const hasUnresolved = checkoutLines.some(line => line.resolution === "pending");
 
     return (
       <div className="container-marketplace py-6 lg:py-6 relative">
@@ -152,6 +308,17 @@ function CheckoutPageContent() {
           {/* Left Column: Decision Cards */}
           <div className="lg:col-span-8 space-y-6">
             
+            {/* Scenario 7: Alert when no payable items remain */}
+            {hasNoPayableItems && !hasUnresolved && (
+              <div className="p-5 border border-red-500/20 bg-red-500/5 rounded-2xl flex items-start gap-3.5 text-red-600">
+                <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5 text-red-500" />
+                <div className="space-y-1">
+                  <h4 className="font-bold text-sm">{t("entireOrderRejected")}</h4>
+                  <p className="text-xs text-red-600/80 leading-relaxed">{t("entireOrderRejectedDesc")}</p>
+                </div>
+              </div>
+            )}
+
             {/* 1. Approved Section */}
             {approvedLines.length > 0 && (
               <Card className="rounded-2xl border p-5 space-y-4 shadow-none">
@@ -201,10 +368,27 @@ function CheckoutPageContent() {
                     const name = locale === "ar" ? line.productNameAr : line.productName;
                     const allocated = line.allocatedQty;
                     const isPending = line.resolution === "pending";
-                    const isAccepted = line.resolution === "accepted_partial";
+                    
+                    // Detailed check for substitute choices in partials
+                    const isAcceptedPartialOnly = line.resolution === "accepted_partial";
+                    const isAcceptedPartialWithSub = line.resolution === "accepted_partial_and_substitute";
+                    const isRemoved = line.resolution === "removed";
+                    
+                    const subList = line.substitutes || [];
+                    const remainingQty = line.requestedQty - (typeof allocated === "number" ? allocated : parseInt(String(allocated), 10) || 0);
 
                     return (
                       <div key={line.productId} className="bg-card border rounded-2xl p-4 space-y-3 shadow-none">
+                        {/* Custom PharmacyHeader for consistent layout styling */}
+                        <PharmacyHeader
+                          name={line.pharmacyName}
+                          nameAr={line.pharmacyNameAr}
+                          status={AllocationStatus.PARTIAL}
+                          className="border-none p-0 shadow-none hover:shadow-none bg-transparent"
+                        />
+
+                        <Separator />
+
                         <div className="flex justify-between items-start gap-4">
                           <div className="flex items-center gap-3 min-w-0">
                             <div className="relative h-12 w-12 shrink-0 border rounded-lg bg-white overflow-hidden flex items-center justify-center">
@@ -213,13 +397,13 @@ function CheckoutPageContent() {
                             <div className="min-w-0">
                               <h4 className="font-semibold text-foreground truncate">{name}</h4>
                               <p className="text-xs text-muted-foreground">
-                                {getPharmacyTranslation(line.pharmacyName)}
+                                {formatPrice(line.price)}
                               </p>
                             </div>
                           </div>
                           <div className="text-end shrink-0 pl-3">
-                            <span className="font-bold text-primary block">{formatPrice(line.price)}</span>
-                            <span className="text-xs text-muted-foreground">Requested: {line.requestedQty}</span>
+                            <span className="text-xs text-muted-foreground block">Requested: {line.requestedQty}</span>
+                            <span className="text-xs text-green-600 font-bold block">Approved: {allocated}</span>
                           </div>
                         </div>
 
@@ -227,16 +411,73 @@ function CheckoutPageContent() {
                           {t("partiallyAvailableNotice", { allocated, requested: line.requestedQty })}
                         </p>
 
-                        <div className="flex gap-2.5 pt-2">
-                          {isPending ? (
-                            <>
+                        {isPending ? (
+                          <div className="space-y-3.5 pt-2 border-t">
+                            {/* Scenario 5: Multiple substitute choices if list exists */}
+                            {subList.length > 0 && (
+                              <div className="space-y-2">
+                                <p className="text-xs font-bold text-foreground">{t("selectSubstituteLabel")}</p>
+                                <div className="grid gap-2">
+                                  {subList.map((sub) => {
+                                    const subName = locale === "ar" ? sub.nameAr : sub.name;
+                                    const isChosen = chosenSubstitutes[line.productId]?.productId === sub.productId;
+
+                                    return (
+                                      <button
+                                        key={sub.productId}
+                                        onClick={() => {
+                                          setChosenSubstitutes({
+                                            ...chosenSubstitutes,
+                                            [line.productId]: sub
+                                          });
+                                        }}
+                                        className={cn(
+                                          "flex items-center gap-3 p-3 rounded-xl border text-start transition-all",
+                                          isChosen ? "border-primary bg-primary/5 shadow-sm" : "border-border hover:bg-muted/30"
+                                        )}
+                                      >
+                                        <div className="h-10 w-10 relative bg-white border rounded-lg shrink-0 overflow-hidden flex items-center justify-center">
+                                          <Image src={sub.image} alt={subName} fill className="object-contain p-0.5" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                          <p className="font-bold text-xs truncate">{subName}</p>
+                                          <p className="text-[10px] text-primary font-semibold">
+                                            {formatPrice(sub.price)} {t("substitutePriceNotice", { price: formatPrice(sub.price) }).includes("(") ? "" : ""}
+                                          </p>
+                                        </div>
+                                        <div className={cn(
+                                          "h-4 w-4 rounded-full border flex items-center justify-center shrink-0",
+                                          isChosen ? "border-primary bg-primary text-white" : "border-muted-foreground"
+                                        )}>
+                                          {isChosen && <span className="h-2 w-2 rounded-full bg-white" />}
+                                        </div>
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
+
+                            <div className="flex flex-col sm:flex-row gap-2 pt-1">
                               <Button
                                 variant="outline"
                                 className="flex-1 text-xs py-5 rounded-xl text-green-600 border-green-600 hover:bg-green-500/5 bg-white font-bold"
                                 onClick={() => resolvePartialLine(line.productId, true)}
                               >
-                                {t("acceptPartial")} ({allocated})
+                                {t("acceptPartialOnly", { qty: allocated })}
                               </Button>
+
+                              {subList.length > 0 && (
+                                <Button
+                                  variant="outline"
+                                  disabled={!chosenSubstitutes[line.productId]}
+                                  className="flex-1 text-xs py-5 rounded-xl text-primary border-primary hover:bg-primary/5 bg-white font-bold"
+                                  onClick={() => resolvePartialWithSubstituteLine(line.productId, chosenSubstitutes[line.productId])}
+                                >
+                                  {t("acceptPartialAndSubstitute", { qty: allocated, subQty: remainingQty })}
+                                </Button>
+                              )}
+
                               <Button
                                 variant="ghost"
                                 className="flex-1 text-xs py-5 rounded-xl text-destructive hover:bg-destructive/5 font-bold"
@@ -244,31 +485,32 @@ function CheckoutPageContent() {
                               >
                                 {t("removeLine")}
                               </Button>
-                            </>
-                          ) : (
-                            <div className="w-full flex justify-between items-center text-xs py-2 px-1">
-                              <span className={cn(
-                                "font-bold flex items-center gap-1.5",
-                                isAccepted ? "text-green-600" : "text-destructive"
-                              )}>
-                                {isAccepted ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
-                                {isAccepted ? `${t("acceptPartial")} (${allocated})` : t("removeLine")}
-                              </span>
-                              <Button
-                                variant="link"
-                                className="text-[11px] h-auto p-0 font-semibold text-primary"
-                                onClick={() => {
-                                  // Reset resolution state
-                                  const currentLines = useCartStore.getState().checkoutLines;
-                                  const updated = currentLines.map(l => l.productId === line.productId ? { ...l, resolution: "pending" as const } : l);
-                                  useCartStore.getState().setCheckoutLines(updated);
-                                }}
-                              >
-                                {locale === "ar" ? "تغيير" : "Change"}
-                              </Button>
                             </div>
-                          )}
-                        </div>
+                          </div>
+                        ) : (
+                          <div className="w-full flex justify-between items-center text-xs py-2 px-1 border-t">
+                            <span className={cn(
+                              "font-bold flex items-center gap-1.5",
+                              isRemoved ? "text-destructive" : "text-green-600"
+                            )}>
+                              {isRemoved ? <XCircle className="h-4 w-4" /> : <CheckCircle className="h-4 w-4" />}
+                              {isRemoved && t("removeLine")}
+                              {isAcceptedPartialOnly && `${t("acceptPartialOnly", { qty: allocated })}`}
+                              {isAcceptedPartialWithSub && `${t("acceptPartialAndSubstitute", { qty: allocated, subQty: remainingQty })} (${locale === "ar" ? line.selectedSubstitute?.nameAr : line.selectedSubstitute?.name})`}
+                            </span>
+                            <Button
+                              variant="link"
+                              className="text-[11px] h-auto p-0 font-semibold text-primary"
+                              onClick={() => {
+                                const currentLines = useCartStore.getState().checkoutLines;
+                                const updated = currentLines.map(l => l.productId === line.productId ? { ...l, resolution: "pending" as const, selectedSubstitute: null } : l);
+                                useCartStore.getState().setCheckoutLines(updated);
+                              }}
+                            >
+                              {locale === "ar" ? "تغيير" : "Change"}
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
@@ -289,9 +531,20 @@ function CheckoutPageContent() {
                     const isPending = line.resolution === "pending";
                     const isSubstitute = line.resolution === "accepted_substitute";
                     const reason = locale === "ar" ? line.rejectionReasonAr : line.rejectionReason;
+                    const subList = line.substitutes || [];
 
                     return (
                       <div key={line.productId} className="bg-card border border-destructive/10 rounded-2xl p-4 space-y-3 shadow-none">
+                        {/* Custom PharmacyHeader for consistent layout styling */}
+                        <PharmacyHeader
+                          name={line.pharmacyName}
+                          nameAr={line.pharmacyNameAr}
+                          status={AllocationStatus.REJECTED}
+                          className="border-none p-0 shadow-none hover:shadow-none bg-transparent"
+                        />
+
+                        <Separator />
+
                         <div className="flex justify-between items-start gap-4">
                           <div className="flex items-center gap-3 min-w-0">
                             <div className="relative h-12 w-12 shrink-0 border rounded-lg bg-white overflow-hidden flex items-center justify-center opacity-70">
@@ -300,7 +553,7 @@ function CheckoutPageContent() {
                             <div className="min-w-0">
                               <h4 className="font-semibold text-foreground line-through truncate">{name}</h4>
                               <p className="text-xs text-muted-foreground">
-                                {getPharmacyTranslation(line.pharmacyName)}
+                                {formatPrice(line.price)}
                               </p>
                             </div>
                           </div>
@@ -314,32 +567,60 @@ function CheckoutPageContent() {
                           {reason === "Out of stock" ? t("outOfStockNotice") : reason}
                         </p>
 
-                        {/* Suggested Substitute Panel */}
-                        {line.substitute && (
-                          <div className="p-3.5 rounded-xl border border-dashed border-primary/20 bg-primary/5 mt-3 space-y-2 text-start">
-                            <span className="text-[10px] font-bold text-primary uppercase tracking-wider block">{t("suggestedSubstitute")}</span>
-                            <div className="flex items-center gap-3">
-                              <div className="h-10 w-10 shrink-0 rounded-lg border bg-white overflow-hidden flex items-center justify-center relative">
-                                <Image src={line.substitute.image} alt={line.substitute.name} fill className="object-contain p-0.5 rounded-lg" />
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <h5 className="text-xs font-bold text-foreground truncate">
-                                  {locale === "ar" ? line.substitute.nameAr : line.substitute.name}
-                                </h5>
-                                <span className="text-xs font-semibold text-primary">{formatPrice(line.substitute.price)}</span>
-                              </div>
-                            </div>
-                          </div>
-                        )}
+                        {isPending ? (
+                          <div className="space-y-3.5 pt-2 border-t">
+                            {/* Scenario 4: Multiple substitute options display */}
+                            {subList.length > 0 && (
+                              <div className="space-y-2">
+                                <p className="text-xs font-bold text-foreground">{t("selectSubstituteLabel")}</p>
+                                <div className="grid gap-2">
+                                  {subList.map((sub) => {
+                                    const subName = locale === "ar" ? sub.nameAr : sub.name;
+                                    const isChosen = chosenSubstitutes[line.productId]?.productId === sub.productId;
 
-                        <div className="flex gap-2.5 pt-2">
-                          {isPending ? (
-                            <>
-                              {line.substitute && (
+                                    return (
+                                      <button
+                                        key={sub.productId}
+                                        onClick={() => {
+                                          setChosenSubstitutes({
+                                            ...chosenSubstitutes,
+                                            [line.productId]: sub
+                                          });
+                                        }}
+                                        className={cn(
+                                          "flex items-center gap-3 p-3 rounded-xl border text-start transition-all",
+                                          isChosen ? "border-primary bg-primary/5 shadow-sm" : "border-border hover:bg-muted/30"
+                                        )}
+                                      >
+                                        <div className="h-10 w-10 relative bg-white border rounded-lg shrink-0 overflow-hidden flex items-center justify-center">
+                                          <Image src={sub.image} alt={subName} fill className="object-contain p-0.5" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                          <p className="font-bold text-xs truncate">{subName}</p>
+                                          <p className="text-[10px] text-primary font-semibold">
+                                            {formatPrice(sub.price)}
+                                          </p>
+                                        </div>
+                                        <div className={cn(
+                                          "h-4 w-4 rounded-full border flex items-center justify-center shrink-0",
+                                          isChosen ? "border-primary bg-primary text-white" : "border-muted-foreground"
+                                        )}>
+                                          {isChosen && <span className="h-2 w-2 rounded-full bg-white" />}
+                                        </div>
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
+
+                            <div className="flex gap-2.5 pt-1">
+                              {subList.length > 0 && (
                                 <Button
                                   variant="outline"
+                                  disabled={!chosenSubstitutes[line.productId]}
                                   className="flex-1 text-xs py-5 rounded-xl text-primary border-primary hover:bg-primary/5 bg-white font-bold"
-                                  onClick={() => resolveRejectedLine(line.productId, true)}
+                                  onClick={() => resolveRejectedLine(line.productId, chosenSubstitutes[line.productId])}
                                 >
                                   {t("acceptSubstitute")}
                                 </Button>
@@ -347,53 +628,34 @@ function CheckoutPageContent() {
                               <Button
                                 variant="ghost"
                                 className="flex-1 text-xs py-5 rounded-xl text-destructive hover:bg-destructive/5 font-bold"
-                                onClick={() => resolveRejectedLine(line.productId, false)}
+                                onClick={() => resolveRejectedLine(line.productId, null)}
                               >
                                 {t("removeLine")}
                               </Button>
-                            </>
-                          ) : (
-                            <div className="w-full flex justify-between items-center text-xs py-2 px-1">
-                              <span className={cn(
-                                "font-bold flex items-center gap-1.5",
-                                isSubstitute ? "text-green-600" : "text-destructive"
-                              )}>
-                                {isSubstitute ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
-                                {isSubstitute ? `${t("acceptSubstitute")} (${locale === "ar" ? line.substitute?.nameAr : line.substitute?.name})` : t("removeLine")}
-                              </span>
-                              <Button
-                                variant="link"
-                                className="text-[11px] h-auto p-0 font-semibold text-primary"
-                                onClick={() => {
-                                  // Restore to original product details and pending resolution
-                                  const currentLines = useCartStore.getState().checkoutLines;
-                                  const updated = currentLines.map(l => {
-                                    const match = l.productId === line.productId || (l.substitute && l.productId === l.substitute.productId);
-                                    if (match) {
-                                      const origProduct = getProductById(line.productId);
-                                      return {
-                                        ...l,
-                                        productId: line.productId,
-                                        productName: origProduct?.name ?? line.productName,
-                                        productNameAr: origProduct?.nameAr ?? line.productNameAr,
-                                        price: origProduct?.price ?? line.price,
-                                        image: origProduct?.image ?? line.image,
-                                        requestedQty: line.requestedQty,
-                                        allocatedQty: line.allocatedQty,
-                                        status: line.status,
-                                        resolution: "pending" as const
-                                      };
-                                    }
-                                    return l;
-                                  });
-                                  useCartStore.getState().setCheckoutLines(updated);
-                                }}
-                              >
-                                {locale === "ar" ? "تغيير" : "Change"}
-                              </Button>
                             </div>
-                          )}
-                        </div>
+                          </div>
+                        ) : (
+                          <div className="w-full flex justify-between items-center text-xs py-2 px-1 border-t">
+                            <span className={cn(
+                              "font-bold flex items-center gap-1.5",
+                              isSubstitute ? "text-green-600" : "text-destructive"
+                            )}>
+                              {isSubstitute ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
+                              {isSubstitute ? `${t("acceptSubstitute")} (${locale === "ar" ? line.selectedSubstitute?.nameAr : line.selectedSubstitute?.name})` : t("removeLine")}
+                            </span>
+                            <Button
+                              variant="link"
+                              className="text-[11px] h-auto p-0 font-semibold text-primary"
+                              onClick={() => {
+                                const currentLines = useCartStore.getState().checkoutLines;
+                                const updated = currentLines.map(l => l.productId === line.productId ? { ...l, resolution: "pending" as const, selectedSubstitute: null } : l);
+                                useCartStore.getState().setCheckoutLines(updated);
+                              }}
+                            >
+                              {locale === "ar" ? "تغيير" : "Change"}
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
@@ -415,7 +677,7 @@ function CheckoutPageContent() {
                 </div>
                 {isPromoApplied && (
                   <div className="flex justify-between text-destructive">
-                    <span>{t("additionalDiscount")}</span>
+                     <span>{t("additionalDiscount")}</span>
                     <span className="font-semibold">-{formatPrice(promoDiscount)}</span>
                   </div>
                 )}
@@ -434,13 +696,26 @@ function CheckoutPageContent() {
               </div>
 
               {/* Action Trigger */}
-              <Button
-                disabled={hasUnresolved}
-                className="w-full py-6 rounded-2xl text-base font-bold bg-primary hover:bg-primary/90 text-white mt-2"
-                onClick={() => setPhase("payment_loading")}
-              >
-                {t("continueToPayment")}
-              </Button>
+              {hasNoPayableItems && !hasUnresolved ? (
+                // Scenario 7: Back to Cart Button instead of Payment
+                <Button
+                  className="w-full py-6 rounded-2xl text-base font-bold bg-primary hover:bg-primary/90 text-white mt-2"
+                  onClick={() => {
+                    resetCheckout();
+                    router.push("/cart");
+                  }}
+                >
+                  {t("returnToCart")}
+                </Button>
+              ) : (
+                <Button
+                  disabled={hasUnresolved}
+                  className="w-full py-6 rounded-2xl text-base font-bold bg-primary hover:bg-primary/90 text-white mt-2"
+                  onClick={() => setPhase("payment_loading")}
+                >
+                  {t("continueToPayment")}
+                </Button>
+              )}
 
               {hasUnresolved && (
                 <p className="text-[10px] text-center font-semibold text-destructive mt-1">
@@ -456,8 +731,11 @@ function CheckoutPageContent() {
 
   // Phase 5: Final Confirmation (Wireframe 1)
   if (phase === "confirmation") {
+    const payableItems = getResolvedItems(receiptLines);
+    const unAvailableItems = getUnavailableItems(receiptLines);
+
     return (
-      <div className="1container-marketplace py-8 max-w-xl mx-auto text-center space-y-6">
+      <div className="container-marketplace py-8 max-w-xl mx-auto text-center space-y-6">
         {/* Receipt Details Dialog */}
         <Dialog open={receiptOpen} onOpenChange={setReceiptOpen}>
           <DialogContent className="sm:max-w-md p-6 rounded-2xl bg-card">
@@ -475,21 +753,22 @@ function CheckoutPageContent() {
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">{t("vat15")}</span>
-                <span className="font-semibold">{formatPrice(checkoutTotal * 0.15)}</span>
+                <span className="font-semibold">{formatPrice(receiptTotal * 0.15)}</span>
               </div>
               <Separator />
               <div className="space-y-2 text-start">
                 <p className="font-semibold text-muted-foreground uppercase tracking-wide text-[10px]">{t("approvedShipments")}</p>
                 {Object.values(
-                  activeLines.reduce<Record<string, { name: string; nameAr: string; lines: typeof activeLines }>>((acc, line) => {
-                    if (!acc[line.pharmacyId]) {
-                      acc[line.pharmacyId] = {
-                        name: line.pharmacyName,
-                        nameAr: line.pharmacyNameAr,
-                        lines: [],
+                  payableItems.reduce<Record<string, { name: string; nameAr: string; items: typeof payableItems }>>((acc, item) => {
+                    const key = item.pharmacyName;
+                    if (!acc[key]) {
+                      acc[key] = {
+                        name: item.pharmacyName,
+                        nameAr: item.pharmacyNameAr,
+                        items: [],
                       };
                     }
-                    acc[line.pharmacyId].lines.push(line);
+                    acc[key].items.push(item);
                     return acc;
                   }, {})
                 ).map((group, idx) => {
@@ -497,10 +776,10 @@ function CheckoutPageContent() {
                   return (
                     <div key={idx} className="space-y-1 text-muted-foreground pt-2 first:pt-0">
                       <p className="font-bold text-foreground text-xs">{pharmName}</p>
-                      {group.lines.map((line, pIdx) => {
-                        const pName = locale === "ar" ? line.productNameAr : line.productName;
+                      {group.items.map((item, pIdx) => {
+                        const pName = locale === "ar" ? item.nameAr : item.name;
                         return (
-                          <p key={pIdx}>• {pName} ({line.requestedQty} {t("item")}) - {formatPrice(line.price * line.requestedQty)}</p>
+                          <p key={pIdx}>• {pName} ({item.qty} {t("item")}) - {formatPrice(item.price * item.qty)}</p>
                         );
                       })}
                     </div>
@@ -510,7 +789,7 @@ function CheckoutPageContent() {
               <Separator />
               <div className="flex justify-between font-bold text-sm text-primary">
                 <span>{t("totalCharged")}</span>
-                <span>{formatPrice(checkoutTotal)}</span>
+                <span>{formatPrice(receiptTotal)}</span>
               </div>
             </div>
             <Button className="w-full rounded-xl" onClick={() => setReceiptOpen(false)}>
@@ -607,22 +886,22 @@ function CheckoutPageContent() {
 
         <div className="space-y-4 text-start">
           {/* Available Items */}
-          {activeLines.length > 0 && (
+          {payableItems.length > 0 && (
             <Card className="rounded-2xl border p-4 space-y-3 shadow-none">
               <div className="flex items-center gap-2 text-success text-sm font-semibold">
-                <CheckCircle className="h-4 w-4" />
+                <CheckCircle className="h-4 w-4 text-green-600" />
                 <span>{t("availableItems")}</span>
               </div>
               <div className="space-y-2">
-                {activeLines.map((line, idx) => {
-                  const name = locale === "ar" ? line.productNameAr : line.productName;
+                {payableItems.map((item, idx) => {
+                  const name = locale === "ar" ? item.nameAr : item.name;
                   return (
                     <div key={idx} className="flex justify-between items-center bg-green-500/5 p-3 rounded-xl border border-green-500/10 text-xs">
                       <div>
                         <h4 className="font-semibold text-foreground">{name}</h4>
-                        <span className="text-muted-foreground text-[10px]">{tc("cart")} Qty: {line.requestedQty}</span>
+                        <span className="text-muted-foreground text-[10px]">{tc("cart")} Qty: {item.qty}</span>
                       </div>
-                      <span className="font-bold text-primary shrink-0">{formatPrice(line.price * line.requestedQty)}</span>
+                      <span className="font-bold text-primary shrink-0">{formatPrice(item.price * item.qty)}</span>
                     </div>
                   );
                 })}
@@ -631,25 +910,25 @@ function CheckoutPageContent() {
           )}
 
           {/* Unavailable Items */}
-          {checkoutLines.filter(line => line.status === AllocationStatus.REJECTED || line.resolution === "removed").length > 0 && (
+          {unAvailableItems.length > 0 && (
             <Card className="rounded-2xl border p-4 space-y-3 bg-muted/20 border-dashed shadow-none">
               <div className="flex items-center gap-2 text-destructive text-sm font-semibold">
-                <XCircle className="h-4 w-4" />
+                <XCircle className="h-4 w-4 text-red-600" />
                 <div>
                   <span>{t("unavailableItems")}</span>
                   <p className="text-[10px] text-muted-foreground font-normal mt-0.5">{t("refundedToWallet")}</p>
                 </div>
               </div>
               <div className="space-y-2">
-                {checkoutLines.filter(line => line.status === AllocationStatus.REJECTED || line.resolution === "removed").map((line, idx) => {
-                  const name = locale === "ar" ? line.productNameAr : line.productName;
+                {unAvailableItems.map((item, idx) => {
+                  const name = locale === "ar" ? item.nameAr : item.name;
                   return (
                     <div key={idx} className="flex justify-between items-center bg-red-500/5 p-3 rounded-xl border border-red-500/10 text-xs opacity-80">
                       <div>
                         <h4 className="font-semibold text-foreground">{name}</h4>
-                        <span className="text-muted-foreground text-[10px]">{tc("cart")} Qty: {line.requestedQty}</span>
+                        <span className="text-muted-foreground text-[10px]">{tc("cart")} Qty: {item.qty}</span>
                       </div>
-                      <span className="font-bold text-red-500 shrink-0">{formatPrice(line.price * line.requestedQty)}</span>
+                      <span className="font-bold text-red-500 shrink-0">{formatPrice(item.price * item.qty)}</span>
                     </div>
                   );
                 })}
@@ -660,7 +939,7 @@ function CheckoutPageContent() {
           {/* Final Total */}
           <div className="flex justify-between items-center p-4 border-t border-b">
             <span className="font-bold text-foreground">{t("total")}</span>
-            <span className="text-xl font-bold text-primary">{formatPrice(checkoutTotal)}</span>
+            <span className="text-xl font-bold text-primary">{formatPrice(receiptTotal)}</span>
           </div>
         </div>
 

@@ -15,7 +15,7 @@ import { QuantityStepper } from "@/components/marketplace/product-card";
 import { getProductById, getPharmacyById } from "@/lib/mock-data";
 import { useCartStore } from "@/stores/cart-store";
 import { cn, formatPrice } from "@/lib/utils";
-import { getMockAllocations, AllocationStatus, AllocationItem } from "@/lib/allocation-evaluator";
+import { getMockAllocations, AllocationStatus, AllocationItem, SCENARIOS } from "@/lib/allocation-evaluator";
 
 const mockAddresses = [
   { id: "addr-1", label: "the home", isMain: true, address: "Samaya Furnished Apartments, Room 260, Al Quds, Riyadh, Saudi Arabia" },
@@ -61,7 +61,7 @@ export function CartPage() {
   const tCheckout = useTranslations("checkout");
   const locale = useLocale();
   const router = useRouter();
-  const { items, removeItem, updateQuantity, checkoutLines, setCheckoutLines, setCheckoutAddressId } = useCartStore();
+  const { items, removeItem, updateQuantity, checkoutLines, setCheckoutLines, setCheckoutAddressId, resetCheckout, activeScenarioId } = useCartStore();
 
   // Address dialog state
   const [addressModalOpen, setAddressModalOpen] = useState(false);
@@ -158,6 +158,57 @@ export function CartPage() {
 
     return () => clearInterval(interval);
   }, [processingOpen, finalAllocations, router, setCheckoutLines]);
+
+  // If checkout is in progress, lock the cart screen
+  if (checkoutLines && checkoutLines.length > 0) {
+    return (
+      <div className="container-marketplace py-12 max-w-2xl mx-auto text-center space-y-6">
+        <div className="flex justify-center">
+          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-yellow-500/10 border-4 border-yellow-500/20 text-yellow-500">
+            <Clock className="h-10 w-10 animate-pulse" />
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <h1 className="text-2xl font-bold text-foreground">{tCheckout("cartLocked")}</h1>
+          <p className="text-muted-foreground text-sm max-w-md mx-auto">{tCheckout("cartLockedDesc")}</p>
+        </div>
+
+        <div className="p-5 border rounded-2xl bg-card space-y-3 text-start">
+          <h3 className="font-bold text-sm text-foreground">{locale === "ar" ? "تفاصيل الطلب النشط:" : "Active Checkout Details:"}</h3>
+          <div className="divide-y text-xs text-muted-foreground">
+            {checkoutLines.map((line, idx) => {
+              const name = locale === "ar" ? line.productNameAr : line.productName;
+              return (
+                <div key={idx} className="py-2.5 flex justify-between">
+                  <span>{name} ({line.requestedQty} {tCheckout("item")})</span>
+                  <span className="font-semibold text-foreground">{formatPrice(line.price * line.requestedQty)}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Button
+            className="w-full sm:flex-1 py-6 rounded-2xl text-base font-bold bg-primary hover:bg-primary/95 text-white"
+            onClick={() => router.push("/checkout")}
+          >
+            {tCheckout("viewActiveCheckout")}
+          </Button>
+          <Button
+            variant="outline"
+            className="w-full sm:flex-1 py-6 rounded-2xl text-base font-bold text-destructive border-destructive/20 hover:bg-destructive/5"
+            onClick={() => {
+              resetCheckout();
+            }}
+          >
+            {tCheckout("cancelCheckout")}
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const cartGroups = items.reduce<
     Record<string, { pharmacyId: string; lines: { productId: string; quantity: number }[] }>
@@ -364,7 +415,8 @@ export function CartPage() {
               className="w-full py-6 rounded-xl text-base font-bold text-white bg-primary hover:bg-primary/95"
               onClick={() => {
                 // Simulate checkoutSubmit mutation success
-                const allocations = getMockAllocations(items);
+                const activeScenario = activeScenarioId ? SCENARIOS.find(s => s.id === activeScenarioId) : null;
+                const allocations = activeScenario ? activeScenario.allocations : getMockAllocations(items);
                 setFinalAllocations(allocations);
 
                 const initialLines = allocations.map(line => ({

@@ -26,16 +26,31 @@ export type AllocationItem = {
     price: number;
     image: string;
   } | null;
+  substitutes?: Array<{
+    productId: string;
+    name: string;
+    nameAr: string;
+    price: number;
+    image: string;
+  }>;
   rejectionReason?: string;
   rejectionReasonAr?: string;
 };
 
+export type ScenarioDefinition = {
+  id: string;
+  name: string;
+  nameAr: string;
+  items: Array<{ productId: string; quantity: number }>;
+  allocations: AllocationItem[];
+};
+
 export function evaluateAllocation(requested: number, allocation: string | number | null | undefined): AllocationStatus {
-  if (allocation === null || allocation === undefined || allocation === "?") {
+  if (allocation === null || allocation === undefined || allocation === "?" || allocation === "") {
     return AllocationStatus.PENDING;
   }
   if (allocation === "*") {
-    return AllocationStatus.APPROVED;
+    return AllocationStatus.REJECTED; // Corrected: * represents Fully Rejected
   }
   const allocNum = typeof allocation === "number" ? allocation : parseInt(String(allocation), 10);
   if (isNaN(allocNum)) {
@@ -52,6 +67,333 @@ export function evaluateAllocation(requested: number, allocation: string | numbe
   }
   return AllocationStatus.PENDING;
 }
+
+export const SCENARIOS: ScenarioDefinition[] = [
+  {
+    id: "scenario-1",
+    name: "Scenario 1 — Full Approval",
+    nameAr: "السيناريو 1 — موافقة كاملة",
+    items: [
+      { productId: "pr1", quantity: 1 },
+      { productId: "pr2", quantity: 2 }
+    ],
+    allocations: [
+      {
+        productId: "pr1",
+        productName: "Body & Hair Care Oils Collection",
+        productNameAr: "مجموعة زيوت العناية بالجسم والشعر",
+        price: 68.0,
+        image: "/images/products/product-1.jpg",
+        pharmacyId: "p1",
+        pharmacyName: "Nahdi Pharmacy",
+        pharmacyNameAr: "صيدلية النهدي",
+        requestedQty: 1,
+        allocatedQty: 1,
+        status: AllocationStatus.APPROVED
+      },
+      {
+        productId: "pr2",
+        productName: "Keune Satin Oil Shampoo",
+        productNameAr: "كيون ساتين أويل شامبو",
+        price: 95.0,
+        image: "/images/products/product-2.jpg",
+        pharmacyId: "p1",
+        pharmacyName: "Nahdi Pharmacy",
+        pharmacyNameAr: "صيدلية النهدي",
+        requestedQty: 2,
+        allocatedQty: 2,
+        status: AllocationStatus.APPROVED
+      }
+    ]
+  },
+  {
+    id: "scenario-2",
+    name: "Scenario 2 — Partial Rejection",
+    nameAr: "السيناريو 2 — رفض جزئي",
+    items: [
+      { productId: "pr1", quantity: 1 },
+      { productId: "pr9", quantity: 1 }
+    ],
+    allocations: [
+      {
+        productId: "pr1",
+        productName: "Body & Hair Care Oils Collection",
+        productNameAr: "مجموعة زيوت العناية بالجسم والشعر",
+        price: 68.0,
+        image: "/images/products/product-1.jpg",
+        pharmacyId: "p1",
+        pharmacyName: "Nahdi Pharmacy",
+        pharmacyNameAr: "صيدلية النهدي",
+        requestedQty: 1,
+        allocatedQty: 1,
+        status: AllocationStatus.APPROVED
+      },
+      {
+        productId: "pr9",
+        productName: "Cetaphil Daily Hydrating Lotion",
+        productNameAr: "سيتافيل لوشن الترطيب اليومي",
+        price: 89.0,
+        image: "/images/products/product-3.jpg",
+        pharmacyId: "p5",
+        pharmacyName: "Whites Pharmacy",
+        pharmacyNameAr: "صيدلية وايتس",
+        requestedQty: 1,
+        allocatedQty: 0,
+        status: AllocationStatus.REJECTED,
+        rejectionReason: "Out of stock",
+        rejectionReasonAr: "غير متوفر في المخزون"
+      }
+    ]
+  },
+  {
+    id: "scenario-3",
+    name: "Scenario 3 — Partial Allocation",
+    nameAr: "السيناريو 3 — توزيع جزئي",
+    items: [
+      { productId: "pr7", quantity: 10 }
+    ],
+    allocations: [
+      {
+        productId: "pr7",
+        productName: "Jamieson Vitamin C 1000mg",
+        productNameAr: "جاميسون فيتامين سي 1000 مجم",
+        price: 55.0,
+        image: "/images/products/product-7.jpg",
+        pharmacyId: "p4",
+        pharmacyName: "United Pharmacy",
+        pharmacyNameAr: "صيدلية المتحدة",
+        requestedQty: 10,
+        allocatedQty: 4,
+        status: AllocationStatus.PARTIAL
+      }
+    ]
+  },
+  {
+    id: "scenario-4",
+    name: "Scenario 4 — Rejected with Replacements",
+    nameAr: "السيناريو 4 — مرفوض مع بدائل",
+    items: [
+      { productId: "pr10", quantity: 1 }
+    ],
+    allocations: [
+      {
+        productId: "pr10",
+        productName: "Advil Liqui-Gels Pain Reliever",
+        productNameAr: "أدفيل كبسولات مسكن للآلام",
+        price: 35.0,
+        image: "/images/products/product-6.jpg",
+        pharmacyId: "p5",
+        pharmacyName: "Whites Pharmacy",
+        pharmacyNameAr: "صيدلية وايتس",
+        requestedQty: 1,
+        allocatedQty: 0,
+        status: AllocationStatus.REJECTED,
+        rejectionReason: "Out of stock",
+        rejectionReasonAr: "غير متوفر في المخزون",
+        substitutes: [
+          {
+            productId: "sub-seven-seas",
+            name: "Seven Seas Cod Liver Oil",
+            nameAr: "زيت كبد السمك سفن سيز",
+            price: 45.0,
+            image: "/images/products/product-7.jpg"
+          },
+          {
+            productId: "sub-centrum",
+            name: "Centrum Adults Multivitamin",
+            nameAr: "سنتروم فيتامينات متعددة للبالغين",
+            price: 85.0,
+            image: "/images/products/product-7.jpg"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "scenario-5",
+    name: "Scenario 5 — Partial Allocation with Replacements",
+    nameAr: "السيناريو 5 — توزيع جزئي مع بدائل",
+    items: [
+      { productId: "pr7", quantity: 5 }
+    ],
+    allocations: [
+      {
+        productId: "pr7",
+        productName: "Jamieson Vitamin C 1000mg",
+        productNameAr: "جاميسون فيتامين سي 1000 مجم",
+        price: 55.0,
+        image: "/images/products/product-7.jpg",
+        pharmacyId: "p4",
+        pharmacyName: "United Pharmacy",
+        pharmacyNameAr: "صيدلية المتحدة",
+        requestedQty: 5,
+        allocatedQty: 2,
+        status: AllocationStatus.PARTIAL,
+        substitutes: [
+          {
+            productId: "sub-seven-seas",
+            name: "Seven Seas Cod Liver Oil",
+            nameAr: "زيت كبد السمك سفن سيز",
+            price: 45.0,
+            image: "/images/products/product-7.jpg"
+          },
+          {
+            productId: "sub-centrum",
+            name: "Centrum Adults Multivitamin",
+            nameAr: "سنتروم فيتامينات متعددة للبالغين",
+            price: 85.0,
+            image: "/images/products/product-7.jpg"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "scenario-6",
+    name: "Scenario 6 — Reject All Replacements",
+    nameAr: "السيناريو 6 — رفض جميع البدائل",
+    items: [
+      { productId: "pr10", quantity: 1 }
+    ],
+    allocations: [
+      {
+        productId: "pr10",
+        productName: "Advil Liqui-Gels Pain Reliever",
+        productNameAr: "أدفيل كبسولات مسكن للآلام",
+        price: 35.0,
+        image: "/images/products/product-6.jpg",
+        pharmacyId: "p5",
+        pharmacyName: "Whites Pharmacy",
+        pharmacyNameAr: "صيدلية وايتس",
+        requestedQty: 1,
+        allocatedQty: 0,
+        status: AllocationStatus.REJECTED,
+        rejectionReason: "Out of stock",
+        rejectionReasonAr: "غير متوفر في المخزون",
+        substitutes: [
+          {
+            productId: "sub-seven-seas",
+            name: "Seven Seas Cod Liver Oil",
+            nameAr: "زيت كبد السمك سفن سيز",
+            price: 45.0,
+            image: "/images/products/product-7.jpg"
+          },
+          {
+            productId: "sub-centrum",
+            name: "Centrum Adults Multivitamin",
+            nameAr: "سنتروم فيتامينات متعددة للبالغين",
+            price: 85.0,
+            image: "/images/products/product-7.jpg"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "scenario-7",
+    name: "Scenario 7 — Entire Order Rejected",
+    nameAr: "السيناريو 7 — رفض الطلب بالكامل",
+    items: [
+      { productId: "pr10", quantity: 1 }
+    ],
+    allocations: [
+      {
+        productId: "pr10",
+        productName: "Advil Liqui-Gels Pain Reliever",
+        productNameAr: "أدفيل كبسولات مسكن للآلام",
+        price: 35.0,
+        image: "/images/products/product-6.jpg",
+        pharmacyId: "p5",
+        pharmacyName: "Whites Pharmacy",
+        pharmacyNameAr: "صيدلية وايتس",
+        requestedQty: 1,
+        allocatedQty: "*", // Fully Rejected
+        status: AllocationStatus.REJECTED,
+        rejectionReason: "Out of stock",
+        rejectionReasonAr: "غير متوفر في المخزون",
+        substitutes: []
+      }
+    ]
+  },
+  {
+    id: "scenario-8",
+    name: "Scenario 8 — Mixed Order",
+    nameAr: "السيناريو 8 — طلب مختلط",
+    items: [
+      { productId: "pr1", quantity: 3 },
+      { productId: "pr7", quantity: 5 },
+      { productId: "pr10", quantity: 1 }
+    ],
+    allocations: [
+      {
+        productId: "pr1",
+        productName: "Body & Hair Care Oils Collection",
+        productNameAr: "مجموعة زيوت العناية بالجسم والشعر",
+        price: 68.0,
+        image: "/images/products/product-1.jpg",
+        pharmacyId: "p1",
+        pharmacyName: "Nahdi Pharmacy",
+        pharmacyNameAr: "صيدلية النهدي",
+        requestedQty: 3,
+        allocatedQty: 3,
+        status: AllocationStatus.APPROVED
+      },
+      {
+        productId: "pr7",
+        productName: "Jamieson Vitamin C 1000mg",
+        productNameAr: "جاميسون فيتامين سي 1000 مجم",
+        price: 55.0,
+        image: "/images/products/product-7.jpg",
+        pharmacyId: "p4",
+        pharmacyName: "United Pharmacy",
+        pharmacyNameAr: "صيدلية المتحدة",
+        requestedQty: 5,
+        allocatedQty: 2,
+        status: AllocationStatus.PARTIAL,
+        substitutes: [
+          {
+            productId: "sub-seven-seas",
+            name: "Seven Seas Cod Liver Oil",
+            nameAr: "زيت كبد السمك سفن سيز",
+            price: 45.0,
+            image: "/images/products/product-7.jpg"
+          },
+          {
+            productId: "sub-centrum",
+            name: "Centrum Adults Multivitamin",
+            nameAr: "سنتروم فيتامينات متعددة للبالغين",
+            price: 85.0,
+            image: "/images/products/product-7.jpg"
+          }
+        ]
+      },
+      {
+        productId: "pr10",
+        productName: "Advil Liqui-Gels Pain Reliever",
+        productNameAr: "أدفيل كبسولات مسكن للآلام",
+        price: 35.0,
+        image: "/images/products/product-6.jpg",
+        pharmacyId: "p5",
+        pharmacyName: "Whites Pharmacy",
+        pharmacyNameAr: "صيدلية وايتس",
+        requestedQty: 1,
+        allocatedQty: 0,
+        status: AllocationStatus.REJECTED,
+        rejectionReason: "Out of stock",
+        rejectionReasonAr: "غير متوفر في المخزون",
+        substitutes: [
+          {
+            productId: "sub-seven-seas",
+            name: "Seven Seas Cod Liver Oil",
+            nameAr: "زيت كبد السمك سفن سيز",
+            price: 45.0,
+            image: "/images/products/product-7.jpg"
+          }
+        ]
+      }
+    ]
+  }
+];
 
 export function getMockAllocations(cartItems: { productId: string; quantity: number }[]): AllocationItem[] {
   return cartItems.map((item) => {
@@ -78,50 +420,40 @@ export function getMockAllocations(cartItems: { productId: string; quantity: num
 
     let allocatedQty: string | number = item.quantity;
     let status = AllocationStatus.APPROVED;
-    let substitute = null;
+    let substitutes = undefined;
     let rejectionReason = "";
     let rejectionReasonAr = "";
 
     // Simulate based on pharmacyId or product id
     if (product.pharmacyId === "p1") {
-      // Nahdi Pharmacy - Case B/C (Approved)
-      // Alternate for variety
-      if (product.id === "pr1") {
-        allocatedQty = "*"; // Case B
-      } else {
-        allocatedQty = item.quantity; // Case C
-      }
+      allocatedQty = item.quantity;
       status = AllocationStatus.APPROVED;
     } else if (product.pharmacyId === "p4") {
-      // United Pharmacy - Case D (Partial)
       const requested = item.quantity;
-      const effectiveRequested = requested === 1 ? 2 : requested;
-      allocatedQty = Math.max(1, Math.floor(effectiveRequested / 2));
+      allocatedQty = Math.max(1, Math.floor(requested / 2));
       status = AllocationStatus.PARTIAL;
     } else if (product.pharmacyId === "p5") {
-      // Whites Pharmacy - Case E (Rejected)
       allocatedQty = 0;
       status = AllocationStatus.REJECTED;
       rejectionReason = "Out of stock";
       rejectionReasonAr = "غير متوفر في المخزون";
 
-      if (product.id === "pr10") {
-        substitute = {
-          productId: "pr5", // Suggest Prof Cold & Flu Tablets
-          name: "Seven Seas Cod Liver Oil", // Keep labels consistent with translations/mock modal
+      substitutes = [
+        {
+          productId: "sub-seven-seas",
+          name: "Seven Seas Cod Liver Oil",
           nameAr: "زيت كبد السمك سفن سيز",
-          price: 129.35,
+          price: 45.0,
           image: "/images/products/product-7.jpg",
-        };
-      } else {
-        substitute = {
-          productId: "pr7", // Suggest Jamieson Vitamin C
+        },
+        {
+          productId: "sub-centrum",
           name: "Centrum Adults Multivitamin",
           nameAr: "سنتروم فيتامينات متعددة للبالغين",
-          price: 129.35,
+          price: 85.0,
           image: "/images/products/product-7.jpg",
-        };
-      }
+        }
+      ];
     } else {
       allocatedQty = item.quantity;
       status = AllocationStatus.APPROVED;
@@ -136,10 +468,11 @@ export function getMockAllocations(cartItems: { productId: string; quantity: num
       pharmacyId: product.pharmacyId,
       pharmacyName,
       pharmacyNameAr,
-      requestedQty: product.pharmacyId === "p4" && item.quantity === 1 ? 2 : item.quantity,
+      requestedQty: item.quantity,
       allocatedQty,
       status,
-      substitute,
+      substitute: substitutes ? substitutes[0] : null,
+      substitutes,
       rejectionReason,
       rejectionReasonAr,
     };

@@ -21,13 +21,13 @@ export function CheckoutSuccessPage() {
       </p>
       <Card className="mt-8 w-full max-w-md">
         <CardContent className="p-6">
-          <p className="text-sm text-muted-foreground">Order Number</p>
+          <p className="text-sm text-muted-foreground">{t("orderNumberLabel")}</p>
           <p className="text-xl font-bold text-primary">YUS-28500</p>
         </CardContent>
       </Card>
       <div className="mt-8 flex gap-4">
         <Button asChild size="lg">
-          <Link href="/orders">Track Order</Link>
+          <Link href="/orders">{t("trackOrder")}</Link>
         </Button>
         <Button asChild variant="outline" size="lg">
           <Link href="/products">{tc("continueShopping")}</Link>

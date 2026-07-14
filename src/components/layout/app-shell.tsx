@@ -3,6 +3,7 @@
 import { usePathname } from "@/i18n/navigation";
 import { SiteHeader, MobileBottomNav } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
+import { ScenarioSelector } from "@/components/marketplace/scenario-selector";
 
 const AUTH_ROUTES = ["/login", "/register", "/otp", "/forgot-password", "/reset-password"];
 
@@ -20,6 +21,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <main className="flex-1 pb-20 md:pb-0">{children}</main>
       <SiteFooter />
       <MobileBottomNav />
+      <ScenarioSelector />
     </>
   );
 }
