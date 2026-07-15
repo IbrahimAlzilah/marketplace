@@ -624,13 +624,13 @@ export const banners = [
     image: "/images/deals/deal_3.webp",
     link: "/products?category=baby-care",
   },
-  {
-    id: "b4",
-    title: "Baby Care Essentials",
-    titleAr: "أساسيات العناية بالطفل",
-    image: "/images/deals/deal_4.webp",
-    link: "/products?category=baby-care",
-  },
+  // {
+  //   id: "b4",
+  //   title: "Baby Care Essentials",
+  //   titleAr: "أساسيات العناية بالطفل",
+  //   image: "/images/deals/deal_4.webp",
+  //   link: "/products?category=baby-care",
+  // },
 ];
 
 export const orders: Order[] = [

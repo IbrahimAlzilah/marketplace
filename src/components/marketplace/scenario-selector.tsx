@@ -56,7 +56,7 @@ export function ScenarioSelector() {
             size="lg"
             className="rounded-full shadow-2xl bg-gradient-to-r from-primary to-secondary text-white hover:opacity-90 flex items-center gap-2 border border-white/20 h-12 px-5 hover:scale-105 transition-transform"
           >
-            <Beaker className="h-5 w-5 animate-pulse" />
+            {/* <Beaker className="h-5 w-5 animate-pulse" /> */}
             <span className="text-xs font-bold font-mono tracking-wide uppercase">
               {locale === "ar" ? "سيناريوهات الاختبار" : "Test Scenarios"}
             </span>

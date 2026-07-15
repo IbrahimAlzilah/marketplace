@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { ToastContainer } from "@/components/providers/toast-provider";
 import { AppShell } from "@/components/layout/app-shell";
+import { coHeadline, arabKufi } from "@/app/fonts";
 import "../globals.css";
 
 export function generateStaticParams() {
@@ -28,7 +29,7 @@ export default async function LocaleLayout({
   const dir = locale === "ar" ? "rtl" : "ltr";
 
   return (
-    <html lang={locale} dir={dir} suppressHydrationWarning>
+    <html lang={locale} dir={dir} className={`${coHeadline.variable} ${arabKufi.variable}`} suppressHydrationWarning>
       <body className="min-h-screen flex flex-col">
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           <QueryProvider>
