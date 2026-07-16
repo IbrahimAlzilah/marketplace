@@ -49,24 +49,21 @@ export function ScenarioSelector() {
   };
 
   return (
-    <div className="fixed bottom-24 end-6 z-50">
+    <div className="fixed bottom-8 end-6 z-50">
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button
             size="lg"
-            className="rounded-full shadow-2xl bg-gradient-to-r from-primary to-secondary text-white hover:opacity-90 flex items-center gap-2 border border-white/20 h-12 px-5 hover:scale-105 transition-transform"
+            title={locale === "ar" ? "سيناريوهات الاختبار" : "Test Scenarios"}
+            className="rounded-full shadow-2xl bg-gradient-to-r from-primary to-secondary text-white hover:opacity-90 flex items-center gap-2 border border-white/20 h-12 w-12 px-3 hover:scale-105 transition-transform"
           >
-            {/* <Beaker className="h-5 w-5 animate-pulse" /> */}
-            <span className="text-xs font-bold font-mono tracking-wide uppercase">
-              {locale === "ar" ? "سيناريوهات الاختبار" : "Test Scenarios"}
-            </span>
+            <Beaker className="size-6 animate-pulse" />
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-xl max-h-[85vh] overflow-hidden flex flex-col p-6 rounded-3xl bg-card border">
+        <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-hidden flex flex-col p-6 rounded-3xl bg-card border">
           <DialogHeader className="pb-3 border-b">
             <div className="flex items-center justify-between">
               <DialogTitle className="text-lg font-bold text-foreground flex items-center gap-2">
-                <Beaker className="h-5 w-5 text-primary animate-pulse" />
                 {locale === "ar" ? "أداة محاكاة سيناريوهات الشراء" : "Checkout Scenario Simulator"}
               </DialogTitle>
             </div>
