@@ -179,7 +179,7 @@ export function SiteHeader() {
             <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
               <Search className="size-5" />
             </Button>
-            <Button variant="ghost" size="icon" className="hidden sm:flex" asChild>
+            <Button variant="ghost" size="icon" className="hidden sm:flex rounded-full" asChild>
               <Link href="/notifications">
                 <Bell className="size-5" />
               </Link>
@@ -189,7 +189,7 @@ export function SiteHeader() {
                 variant="ghost"
                 size="icon"
                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="hidden sm:flex"
+                className="hidden sm:flex rounded-full"
               >
                 {theme === "dark" ? <Sun className="size-5" /> : <Moon className="size-5" />}
               </Button>
@@ -201,14 +201,13 @@ export function SiteHeader() {
               className="hidden sm:flex"
             >
               <Globe className="size-5 text-foreground/70" />
-              {/* <span>{locale === "en" ? "العربية" : "English"}</span> */}
               <span>{locale === "en" ? "AR" : "EN"}</span>
             </Button>
-            <Button variant="ghost" size="icon" className="relative" asChild>
+            <Button variant="ghost" size="icon" className="relative rounded-full" asChild>
               <Link href="/cart">
                 <ShoppingCart className="size-5" />
                 {itemCount > 0 && (
-                  <Badge className="absolute -end-1 -top-1 flex size-5 items-center justify-center p-0 text-[10px]">
+                  <Badge className="absolute -end-0 -top-0 flex size-5 items-center justify-center p-0 text-xs rounded-full">
                     {itemCount}
                   </Badge>
                 )}

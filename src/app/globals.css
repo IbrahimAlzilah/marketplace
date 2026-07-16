@@ -242,7 +242,7 @@ html[dir="rtl"] {
   --popover-foreground: oklch(0.98 0.005 240);
 
   --primary: oklch(0.53 0.16 295);
-  --primary-foreground: oklch(0.14 0.015 240);
+  --primary-foreground: oklch(1.0 0.0 0.0);
   --secondary: oklch(0.69 0.18 45);
   --secondary-foreground: oklch(0.14 0.015 240);
 
