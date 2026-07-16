@@ -300,7 +300,7 @@ export function SiteHeader() {
             >
               {t("offers")}
             </Link>
-            {categories.slice(0, 7).map((cat) => {
+            {categories.slice(0, 8).map((cat) => {
               const catName = locale === "ar" ? cat.nameAr : cat.name;
               const isActive = pathname.startsWith("/products") && activeCategory === cat.slug;
               return (

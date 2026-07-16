@@ -327,8 +327,8 @@ export function CartPage() {
                       {t("freeDeliveryUnlocked")}
                     </div>
                   ) : (
-                    <div className="p-3 rounded-lg border bg-muted/10 space-y-3">
-                      <div className="flex justify-between text-xs font-semibold text-muted-foreground">
+                    <div className="p-3 rounded-lg border bg-muted/10 space-y-2">
+                      <div className="flex justify-between text-xs font-medium text-muted-foreground">
                         <span className="inline-flex items-center gap-1">
                           {t.rich("addMoreForFree", {
                             amount: () => <Price amount={remainingForFree} className="font-semibold text-muted-foreground" iconClassName="text-muted-foreground" />
