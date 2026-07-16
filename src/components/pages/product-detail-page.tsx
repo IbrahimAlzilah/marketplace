@@ -117,8 +117,8 @@ export function ProductDetailPage({ slug }: { slug: string }) {
                 onClick={() => setActiveImage(i)}
                 className={cn(
                   "relative h-14 w-14 overflow-hidden rounded-md border border-2 bg-white p-1 transition-all duration-200",
-                  activeImage === i 
-                    ? "border-primary scale-110" 
+                  activeImage === i
+                    ? "border-primary scale-110"
                     : "border-slate-200 hover:border-slate-300"
                 )}
               >

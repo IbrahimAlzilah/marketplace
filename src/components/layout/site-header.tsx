@@ -258,7 +258,7 @@ export function SiteHeader() {
 
       {/*  Quick Links mega nav - desktop */}
       <div
-        className="relative hidden border-t border-slate-200/80 py-1.5 lg:block bg-card"
+        className="relative hidden border-t border-slate-200/80 dark:border-slate-800 py-1.5 lg:block bg-card"
         onMouseLeave={() => setMegaMenuOpen(false)}
       >
         <div className="container-marketplace relative flex items-center justify-between gap-4">
