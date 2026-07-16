@@ -165,8 +165,11 @@ export function CartPage() {
     return (
       <div className="container-marketplace py-12 max-w-2xl mx-auto text-center space-y-6">
         <div className="flex justify-center">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-yellow-500/10 border-4 border-yellow-500/20 text-yellow-500">
+          {/* <div className="flex h-20 w-20 items-center justify-center rounded-full bg-yellow-500/10 border-4 border-yellow-500/20 text-yellow-500">
             <Clock className="h-10 w-10 animate-pulse" />
+          </div> */}
+          <div className="bg-secondary/12 relative flex size-20 items-center justify-center rounded-full">
+            <div className="border-secondary/40 border-t-secondary border-r-secondary absolute inset-4.5 animate-spin rounded-full border-[3.5px]" />
           </div>
         </div>
         
