@@ -1,8 +1,17 @@
-import { setRequestLocale } from "next-intl/server";
-import { OtpPage } from "@/components/pages/otp-page";
+"use client";
 
-export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
-  const { locale } = await params;
-  setRequestLocale(locale);
-  return <OtpPage />;
+import { useEffect } from "react";
+import { useRouter } from "@/i18n/navigation";
+import { useAuthStore } from "@/stores/auth-store";
+
+export default function OtpPage() {
+  const router = useRouter();
+  const openAuthModal = useAuthStore((s) => s.openAuthModal);
+
+  useEffect(() => {
+    openAuthModal("otp");
+    router.replace("/");
+  }, [openAuthModal, router]);
+
+  return null;
 }

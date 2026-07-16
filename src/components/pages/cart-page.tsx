@@ -310,14 +310,6 @@ export function CartPage() {
                               onChange={(q) => updateQuantity(line.productId, q)}
                               max={product.stockCount}
                             />
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-9 w-9 text-muted-foreground hover:text-destructive shrink-0"
-                              onClick={() => removeItem(line.productId)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
                           </div>
                         </div>
                       );

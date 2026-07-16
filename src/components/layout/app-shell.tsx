@@ -4,6 +4,7 @@ import { usePathname } from "@/i18n/navigation";
 import { SiteHeader, MobileBottomNav } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { ScenarioSelector } from "@/components/marketplace/scenario-selector";
+import { AuthModal } from "@/components/auth/auth-modal";
 
 const AUTH_ROUTES = ["/login", "/register", "/otp", "/forgot-password", "/reset-password"];
 
@@ -22,6 +23,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <SiteFooter />
       <MobileBottomNav />
       <ScenarioSelector />
+      <AuthModal />
     </>
   );
 }

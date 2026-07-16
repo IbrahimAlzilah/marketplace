@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
-import { Heart, MapPin, Minus, Plus, ShoppingCart, Star, Loader2 } from "lucide-react";
+import { Heart, MapPin, Minus, Plus, ShoppingCart, Star, Loader2, Trash2 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { cn, formatRating } from "@/lib/utils";
 import { Price } from "@/components/ui/currency";
 import type { Product } from "@/lib/mock-data";
-import { getPharmacyById } from "@/lib/mock-data";
 import { useCartStore } from "@/stores/cart-store";
 import { useWishlistStore } from "@/stores/wishlist-store";
 import { useToast } from "@/components/providers/toast-provider";
@@ -28,10 +27,8 @@ export function ProductCard({ product, className }: ProductCardProps) {
   const { items, addItem, updateQuantity } = useCartStore();
   const { toast } = useToast();
   const { toggleItem, isInWishlist } = useWishlistStore();
-  const pharmacy = getPharmacyById(product.pharmacyId);
   const inWishlist = isInWishlist(product.id);
   const name = locale === "ar" ? product.nameAr : product.name;
-  const pharmacyName = pharmacy ? (locale === "ar" ? pharmacy.nameAr : pharmacy.name) : "";
 
   const [loading, setLoading] = useState(false);
   const cartItem = items.find((item) => item.productId === product.id);
@@ -90,28 +87,30 @@ export function ProductCard({ product, className }: ProductCardProps) {
           <span>{formatRating(product.rating)}</span>
           <span>({product.reviewCount})</span>
         </div>
-        <p className="mt-0.5 truncate text-xs text-muted-foreground">{pharmacyName}</p>
-        <div className="mt-2 flex items-center justify-between gap-2">
-          <div className="flex flex-col min-w-0 leading-tight">
-            <Price amount={product.price} className="text-sm sm:text-base text-primary leading-none" />
+        <div className="mt-2.5 flex flex-col leading-tight">
+          <div className="flex items-baseline gap-1.5 flex-wrap">
+            <Price amount={product.price} className="text-base text-primary font-bold" />
             {product.originalPrice && (
               <Price
                 amount={product.originalPrice}
-                className="text-[10px] text-muted-foreground line-through mt-0.5 leading-none font-normal"
+                className="text-xs text-muted-foreground line-through font-normal"
                 iconClassName="text-muted-foreground"
               />
             )}
           </div>
+        </div>
+
+        <div className="mt-3">
           {cartItem ? (
             <QuantityStepper
               value={cartItem.quantity}
               onChange={(q) => updateQuantity(product.id, q)}
               max={product.stockCount}
+              className="w-full h-10 flex justify-between p-1"
             />
           ) : (
             <Button
-              size="icon"
-              className="h-8 w-8 shrink-0 rounded-full"
+              className="w-full h-10 rounded-full text-sm font-medium bg-primary hover:bg-primary/95 text-white flex items-center justify-center gap-1.5"
               disabled={!product.inStock || loading}
               onClick={() => {
                 setLoading(true);
@@ -121,12 +120,14 @@ export function ProductCard({ product, className }: ProductCardProps) {
                   toast({ title: tt("addedToCart"), description: tt("addedToCartDesc") });
                 }, 800);
               }}
-              aria-label={t("addToCart")}
             >
               {loading ? (
                 <Loader2 className="size-4 animate-spin" />
               ) : (
-                <ShoppingCart className="size-4" />
+                <>
+                  <ShoppingCart className="size-4" />
+                  <span>{t("addToCart")}</span>
+                </>
               )}
             </Button>
           )}
@@ -154,29 +155,42 @@ export function QuantityStepper({
   value,
   onChange,
   max = 99,
+  className,
 }: {
   value: number;
   onChange: (v: number) => void;
   max?: number;
+  className?: string;
 }) {
+  const isFullWidth = className?.includes("w-full");
+
   return (
-    <div className="inline-flex items-center bg-slate-100/60 border border-slate-200/50 rounded-full p-0.5 gap-0.5 shrink-0">
+    <div className={cn("inline-flex items-center bg-slate-100/60 border border-slate-200/50 rounded-full p-0.5 gap-0.5 shrink-0", className)}>
       <button
         type="button"
-        className="h-6 w-6 rounded-full bg-white border border-slate-200/30 flex items-center justify-center text-foreground hover:bg-slate-50 active:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-xs"
+        className={cn(
+          "rounded-full bg-white border border-slate-200/30 flex items-center justify-center text-foreground hover:bg-slate-50 active:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-xs",
+          isFullWidth ? "h-8 w-8" : "h-6 w-6"
+        )}
         onClick={() => onChange(value - 1)}
-        disabled={value <= 1}
       >
-        <Minus className="size-3" />
+        {value === 1 ? (
+          <Trash2 className={cn("text-red-500/80", isFullWidth ? "size-4 stroke-[2]" : "size-3.5")} />
+        ) : (
+          <Minus className={isFullWidth ? "size-3.5" : "size-3"} />
+        )}
       </button>
-      <span className="w-6 text-center text-xs font-bold text-foreground select-none">{value}</span>
+      <span className={cn("text-center font-bold text-foreground select-none", isFullWidth ? "text-sm w-8" : "text-xs w-6")}>{value}</span>
       <button
         type="button"
-        className="h-6 w-6 rounded-full bg-white border border-slate-200/30 flex items-center justify-center text-foreground hover:bg-slate-50 active:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-xs"
+        className={cn(
+          "rounded-full bg-white border border-slate-200/30 flex items-center justify-center text-foreground hover:bg-slate-50 active:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-xs",
+          isFullWidth ? "h-8 w-8" : "h-6 w-6"
+        )}
         onClick={() => onChange(value + 1)}
         disabled={value >= max}
       >
-        <Plus className="size-3" />
+        <Plus className={isFullWidth ? "size-3.5" : "size-3"} />
       </button>
     </div>
   );

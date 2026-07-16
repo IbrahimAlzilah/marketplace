@@ -355,7 +355,15 @@
     "verify": "Verify",
     "resend": "Resend code",
     "resendIn": "Resend in {seconds}s",
-    "sendCode": "Send verification code"
+    "sendCode": "Send verification code",
+    "nationalId": "National ID / Iqama",
+    "nationalIdRequired": "National ID is required",
+    "nationalIdInvalid": "National ID must start with 1 or 2 and be 10 digits",
+    "resetPasswordTitle": "Reset password",
+    "resetPasswordSubtitle": "Enter your new password",
+    "confirm": "Confirm",
+    "success": "Success",
+    "passwordResetSuccess": "Password has been reset successfully. Please login with your new password."
   },
   "location": {
     "title": "Choose delivery location",

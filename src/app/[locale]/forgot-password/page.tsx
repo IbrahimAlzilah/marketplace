@@ -1,8 +1,17 @@
-import { setRequestLocale } from "next-intl/server";
-import { ForgotPasswordPage } from "@/components/pages/forgot-password-page";
+"use client";
 
-export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
-  const { locale } = await params;
-  setRequestLocale(locale);
-  return <ForgotPasswordPage />;
+import { useEffect } from "react";
+import { useRouter } from "@/i18n/navigation";
+import { useAuthStore } from "@/stores/auth-store";
+
+export default function ForgotPasswordPage() {
+  const router = useRouter();
+  const openAuthModal = useAuthStore((s) => s.openAuthModal);
+
+  useEffect(() => {
+    openAuthModal("forgot-password");
+    router.replace("/");
+  }, [openAuthModal, router]);
+
+  return null;
 }

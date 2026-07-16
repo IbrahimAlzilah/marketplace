@@ -353,9 +353,17 @@
     "acceptTerms": "أوافق على",
     "terms": "شروط الخدمة",
     "verify": "تحقق",
-    "resend": "إعادة إرسال الرمز",
+    "resend": "إعادة ارسال الرمز",
     "resendIn": "إعادة الإرسال خلال {seconds} ث",
-    "sendCode": "إرسال رمز التحقق"
+    "sendCode": "إرسال رمز التحقق",
+    "nationalId": "الهوية الوطنية / الإقامة",
+    "nationalIdRequired": "الهوية الوطنية مطلوبة",
+    "nationalIdInvalid": "يجب أن تبدأ الهوية الوطنية بـ 1 أو 2 وتتكون من 10 أرقام",
+    "resetPasswordTitle": "إعادة تعيين كلمة المرور",
+    "resetPasswordSubtitle": "أدخل كلمة المرور الجديدة",
+    "confirm": "تأكيد",
+    "success": "نجاح",
+    "passwordResetSuccess": "تم إعادة تعيين كلمة المرور بنجاح. يرجى تسجيل الدخول بكلمة المرور الجديدة."
   },
   "location": {
     "title": "اختر موقع التوصيل",

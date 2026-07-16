@@ -1,8 +1,17 @@
-import { setRequestLocale } from "next-intl/server";
-import { LoginPage } from "@/components/pages/login-page";
+"use client";
 
-export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
-  const { locale } = await params;
-  setRequestLocale(locale);
-  return <LoginPage />;
+import { useEffect } from "react";
+import { useRouter } from "@/i18n/navigation";
+import { useAuthStore } from "@/stores/auth-store";
+
+export default function LoginPage() {
+  const router = useRouter();
+  const openAuthModal = useAuthStore((s) => s.openAuthModal);
+
+  useEffect(() => {
+    openAuthModal("login");
+    router.replace("/");
+  }, [openAuthModal, router]);
+
+  return null;
 }

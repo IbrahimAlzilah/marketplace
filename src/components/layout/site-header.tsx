@@ -42,7 +42,7 @@ export function SiteHeader() {
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
   const itemCount = useCartStore((s) => s.getItemCount());
   const { city, district } = useLocationStore();
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, openAuthModal } = useAuthStore();
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   useEffect(() => {
@@ -221,15 +221,21 @@ export function SiteHeader() {
                 </Link>
               </Button>
             ) : (
-              <Button variant="outline" size="sm" className="hidden sm:flex" asChild>
-                <Link href="/login">{t("login")}</Link>
+              <Button variant="outline" size="sm" className="hidden sm:flex" onClick={() => openAuthModal("login")}>
+                {t("login")}
               </Button>
             )}
-            <Button variant="ghost" size="icon" className="sm:hidden" asChild>
-              <Link href="/profile">
+            {isAuthenticated ? (
+              <Button variant="ghost" size="icon" className="sm:hidden" asChild>
+                <Link href="/profile">
+                  <User className="size-5" />
+                </Link>
+              </Button>
+            ) : (
+              <Button variant="ghost" size="icon" className="sm:hidden" onClick={() => openAuthModal("login")}>
                 <User className="size-5" />
-              </Link>
-            </Button>
+              </Button>
+            )}
             <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
               <Menu className="size-5" />
             </Button>
@@ -410,6 +416,7 @@ export function MobileBottomNav() {
   const t = useTranslations("common");
   const pathname = usePathname();
   const itemCount = useCartStore((s) => s.getItemCount());
+  const { isAuthenticated, openAuthModal } = useAuthStore();
 
   const links = [
     { href: "/", icon: Home, label: t("home"), match: (p: string) => p === "/" },
@@ -425,6 +432,23 @@ export function MobileBottomNav() {
         {links.map((link) => {
           const Icon = link.icon;
           const active = link.match(pathname);
+          const isProfileLink = link.href === "/profile";
+
+          if (isProfileLink && !isAuthenticated) {
+            return (
+              <button
+                key={link.href}
+                onClick={() => openAuthModal("login")}
+                className={cn(
+                  "relative flex flex-col items-center gap-0.5 px-3 py-1 text-[10px] text-muted-foreground cursor-pointer"
+                )}
+              >
+                <Icon className="size-5 text-muted-foreground" />
+                <span>{link.label}</span>
+              </button>
+            );
+          }
+
           return (
             <Link
               key={link.href}

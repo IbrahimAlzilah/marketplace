@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
@@ -44,17 +45,24 @@ export function RegisterPage() {
         <div>
           <Label htmlFor="phone">{t("phone")}</Label>
           <div className="mt-1 flex">
-            <span className="inline-flex items-center rounded-s-lg border border-e-0 border-input bg-muted px-3 text-sm text-muted-foreground">
-              +966
+            <span className="inline-flex items-center gap-1.5 rounded-s-lg border border-e-0 border-input bg-muted px-3 text-sm text-muted-foreground">
+              <Image
+                src="/images/flag-sa.webp"
+                alt="SA Flag"
+                width={20}
+                height={14}
+                className="rounded-sm object-contain shrink-0"
+              />
+              <span>+966</span>
             </span>
             <Input id="phone" className="rounded-s-none" {...register("phone")} />
           </div>
           {errors.phone && <p className="mt-1 text-sm text-destructive">{errors.phone.message}</p>}
         </div>
         <div>
-          <Label htmlFor="email">{t("email")}</Label>
-          <Input id="email" type="email" className="mt-1" {...register("email")} />
-          {errors.email && <p className="mt-1 text-sm text-destructive">{errors.email.message}</p>}
+          <Label htmlFor="nationalId">{t("nationalId")}</Label>
+          <Input id="nationalId" className="mt-1" {...register("nationalId")} />
+          {errors.nationalId && <p className="mt-1 text-sm text-destructive">{errors.nationalId.message}</p>}
         </div>
         <div>
           <Label htmlFor="password">{t("password")}</Label>
