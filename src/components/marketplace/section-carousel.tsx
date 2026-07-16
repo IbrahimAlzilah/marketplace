@@ -47,8 +47,8 @@ export function SectionCarousel<T>({
           ))}
         </CarouselContent>
         <div className="hidden md:block">
-          <CarouselPrevious className="absolute top-1/2 -translate-y-1/2 -start-6 lg:-start-10 xl:-start-12 h-10 w-10 border-primary/20 bg-background/90 text-primary shadow-sm backdrop-blur-sm transition-all hover:bg-primary hover:text-white" />
-          <CarouselNext className="absolute top-1/2 -translate-y-1/2 -end-6 lg:-end-10 xl:-end-12 h-10 w-10 border-primary/20 bg-background/90 text-primary shadow-sm backdrop-blur-sm transition-all hover:bg-primary hover:text-white" />
+          <CarouselPrevious className="absolute top-1/2 -translate-y-1/2 -start-2 lg:-start-4 h-10 w-10 border-primary/20 bg-background/90 text-primary shadow-xs backdrop-blur-sm transition-all hover:bg-primary hover:text-white" />
+          <CarouselNext className="absolute top-1/2 -translate-y-1/2 -end-2 lg:-end-4 h-10 w-10 border-primary/20 bg-background/90 text-primary shadow-xs backdrop-blur-sm transition-all hover:bg-primary hover:text-white" />
         </div>
       </Carousel>
     </div>

@@ -223,7 +223,7 @@ export function HomePage() {
         <SectionCarousel
           items={featuredProducts}
           renderItem={(product) => <ProductCard product={product} />}
-          itemClassName="basis-[46%] sm:basis-[46%] md:basis-[31%] lg:basis-[20%] xl:basis-[18%]"
+          itemClassName="basis-[46%] sm:basis-[46%] md:basis-[31%] lg:basis-[20%] xl:basis-[20%]"
         />
       </section>
 
@@ -235,7 +235,7 @@ export function HomePage() {
         <SectionCarousel
           items={recommendedProducts}
           renderItem={(product) => <ProductCard product={product} />}
-          itemClassName="basis-[46%] sm:basis-[46%] md:basis-[31%] lg:basis-[20%] xl:basis-[18%]"
+          itemClassName="basis-[46%] sm:basis-[46%] md:basis-[31%] lg:basis-[20%] xl:basis-[20%]"
         />
       </section>
 
@@ -248,7 +248,7 @@ export function HomePage() {
           <SectionCarousel
             items={recentlyViewed.filter(Boolean) as typeof products}
             renderItem={(product) => <ProductCard product={product} />}
-            itemClassName="basis-[46%] sm:basis-[46%] md:basis-[31%] lg:basis-[20%] xl:basis-[18%]"
+            itemClassName="basis-[46%] sm:basis-[46%] md:basis-[31%] lg:basis-[20%] xl:basis-[20%]"
           />
         </section>
       )}

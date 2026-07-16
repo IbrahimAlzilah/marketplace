@@ -3,12 +3,12 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
-import { Heart, MapPin, Minus, Plus, ShoppingCart, Star, Loader2, Trash2 } from "lucide-react";
+import { Heart, MapPin, Minus, Plus, ShoppingCart, Loader2, Trash2 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { cn, formatRating } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { Price } from "@/components/ui/currency";
 import type { Product } from "@/lib/mock-data";
 import { useCartStore } from "@/stores/cart-store";
@@ -82,11 +82,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
           <p className="text-xs text-muted-foreground">{product.brand}</p>
           <h3 className="line-clamp-2 text-sm font-medium leading-snug truncate">{name}</h3>
         </Link>
-        <div className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
-          <Star className="size-3 fill-warning text-warning" />
-          <span>{formatRating(product.rating)}</span>
-          <span>({product.reviewCount})</span>
-        </div>
+
         <div className="mt-2.5 flex flex-col leading-tight">
           <div className="flex items-baseline gap-1.5 flex-wrap">
             <Price amount={product.price} className="text-base text-primary font-bold" />
