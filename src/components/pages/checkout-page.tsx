@@ -978,9 +978,9 @@ function CheckoutPageContent() {
         </DialogContent>
       </Dialog>
 
-      <div className="flex items-center gap-3 mb-8">
+      <div className="flex items-center gap-3 mb-5">
         <Button variant="ghost" size="icon" onClick={() => router.push("/cart")} className="rounded-full">
-          <ChevronLeft className="h-6 w-6" />
+          <ChevronLeft className="size-6 rtl:-rotate-180" />
         </Button>
         <h1 className="text-2xl font-bold text-foreground">{t("paymentMethod")}</h1>
       </div>
@@ -1206,7 +1206,7 @@ function CheckoutPageContent() {
             </div>
 
             {/* Confirm Payment Trigger */}
-            <Button disabled={showPaymentLoading} className="w-full py-6 rounded-2xl text-base font-bold bg-primary hover:bg-primary/90 text-white mt-2" onClick={handlePlaceOrder}>
+            <Button disabled={showPaymentLoading} className="w-full py-6 rounded-full text-base font-medium bg-primary hover:bg-primary/90 text-white mt-2" onClick={handlePlaceOrder}>
               {t("confirmPayment")}
             </Button>
           </Card>
