@@ -2,9 +2,8 @@
 
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
-import { Clock, MapPin, CheckCircle, XCircle, AlertCircle, ShieldCheck } from "lucide-react";
+import { Clock, MapPin, ShieldCheck } from "lucide-react";
 import { AllocationStatus } from "@/lib/allocation-evaluator";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 type PharmacyHeaderProps = {
@@ -34,25 +33,6 @@ export function PharmacyHeader({
 
   const displayName = locale === "ar" ? nameAr : name;
 
-  // Determine status color, labels, and icons
-  let statusColor = "bg-yellow-500/10 text-yellow-600 border-yellow-500/20";
-  let statusLabel = t("pending");
-  let StatusIcon = AlertCircle;
-
-  if (status === AllocationStatus.APPROVED) {
-    statusColor = "bg-green-500/10 text-green-600 border-green-500/20";
-    statusLabel = t("approve");
-    StatusIcon = CheckCircle;
-  } else if (status === AllocationStatus.PARTIAL) {
-    statusColor = "bg-orange-500/10 text-orange-600 border-orange-500/20";
-    statusLabel = t("partiallyAvailable");
-    StatusIcon = Clock;
-  } else if (status === AllocationStatus.REJECTED) {
-    statusColor = "bg-red-500/10 text-red-600 border-red-500/20";
-    statusLabel = t("rejected");
-    StatusIcon = XCircle;
-  }
-
   return (
     <div
       className={cn(
@@ -79,12 +59,6 @@ export function PharmacyHeader({
         <div className="space-y-0.5">
           <div className="flex items-center gap-2 flex-wrap">
             <h4 className="font-bold text-base text-foreground">{displayName}</h4>
-            {licensed && (
-              <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-primary bg-primary/5 px-2 py-0.5 rounded-full border border-primary/10">
-                <ShieldCheck className="h-3 w-3" />
-                {tc("licensed")}
-              </span>
-            )}
           </div>
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
             {eta !== undefined && (
@@ -101,19 +75,6 @@ export function PharmacyHeader({
             )}
           </div>
         </div>
-      </div>
-
-      <div className="flex items-center self-end sm:self-center shrink-0">
-        <Badge
-          variant="outline"
-          className={cn(
-            "flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border",
-            statusColor
-          )}
-        >
-          <StatusIcon className="h-3.5 w-3.5 shrink-0" />
-          <span>{statusLabel}</span>
-        </Badge>
       </div>
     </div>
   );

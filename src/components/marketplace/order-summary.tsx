@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { formatPrice } from "@/lib/utils";
+import { Price } from "@/components/ui/currency";
 import { useCartStore } from "@/stores/cart-store";
 
 type OrderSummaryProps = {
@@ -80,7 +80,7 @@ export function OrderSummary({
               <Label htmlFor="wallet" className="flex-1 cursor-pointer">
                 {tc("useWallet")}
               </Label>
-              <span className="text-sm font-medium text-primary">{formatPrice(WALLET_BALANCE)}</span>
+              <Price amount={WALLET_BALANCE} className="text-sm text-primary font-medium" />
             </div>
           </div>
         )}
@@ -97,43 +97,44 @@ export function OrderSummary({
               max={Math.min(LOYALTY_POINTS, Math.floor(subtotal / POINTS_TO_SAR))}
               step={100}
             />
-            <p className="text-xs text-muted-foreground">
-              {loyaltyPoints} pts = {formatPrice(loyaltyDiscount)}
+            <p className="text-xs text-muted-foreground flex items-center gap-1">
+              <span>{loyaltyPoints} pts =</span>
+              <Price amount={loyaltyDiscount} className="font-medium text-muted-foreground" iconClassName="text-muted-foreground" />
             </p>
           </div>
         )}
 
         <Separator />
 
-        <div className="space-y-2 text-sm">
+        <div className="space-y-2 text-sm font-medium">
           <div className="flex justify-between">
-            <span className="text-muted-foreground">{tc("subtotal")}</span>
-            <span>{formatPrice(subtotal)}</span>
+            <span className="text-muted-foreground font-normal">{tc("subtotal")}</span>
+            <Price amount={subtotal} className="font-medium text-foreground" />
           </div>
           <div className="flex justify-between">
-            <span className="text-muted-foreground">{t("deliveryFees")}</span>
-            <span>{formatPrice(deliveryFees)}</span>
+            <span className="text-muted-foreground font-normal">{t("deliveryFees")}</span>
+            <Price amount={deliveryFees} className="font-medium text-foreground" />
           </div>
           <div className="flex justify-between">
-            <span className="text-muted-foreground">{t("vat15")}</span>
-            <span>{formatPrice(total * 0.15)}</span>
+            <span className="text-muted-foreground font-normal">{t("vat15")}</span>
+            <Price amount={total * 0.15} className="font-medium text-foreground" />
           </div>
           {discount > 0 && (
             <div className="flex justify-between text-success">
-              <span>{t("discount")}</span>
-              <span>-{formatPrice(discount)}</span>
+              <span className="font-normal">{t("discount")}</span>
+              <span className="inline-flex items-center gap-1">-<Price amount={discount} className="text-success font-medium" iconClassName="text-success" /></span>
             </div>
           )}
           {walletAmount > 0 && (
             <div className="flex justify-between text-primary">
-              <span>{t("walletApplied")}</span>
-              <span>-{formatPrice(walletAmount)}</span>
+              <span className="font-normal">{t("walletApplied")}</span>
+              <span className="inline-flex items-center gap-1">-<Price amount={walletAmount} className="text-primary font-medium" /></span>
             </div>
           )}
           {loyaltyDiscount > 0 && (
             <div className="flex justify-between text-secondary">
-              <span>{t("loyaltyApplied")}</span>
-              <span>-{formatPrice(loyaltyDiscount)}</span>
+              <span className="font-normal">{t("loyaltyApplied")}</span>
+              <span className="inline-flex items-center gap-1">-<Price amount={loyaltyDiscount} className="text-secondary font-medium" iconClassName="text-secondary" /></span>
             </div>
           )}
         </div>
@@ -142,11 +143,11 @@ export function OrderSummary({
 
         <div className="flex justify-between text-lg font-bold">
           <span>{t("totalAmount")}</span>
-          <span className="text-primary">{formatPrice(total)}</span>
+          <Price amount={total} className="text-lg text-primary font-bold" />
         </div>
 
         {showCheckoutButton && (
-          <Button className="w-full" size="lg" onClick={onCheckout}>
+          <Button className="w-full rounded-full" size="lg" onClick={onCheckout}>
             {tc("checkout")}
           </Button>
         )}

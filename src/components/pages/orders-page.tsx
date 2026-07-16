@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { orders, getPharmacyById } from "@/lib/mock-data";
-import { formatPrice } from "@/lib/utils";
+import { Price } from "@/components/ui/currency";
 
 export function OrdersPage() {
   const t = useTranslations("orders");
@@ -51,7 +51,7 @@ export function OrdersPage() {
             </div>
           </div>
           <div className="flex items-center gap-4 sm:flex-col sm:items-end">
-            <p className="text-lg font-bold">{formatPrice(order.total)}</p>
+            <Price amount={order.total} className="text-lg font-bold text-foreground" />
             <div className="flex gap-2">
               {order.status === "shipped" && (
                 <Button size="sm" asChild>

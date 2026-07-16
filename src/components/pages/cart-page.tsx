@@ -14,7 +14,8 @@ import { OrderSummary } from "@/components/marketplace/order-summary";
 import { QuantityStepper } from "@/components/marketplace/product-card";
 import { getProductById, getPharmacyById } from "@/lib/mock-data";
 import { useCartStore } from "@/stores/cart-store";
-import { cn, formatPrice } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { Price } from "@/components/ui/currency";
 import { getMockAllocations, AllocationStatus, AllocationItem, SCENARIOS } from "@/lib/allocation-evaluator";
 
 const mockAddresses = [
@@ -182,7 +183,7 @@ export function CartPage() {
               return (
                 <div key={idx} className="py-2.5 flex justify-between">
                   <span>{name} ({line.requestedQty} {tCheckout("item")})</span>
-                  <span className="font-semibold text-foreground">{formatPrice(line.price * line.requestedQty)}</span>
+                  <Price amount={line.price * line.requestedQty} className="font-semibold text-foreground" />
                 </div>
               );
             })}
@@ -191,14 +192,14 @@ export function CartPage() {
 
         <div className="flex flex-col sm:flex-row gap-3">
           <Button
-            className="w-full sm:flex-1 py-6 rounded-2xl text-base font-bold bg-primary hover:bg-primary/95 text-white"
+            className="w-full sm:flex-1 py-5 rounded-2xl text-sm font-medium bg-primary hover:bg-primary/95 text-white"
             onClick={() => router.push("/checkout")}
           >
             {tCheckout("viewActiveCheckout")}
           </Button>
           <Button
             variant="outline"
-            className="w-full sm:flex-1 py-6 rounded-2xl text-base font-bold text-destructive border-destructive/20 hover:bg-destructive/5"
+            className="w-full sm:flex-1 py-5 rounded-2xl text-sm font-medium text-destructive border-destructive/20 hover:bg-destructive/5"
             onClick={() => {
               resetCheckout();
             }}
@@ -280,9 +281,6 @@ export function CartPage() {
                         {pharmacyName}
                       </CardTitle>
                     </div>
-                    <div className="text-xs font-semibold text-muted-foreground">
-                      {t("deliveryEta", { time: pharmacy.eta })}
-                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="p-5 space-y-4">
@@ -300,9 +298,7 @@ export function CartPage() {
                             </div>
                             <div className="min-w-0">
                               <h4 className="font-semibold text-sm text-foreground line-clamp-1 truncate">{name}</h4>
-                              <p className="text-sm font-bold text-primary mt-0.5">
-                                {formatPrice(product.price)}
-                              </p>
+                              <Price amount={product.price} className="text-sm font-bold text-primary mt-0.5" />
                             </div>
                           </div>
                           <div className="flex items-center gap-1.5 shrink-0">
@@ -327,13 +323,17 @@ export function CartPage() {
 
                   {/* Delivery Threshold Indicator */}
                   {isFreeDeliveryUnlocked ? (
-                    <div className="p-3.5 rounded-xl border border-green-500/10 bg-green-500/5 text-xs text-green-600 font-semibold text-start">
+                    <div className="p-2.5 rounded-lg border border-green-500/10 bg-green-500/5 text-xs text-green-600 font-medium text-start">
                       {t("freeDeliveryUnlocked")}
                     </div>
                   ) : (
                     <div className="p-3 rounded-lg border bg-muted/10 space-y-3">
                       <div className="flex justify-between text-xs font-semibold text-muted-foreground">
-                        <span>{t("addMoreForFree", { amount: formatPrice(remainingForFree) })}</span>
+                        <span className="inline-flex items-center gap-1">
+                          {t.rich("addMoreForFree", {
+                            amount: () => <Price amount={remainingForFree} className="font-semibold text-muted-foreground" iconClassName="text-muted-foreground" />
+                          })}
+                        </span>
                         <span>{freeDeliveryPercent}%</span>
                       </div>
                       <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
@@ -350,9 +350,7 @@ export function CartPage() {
                     <span className="text-muted-foreground">
                       {locale === "ar" ? "المجموع الفرعي للصيدلية:" : "Pharmacy Subtotal:"}
                     </span>
-                    <span className="font-bold text-foreground">
-                      {formatPrice(groupSubtotal)}
-                    </span>
+                    <Price amount={groupSubtotal} className="font-bold text-foreground" />
                   </div>
                 </CardContent>
               </Card>
@@ -594,7 +592,7 @@ export function CartPage() {
                     {pharm.products.map((p, pIdx) => (
                       <div key={pIdx} className="flex justify-between">
                         <span>{getProductTranslation(p.name)} × {p.qty}</span>
-                        <span className="font-semibold">{formatPrice(p.price)}</span>
+                        <Price amount={p.price} className="font-semibold text-foreground" iconClassName="text-foreground" />
                       </div>
                     ))}
                   </div>
@@ -643,7 +641,7 @@ export function CartPage() {
             {/* Footer Buttons */}
             <div className="flex flex-col gap-2 pt-2 border-t">
               <Button
-                className="w-full py-5 rounded-xl text-sm font-bold bg-primary hover:bg-primary/95 text-white"
+                className="w-full py-5 rounded-full text-sm font-medium bg-primary hover:bg-primary/95 text-white"
                 onClick={() => {
                   setStatusOpen(false);
                   router.push("/checkout");
@@ -680,8 +678,8 @@ export function CartPage() {
               <Separator className="my-1 border-dashed" />
               <div className="flex justify-between text-xs">
                 <span className="text-success font-bold">{tCheckout("substituteItem")}:</span>
-                <span className="font-bold text-primary">
-                  {getProductTranslation("Seven Seas Cod Liver Oil")} (129.35 {tc("sar")})
+                <span className="font-bold text-primary inline-flex items-center gap-1">
+                  {getProductTranslation("Seven Seas Cod Liver Oil")} (<Price amount={129.35} className="font-bold text-primary text-xs" />)
                 </span>
               </div>
             </div>
@@ -695,8 +693,8 @@ export function CartPage() {
               <Separator className="my-1 border-dashed" />
               <div className="flex justify-between text-xs">
                 <span className="text-success font-bold">{tCheckout("substituteItem")}:</span>
-                <span className="font-bold text-primary">
-                  {getProductTranslation("Centrum Adults Multivitamin")} (129.35 {tc("sar")})
+                <span className="font-bold text-primary inline-flex items-center gap-1">
+                  {getProductTranslation("Centrum Adults Multivitamin")} (<Price amount={129.35} className="font-bold text-primary text-xs" />)
                 </span>
               </div>
             </div>

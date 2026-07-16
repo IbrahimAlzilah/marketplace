@@ -8,7 +8,8 @@ import { Link } from "@/i18n/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { cn, formatPrice, formatRating } from "@/lib/utils";
+import { cn, formatRating } from "@/lib/utils";
+import { Price } from "@/components/ui/currency";
 import type { Product } from "@/lib/mock-data";
 import { getPharmacyById } from "@/lib/mock-data";
 import { useCartStore } from "@/stores/cart-store";
@@ -92,11 +93,13 @@ export function ProductCard({ product, className }: ProductCardProps) {
         <p className="mt-0.5 truncate text-xs text-muted-foreground">{pharmacyName}</p>
         <div className="mt-2 flex items-center justify-between gap-2">
           <div className="flex flex-col min-w-0 leading-tight">
-            <span className="text-sm sm:text-base font-bold text-primary leading-none">{formatPrice(product.price)}</span>
+            <Price amount={product.price} className="text-sm sm:text-base text-primary leading-none" />
             {product.originalPrice && (
-              <span className="text-[10px] text-muted-foreground line-through mt-0.5 leading-none">
-                {formatPrice(product.originalPrice)}
-              </span>
+              <Price
+                amount={product.originalPrice}
+                className="text-[10px] text-muted-foreground line-through mt-0.5 leading-none font-normal"
+                iconClassName="text-muted-foreground"
+              />
             )}
           </div>
           {cartItem ? (

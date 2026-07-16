@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ProductCard } from "@/components/marketplace/product-card";
 import { PharmacyCard } from "@/components/marketplace/pharmacy-card";
 import { SectionCarousel } from "@/components/marketplace/section-carousel";
+import { Price } from "@/components/ui/currency";
 import { banners, categories, pharmacies, products } from "@/lib/mock-data";
 import { useRecentlyViewedStore } from "@/stores/recently-viewed-store";
 import { getProductById } from "@/lib/mock-data";
@@ -122,7 +123,7 @@ export function HomePage() {
               </div>
               <div className="flex-1">
                 <p className="text-sm text-muted-foreground">{t("walletHighlight")}</p>
-                <p className="text-xl font-bold text-primary">{formatPrice(125.5)}</p>
+                <Price amount={125.5} className="text-xl font-bold text-primary" />
               </div>
               <Button variant="outline" size="sm" asChild>
                 <Link href="/profile/wallet">{tc("viewAll")}</Link>

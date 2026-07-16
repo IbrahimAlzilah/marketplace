@@ -7,7 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { orders, getPharmacyById } from "@/lib/mock-data";
-import { cn, formatPrice } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { Price } from "@/components/ui/currency";
 
 const timelineSteps = ["pending", "confirmed", "preparing", "shipped", "delivered"] as const;
 
@@ -96,7 +97,7 @@ export function OrderDetailPage({ id }: { id: string }) {
               <Separator />
               <div className="flex justify-between font-bold text-lg">
                 <span>Total</span>
-                <span className="text-primary">{formatPrice(order.total)}</span>
+                <Price amount={order.total} className="text-primary font-bold text-lg" />
               </div>
             </CardContent>
           </Card>

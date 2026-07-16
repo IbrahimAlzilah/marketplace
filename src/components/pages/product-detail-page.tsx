@@ -29,7 +29,8 @@ import {
 import { useCartStore } from "@/stores/cart-store";
 import { useWishlistStore } from "@/stores/wishlist-store";
 import { useRecentlyViewedStore } from "@/stores/recently-viewed-store";
-import { cn, formatPrice, formatRating } from "@/lib/utils";
+import { cn, formatRating } from "@/lib/utils";
+import { Price } from "@/components/ui/currency";
 
 export function ProductDetailPage({ slug }: { slug: string }) {
   const product = getProductBySlug(slug);
@@ -161,12 +162,12 @@ export function ProductDetailPage({ slug }: { slug: string }) {
 
           {/* Price breakdown with dynamic vendor price, original price, and 13% off badge */}
           <div className="flex items-baseline gap-3 flex-wrap">
-            <span className="text-2xl font-extrabold text-primary">
-              {formatPrice(selectedVendor.price)}
-            </span>
-            <span className="text-sm text-muted-foreground line-through">
-              {formatPrice(selectedVendor.price * 1.15)}
-            </span>
+            <Price amount={selectedVendor.price} className="text-2xl text-primary font-extrabold" />
+            <Price
+              amount={selectedVendor.price * 1.15}
+              className="text-sm text-muted-foreground line-through font-normal"
+              iconClassName="text-muted-foreground"
+            />
             <span className="text-xs bg-red-100 text-red-600 font-bold px-2.5 py-1 rounded-lg border border-red-200">
               {locale === "ar" ? "%13 خصم" : "13% OFF"}
             </span>
@@ -200,7 +201,7 @@ export function ProductDetailPage({ slug }: { slug: string }) {
                 <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-1">
                   {locale === "ar" ? "الإجمالي / PRICE" : "PRICE / الإجمالي"}
                 </p>
-                <span className="text-2xl font-extrabold text-primary">{formatPrice(selectedVendor.price)}</span>
+                <Price amount={selectedVendor.price} className="text-2xl text-primary font-extrabold" />
               </div>
 
               <Separator />
@@ -232,8 +233,14 @@ export function ProductDetailPage({ slug }: { slug: string }) {
                                 {vendor.logo}
                               </div>
                               <span className="font-semibold">{vName}</span>
-                              <span className="text-muted-foreground text-xs mx-0.5">
-                                ({formatPrice(vendor.price)})
+                              <span className="text-muted-foreground text-xs mx-0.5 inline-flex items-center gap-0.5">
+                                (
+                                <Price
+                                  amount={vendor.price}
+                                  className="text-xs font-normal text-muted-foreground"
+                                  iconClassName="text-muted-foreground"
+                                />
+                                )
                               </span>
                             </div>
                           </SelectItem>
@@ -266,7 +273,14 @@ export function ProductDetailPage({ slug }: { slug: string }) {
                     <span className="text-muted-foreground/30">•</span>
                     <div className="flex items-center gap-1">
                       <Truck className="size-3.5 text-muted-foreground" />
-                      <span>{selectedVendor.deliveryFee === 0 ? tc("freeDelivery") : formatPrice(selectedVendor.deliveryFee)}</span>
+                      {selectedVendor.deliveryFee === 0 ? (
+                        <span className="text-foreground/80 font-medium">{tc("freeDelivery")}</span>
+                      ) : (
+                        <Price
+                          amount={selectedVendor.deliveryFee}
+                          className="text-foreground/80 font-medium"
+                        />
+                      )}
                     </div>
                   </div>
                 </div>

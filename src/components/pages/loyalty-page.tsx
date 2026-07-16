@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { loyaltyTransactions } from "@/lib/mock-data";
-import { formatPrice } from "@/lib/utils";
+import { Price } from "@/components/ui/currency";
 import { Star } from "lucide-react";
 
 export function LoyaltyPage() {
@@ -23,7 +23,11 @@ export function LoyaltyPage() {
             <div>
               <p className="text-sm text-muted-foreground">{t("balance")}</p>
               <p className="text-4xl font-bold text-secondary">2,400</p>
-              <p className="text-sm text-muted-foreground">{t("worth", { amount: formatPrice(24) })}</p>
+              <p className="text-sm text-muted-foreground">
+                {t.rich("worth", {
+                  amount: () => <Price amount={24} className="text-sm text-muted-foreground font-medium inline-flex" iconClassName="text-muted-foreground" />
+                })}
+              </p>
             </div>
           </div>
           <div className="mt-4">
@@ -62,7 +66,11 @@ export function LoyaltyPage() {
         <TabsContent value="earn" className="mt-4">
           <Card>
             <CardContent className="p-5 space-y-2 text-sm text-muted-foreground">
-              <p>• Earn 1 point for every SAR 1 spent</p>
+              <p className="flex items-center gap-1 flex-wrap">
+                <span>• Earn 1 point for every</span>
+                <Price amount={1} className="font-normal text-muted-foreground text-sm" iconClassName="text-muted-foreground" />
+                <span>spent</span>
+              </p>
               <p>• Bonus points on wellness bundles</p>
               <p>• Double points during promotional periods</p>
             </CardContent>
@@ -71,7 +79,11 @@ export function LoyaltyPage() {
         <TabsContent value="redeem" className="mt-4">
           <Card>
             <CardContent className="p-5 space-y-2 text-sm text-muted-foreground">
-              <p>• 100 points = SAR 1 discount</p>
+              <p className="flex items-center gap-1 flex-wrap">
+                <span>• 100 points =</span>
+                <Price amount={1} className="font-normal text-muted-foreground text-sm" iconClassName="text-muted-foreground" />
+                <span>discount</span>
+              </p>
               <p>• Minimum 100 points to redeem</p>
               <p>• Redeem at checkout</p>
             </CardContent>

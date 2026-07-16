@@ -5,7 +5,7 @@ import { ProfileLayout } from "@/components/layout/profile-sidebar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { walletTransactions } from "@/lib/mock-data";
-import { formatPrice } from "@/lib/utils";
+import { Price } from "@/components/ui/currency";
 import { Wallet } from "lucide-react";
 
 export function WalletPage() {
@@ -21,7 +21,7 @@ export function WalletPage() {
           </div>
           <div>
             <p className="text-sm text-muted-foreground">{t("balance")}</p>
-            <p className="text-4xl font-bold text-primary">{formatPrice(125.5)}</p>
+            <Price amount={125.5} className="text-4xl font-bold text-primary" />
             <p className="text-sm text-muted-foreground mt-1">{t("useAtCheckout")}</p>
           </div>
         </CardContent>
@@ -37,8 +37,13 @@ export function WalletPage() {
                 <p className="text-sm text-muted-foreground">{tx.date}</p>
               </div>
               <div className="text-end">
-                <p className={`font-bold ${tx.type === "credit" ? "text-success" : "text-destructive"}`}>
-                  {tx.type === "credit" ? "+" : "-"}{formatPrice(tx.amount)}
+                <p className={`font-bold inline-flex items-center gap-1 ${tx.type === "credit" ? "text-success" : "text-destructive"}`}>
+                  <span>{tx.type === "credit" ? "+" : "-"}</span>
+                  <Price
+                    amount={tx.amount}
+                    className={tx.type === "credit" ? "text-success" : "text-destructive"}
+                    iconClassName={tx.type === "credit" ? "text-success" : "text-destructive"}
+                  />
                 </p>
                 <Badge variant="outline" className="text-xs">
                   {tx.type === "credit" ? t("credit") : t("debit")}

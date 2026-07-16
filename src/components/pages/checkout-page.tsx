@@ -22,7 +22,8 @@ import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { cn, formatPrice } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { Price } from "@/components/ui/currency";
 import { useCartStore, CheckoutLine } from "@/stores/cart-store";
 import { AllocationStatus } from "@/lib/allocation-evaluator";
 import { getProductById, pharmacies } from "@/lib/mock-data";
@@ -297,11 +298,11 @@ function CheckoutPageContent() {
 
     return (
       <div className="container-marketplace py-6 lg:py-6 relative">
-        <div className="flex items-center gap-3 mb-8">
+        <div className="flex items-center gap-3 mb-5">
           <Button variant="ghost" size="icon" onClick={() => router.push("/cart")} className="rounded-full">
-            <ChevronLeft className="h-6 w-6" />
+            <ChevronLeft className="h-6 w-6 rtl:rotate-180" />
           </Button>
-          <h1 className="text-2xl font-bold text-foreground">{t("orderApprovalStatus")}</h1>
+          <h1 className="text-xl font-bold text-foreground">{t("orderApprovalStatus")}</h1>
         </div>
 
         <div className="grid gap-8 lg:grid-cols-12">
@@ -346,7 +347,7 @@ function CheckoutPageContent() {
                           </div>
                         </div>
                         <div className="text-end shrink-0 pl-3">
-                          <span className="font-bold text-primary block">{formatPrice(line.price)}</span>
+                          <Price amount={line.price} className="font-bold text-primary block text-right" />
                           <span className="text-xs text-muted-foreground">Qty: {line.requestedQty}</span>
                         </div>
                       </div>
@@ -395,10 +396,8 @@ function CheckoutPageContent() {
                               <Image src={line.image} alt={name} fill className="object-contain p-1 rounded-lg" />
                             </div>
                             <div className="min-w-0">
-                              <h4 className="font-semibold text-foreground truncate">{name}</h4>
-                              <p className="text-xs text-muted-foreground">
-                                {formatPrice(line.price)}
-                              </p>
+                                <h4 className="font-semibold text-foreground truncate">{name}</h4>
+                                <Price amount={line.price} className="text-xs text-muted-foreground font-normal" iconClassName="text-muted-foreground" />
                             </div>
                           </div>
                           <div className="text-end shrink-0 pl-3">
@@ -441,9 +440,7 @@ function CheckoutPageContent() {
                                         </div>
                                         <div className="flex-1 min-w-0">
                                           <p className="font-bold text-xs truncate">{subName}</p>
-                                          <p className="text-[10px] text-primary font-semibold">
-                                            {formatPrice(sub.price)} {t("substitutePriceNotice", { price: formatPrice(sub.price) }).includes("(") ? "" : ""}
-                                          </p>
+                                          <Price amount={sub.price} className="text-[10px] text-primary font-semibold" />
                                         </div>
                                         <div className={cn(
                                           "h-4 w-4 rounded-full border flex items-center justify-center shrink-0",
@@ -551,15 +548,13 @@ function CheckoutPageContent() {
                               <Image src={line.image} alt={name} fill className="object-contain p-1 rounded-lg" />
                             </div>
                             <div className="min-w-0">
-                              <h4 className="font-semibold text-foreground line-through truncate">{name}</h4>
-                              <p className="text-xs text-muted-foreground">
-                                {formatPrice(line.price)}
-                              </p>
+                               <h4 className="font-semibold text-foreground line-through truncate">{name}</h4>
+                               <Price amount={line.price} className="text-xs text-muted-foreground font-normal" iconClassName="text-muted-foreground" />
                             </div>
                           </div>
                           <div className="text-end shrink-0 pl-3">
-                            <span className="font-bold text-muted-foreground line-through block">{formatPrice(line.price)}</span>
-                            <span className="text-xs text-muted-foreground">Qty: {line.requestedQty}</span>
+                             <Price amount={line.price} className="font-bold text-muted-foreground line-through block text-right" iconClassName="text-muted-foreground" />
+                             <span className="text-xs text-muted-foreground">Qty: {line.requestedQty}</span>
                           </div>
                         </div>
 
@@ -597,9 +592,7 @@ function CheckoutPageContent() {
                                         </div>
                                         <div className="flex-1 min-w-0">
                                           <p className="font-bold text-xs truncate">{subName}</p>
-                                          <p className="text-[10px] text-primary font-semibold">
-                                            {formatPrice(sub.price)}
-                                          </p>
+                                          <Price amount={sub.price} className="text-[10px] text-primary font-semibold" />
                                         </div>
                                         <div className={cn(
                                           "h-4 w-4 rounded-full border flex items-center justify-center shrink-0",
@@ -673,24 +666,26 @@ function CheckoutPageContent() {
               <div className="space-y-3 text-xs">
                 <div className="flex justify-between text-muted-foreground">
                   <span>{t("productPrice")}</span>
-                  <span className="font-semibold text-foreground">{formatPrice(productPrice)}</span>
+                  <Price amount={productPrice} className="font-semibold text-foreground" />
                 </div>
                 {isPromoApplied && (
                   <div className="flex justify-between text-destructive">
                      <span>{t("additionalDiscount")}</span>
-                    <span className="font-semibold">-{formatPrice(promoDiscount)}</span>
+                    <span className="inline-flex items-center gap-1 font-semibold text-destructive">-<Price amount={promoDiscount} className="text-destructive font-semibold" iconClassName="text-destructive" /></span>
                   </div>
                 )}
                 <div className="flex justify-between text-muted-foreground">
                   <span>{t("deliveryFees")}</span>
-                  <span className="text-green-600 font-semibold">
-                    {deliveryFee > 0 ? formatPrice(deliveryFee) : t("free")}
-                  </span>
+                  {deliveryFee > 0 ? (
+                    <Price amount={deliveryFee} className="text-green-600 font-semibold" iconClassName="text-green-600" />
+                  ) : (
+                    <span className="text-green-600 font-semibold">{t("free")}</span>
+                  )}
                 </div>
                 <Separator />
                 <div className="flex justify-between text-sm font-bold text-foreground">
                   <span>{t("total")}</span>
-                  <span>{formatPrice(checkoutTotal)}</span>
+                  <Price amount={checkoutTotal} className="text-sm font-bold text-foreground" />
                 </div>
                 <p className="text-[10px] text-muted-foreground">{t("includesVat")}</p>
               </div>
@@ -710,7 +705,7 @@ function CheckoutPageContent() {
               ) : (
                 <Button
                   disabled={hasUnresolved}
-                  className="w-full py-6 rounded-2xl text-base font-bold bg-primary hover:bg-primary/90 text-white mt-2"
+                  className="w-full py-6 rounded-full text-base font-medium bg-primary hover:bg-primary/90 text-white mt-2"
                   onClick={() => setPhase("payment_loading")}
                 >
                   {t("continueToPayment")}
@@ -753,7 +748,7 @@ function CheckoutPageContent() {
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">{t("vat15")}</span>
-                <span className="font-semibold">{formatPrice(receiptTotal * 0.15)}</span>
+                <Price amount={receiptTotal * 0.15} className="font-semibold" />
               </div>
               <Separator />
               <div className="space-y-2 text-start">
@@ -779,7 +774,10 @@ function CheckoutPageContent() {
                       {group.items.map((item, pIdx) => {
                         const pName = locale === "ar" ? item.nameAr : item.name;
                         return (
-                          <p key={pIdx}>• {pName} ({item.qty} {t("item")}) - {formatPrice(item.price * item.qty)}</p>
+                          <p key={pIdx} className="flex items-center flex-wrap gap-1">
+                            <span>• {pName} ({item.qty} {t("item")}) -</span>
+                            <Price amount={item.price * item.qty} className="font-medium text-muted-foreground" iconClassName="text-muted-foreground" />
+                          </p>
                         );
                       })}
                     </div>
@@ -789,7 +787,7 @@ function CheckoutPageContent() {
               <Separator />
               <div className="flex justify-between font-bold text-sm text-primary">
                 <span>{t("totalCharged")}</span>
-                <span>{formatPrice(receiptTotal)}</span>
+                <Price amount={receiptTotal} className="text-primary font-bold text-sm" />
               </div>
             </div>
             <Button className="w-full rounded-xl" onClick={() => setReceiptOpen(false)}>
@@ -901,7 +899,7 @@ function CheckoutPageContent() {
                         <h4 className="font-semibold text-foreground">{name}</h4>
                         <span className="text-muted-foreground text-[10px]">{tc("cart")} Qty: {item.qty}</span>
                       </div>
-                      <span className="font-bold text-primary shrink-0">{formatPrice(item.price * item.qty)}</span>
+                      <Price amount={item.price * item.qty} className="font-bold text-primary shrink-0" />
                     </div>
                   );
                 })}
@@ -928,7 +926,7 @@ function CheckoutPageContent() {
                         <h4 className="font-semibold text-foreground">{name}</h4>
                         <span className="text-muted-foreground text-[10px]">{tc("cart")} Qty: {item.qty}</span>
                       </div>
-                      <span className="font-bold text-red-500 shrink-0">{formatPrice(item.price * item.qty)}</span>
+                      <Price amount={item.price * item.qty} className="font-bold text-red-500 shrink-0" iconClassName="text-red-500" />
                     </div>
                   );
                 })}
@@ -939,23 +937,23 @@ function CheckoutPageContent() {
           {/* Final Total */}
           <div className="flex justify-between items-center p-4 border-t border-b">
             <span className="font-bold text-foreground">{t("total")}</span>
-            <span className="text-xl font-bold text-primary">{formatPrice(receiptTotal)}</span>
+            <Price amount={receiptTotal} className="text-xl font-bold text-primary" />
           </div>
         </div>
 
-        <div className="flex flex-col gap-2 pt-4">
+        <div className="flex flex-col sm:flex-row items-center gap-2 pt-4">
           {!cancelledByUser && (
             <Button
-              className="w-full py-6 rounded-2xl text-base font-bold bg-destructive hover:bg-destructive/90 text-white"
+              className="w-full py-5 rounded-2xl text-base font-medium bg-destructive hover:bg-destructive/90 text-white"
               onClick={() => setCancelModalOpen(true)}
             >
               {t("cancelOrder")}
             </Button>
           )}
-          <Button variant="outline" className="w-full py-6 rounded-2xl text-base font-bold" onClick={() => setReceiptOpen(true)}>
+          <Button variant="outline" className="w-full py-5 rounded-2xl text-base font-medium" onClick={() => setReceiptOpen(true)}>
             {t("viewReceipt")}
           </Button>
-          <Button variant="ghost" className="w-full py-6 rounded-2xl text-base font-bold text-muted-foreground" onClick={() => router.push("/orders")}>
+          <Button variant="ghost" className="w-full py-5 rounded-2xl text-base font-medium text-muted-foreground" onClick={() => router.push("/orders")}>
             {t("viewOrderStatus")}
           </Button>
         </div>
@@ -1037,7 +1035,7 @@ function CheckoutPageContent() {
               </div>
               <div>
                 <p className="text-sm font-bold text-foreground">{t("walletBalance")}</p>
-                <p className="text-sm font-semibold text-primary">{formatPrice(79.00)}</p>
+                <Price amount={79.00} className="text-sm font-semibold text-primary" />
               </div>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
@@ -1092,9 +1090,12 @@ function CheckoutPageContent() {
                   disabled={showPaymentLoading}
                   className="w-full h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-secondary"
                 />
-                <p className="text-[10px] text-muted-foreground leading-normal">
-                  {t("redemptionRate", { pts: redeemPoints, amount: formatPrice(redeemPoints * 0.01) })}
-                </p>
+                 <p className="text-[10px] text-muted-foreground leading-normal">
+                   {t.rich("redemptionRate", {
+                     pts: redeemPoints,
+                     amount: () => <Price amount={redeemPoints * 0.01} className="font-semibold text-muted-foreground" iconClassName="text-muted-foreground" />
+                   })}
+                 </p>
               </div>
             )}
           </Card>
@@ -1172,12 +1173,12 @@ function CheckoutPageContent() {
             <div className="space-y-3 text-xs">
               <div className="flex justify-between text-muted-foreground">
                 <span>{t("productPrice")}</span>
-                <span className="font-semibold text-foreground">{formatPrice(productPrice)}</span>
+                <Price amount={productPrice} className="font-semibold text-foreground" />
               </div>
               {isPromoApplied && (
                 <div className="flex justify-between text-destructive">
                   <span>{t("additionalDiscount")}</span>
-                  <span className="font-semibold">-{formatPrice(promoDiscount)}</span>
+                  <span className="inline-flex items-center gap-1 font-semibold text-destructive">-<Price amount={promoDiscount} className="text-destructive font-semibold" iconClassName="text-destructive" /></span>
                 </div>
               )}
               <div className="flex justify-between text-muted-foreground">
@@ -1187,19 +1188,19 @@ function CheckoutPageContent() {
               {walletApplied && (
                 <div className="flex justify-between text-primary">
                   <span>{t("paymentFromBalance")}</span>
-                  <span className="font-semibold">-{formatPrice(balancePayment)}</span>
+                  <span className="inline-flex items-center gap-1 font-semibold text-primary">-<Price amount={balancePayment} className="text-primary font-semibold" /></span>
                 </div>
               )}
               {loyaltyApplied && (
                 <div className="flex justify-between text-secondary">
                   <span>{t("loyaltyApplied")}</span>
-                  <span className="font-semibold">-{formatPrice(loyaltyDiscount)}</span>
+                  <span className="inline-flex items-center gap-1 font-semibold text-secondary">-<Price amount={loyaltyDiscount} className="text-secondary font-semibold" iconClassName="text-secondary" /></span>
                 </div>
               )}
               <Separator />
               <div className="flex justify-between text-sm font-bold text-foreground">
                 <span>{t("total")}</span>
-                <span>{formatPrice(checkoutTotal)}</span>
+                <Price amount={checkoutTotal} className="text-sm font-bold text-foreground" />
               </div>
               <p className="text-[10px] text-muted-foreground">{t("includesVat")}</p>
             </div>
