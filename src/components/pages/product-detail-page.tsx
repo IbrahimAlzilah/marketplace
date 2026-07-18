@@ -301,7 +301,7 @@ export function ProductDetailPage({ slug }: { slug: string }) {
                 {cartItem ? (
                   <Button
                     variant="outline"
-                    className="w-full border-primary text-primary hover:bg-primary/5 rounded-lg py-5"
+                    className="w-full border-primary text-primary hover:bg-primary/5 rounded-full py-5"
                     asChild
                   >
                     <Link href="/cart">
@@ -310,7 +310,7 @@ export function ProductDetailPage({ slug }: { slug: string }) {
                   </Button>
                 ) : (
                   <Button
-                    className="w-full"
+                    className="w-full rounded-full"
                     size="lg"
                     disabled={!product.inStock || loading}
                     onClick={() => {
