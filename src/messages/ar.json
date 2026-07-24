@@ -59,7 +59,8 @@
     "lightMode": "الوضع الفاتح",
     "badgeOffer": "عرض",
     "badgeBestseller": "الأكثر مبيعاً",
-    "badgeNew": "جديد"
+    "badgeNew": "جديد",
+    "or": "أو"
   },
   "home": {
     "heroTitle": "سوقك الصحي الموثوق",
@@ -134,7 +135,7 @@
     "addMoreForFree": "🚚 أضف {amount} إضافية للحصول على توصيل مجاني",
     "pharmacySubtotal": "المجموع الفرعي للصيدلية: {amount}",
     "vat15": "ضريبة القيمة المضافة (15%)",
-    "totalAmount": "المبلغ الإجمالي"
+    "totalAmount": "الإجمالي"
   },
   "checkout": {
     "title": "إتمام الشراء",
@@ -335,14 +336,16 @@
     "copyright": "© 2026 سوق يُسر. جميع الحقوق محفوظة."
   },
   "auth": {
-    "loginTitle": "مرحباً بعودتك",
-    "loginSubtitle": "سجّل الدخول إلى حسابك في يُسر",
+    "loginTitle": "تسجيل الدخول",
+    "loginSubtitle": "أدخل بياناتك للمتابعة",
     "registerTitle": "إنشاء حساب",
-    "registerSubtitle": "انضم إلى سوق يُسر الصحي",
-    "otpTitle": "تحقق من جوالك",
-    "otpSubtitle": "أدخل الرمز المكون من 6 أرقام المرسل إلى هاتفك",
+    "registerSubtitle": "أكمل بياناتك للمتابعة",
+    "otpTitle": "أدخل رمز التحقق",
+    "otpSubtitle": "أدخل رمز التحقق المكون من 4 أرقام المرسل إلى",
+    "changeMobileNumber": "تغيير رقم الجوال؟",
     "forgotTitle": "نسيت كلمة المرور",
-    "forgotSubtitle": "سنرسل رمز تحقق إلى جوالك",
+    "forgotSubtitle": "أدخل بريدك الإلكتروني أو رقم جوالك لإعادة تعيين كلمة المرور",
+    "emailOrPhone": "البريد الإلكتروني أو رقم الجوال",
     "phone": "رقم الجوال",
     "password": "كلمة المرور",
     "confirmPassword": "تأكيد كلمة المرور",
@@ -353,15 +356,18 @@
     "hasAccount": "لديك حساب بالفعل؟",
     "acceptTerms": "أوافق على",
     "terms": "شروط الخدمة",
-    "verify": "تحقق",
-    "resend": "إعادة ارسال الرمز",
-    "resendIn": "إعادة الإرسال خلال {seconds} ث",
+    "verify": "تأكيد",
+    "resend": "إعادة الإرسال",
+    "resendIn": "{seconds} ث لإعادة الإرسال",
     "sendCode": "إرسال رمز التحقق",
+    "backToLogin": "العودة لتسجيل الدخول",
+    "yesserPlatform": "الدخول عبر منصة يسّر",
+    "createPassword": "إنشاء كلمة المرور",
     "nationalId": "الهوية الوطنية / الإقامة",
     "nationalIdRequired": "الهوية الوطنية مطلوبة",
     "nationalIdInvalid": "يجب أن تبدأ الهوية الوطنية بـ 1 أو 2 وتتكون من 10 أرقام",
     "resetPasswordTitle": "إعادة تعيين كلمة المرور",
-    "resetPasswordSubtitle": "أدخل كلمة المرور الجديدة",
+    "resetPasswordSubtitle": "أنشئ كلمة مرور جديدة. أعد إدخالها للتأكيد.",
     "confirm": "تأكيد",
     "success": "نجاح",
     "passwordResetSuccess": "تم إعادة تعيين كلمة المرور بنجاح. يرجى تسجيل الدخول بكلمة المرور الجديدة."

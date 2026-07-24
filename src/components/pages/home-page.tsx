@@ -83,21 +83,23 @@ export function HomePage() {
           {/* Arrows */}
           <button
             onClick={() => api?.scrollPrev()}
-            className="absolute left-4 top-1/2 z-10 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/20 text-white opacity-0 group-hover:opacity-100 hover:bg-white/35 transition-all duration-300 focus:outline-none rtl:left-auto rtl:right-4"
+            className="absolute start-4 top-1/2 z-10 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/20 text-white opacity-0 group-hover:opacity-100 hover:bg-white/35 transition-all duration-300 focus:outline-none"
+            title="Previous slide"
             aria-label="Previous slide"
           >
             <ChevronLeft className="size-5 rtl:rotate-180" />
           </button>
           <button
             onClick={() => api?.scrollNext()}
-            className="absolute right-4 top-1/2 z-10 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/20 text-white opacity-0 group-hover:opacity-100 hover:bg-white/35 transition-all duration-300 focus:outline-none rtl:right-auto rtl:left-4"
+            className="absolute end-4 top-1/2 z-10 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/20 text-white opacity-0 group-hover:opacity-100 hover:bg-white/35 transition-all duration-300 focus:outline-none"
+            title="Next slide"
             aria-label="Next slide"
           >
             <ChevronRight className="size-5 rtl:rotate-180" />
           </button>
 
           {/* Indicators */}
-          <div className="absolute bottom-4 start-1/2 z-10 flex -translate-x-1/2 gap-2">
+          <div className="absolute bottom-4 ltr:start-1/2 rtl:end-1/2 z-10 flex -translate-x-1/2 gap-2">
             {banners.map((_, i) => (
               <button
                 key={i}

@@ -32,11 +32,11 @@ import { PharmacyHeader } from "@/components/marketplace/pharmacy-header";
 // Helpers for line price calculations
 function getLineTotalPrice(line: CheckoutLine): number {
   if (line.resolution === "removed") return 0;
-  
-  const allocQty = typeof line.allocatedQty === "number" 
-    ? line.allocatedQty 
+
+  const allocQty = typeof line.allocatedQty === "number"
+    ? line.allocatedQty
     : parseInt(String(line.allocatedQty), 10) || 0;
-  
+
   if (line.resolution === "approved") {
     return line.price * line.requestedQty;
   }
@@ -50,7 +50,7 @@ function getLineTotalPrice(line: CheckoutLine): number {
     const remainingQty = line.requestedQty - allocQty;
     return (line.price * allocQty) + (line.selectedSubstitute.price * remainingQty);
   }
-  
+
   return line.price * line.requestedQty;
 }
 
@@ -69,11 +69,11 @@ function getResolvedItems(lines: CheckoutLine[]): ResolvedItem[] {
   const items: ResolvedItem[] = [];
   lines.forEach((line) => {
     if (line.resolution === "removed") return;
-    
-    const allocQty = typeof line.allocatedQty === "number" 
-      ? line.allocatedQty 
+
+    const allocQty = typeof line.allocatedQty === "number"
+      ? line.allocatedQty
       : parseInt(String(line.allocatedQty), 10) || 0;
-      
+
     if (line.resolution === "approved") {
       items.push({
         productId: line.productId,
@@ -148,10 +148,10 @@ type UnavailableItem = {
 function getUnavailableItems(lines: CheckoutLine[]): UnavailableItem[] {
   const items: UnavailableItem[] = [];
   lines.forEach((line) => {
-    const allocQty = typeof line.allocatedQty === "number" 
-      ? line.allocatedQty 
+    const allocQty = typeof line.allocatedQty === "number"
+      ? line.allocatedQty
       : parseInt(String(line.allocatedQty), 10) || 0;
-      
+
     if (line.resolution === "removed") {
       items.push({
         name: line.productName,
@@ -308,7 +308,7 @@ function CheckoutPageContent() {
         <div className="grid gap-8 lg:grid-cols-12">
           {/* Left Column: Decision Cards */}
           <div className="lg:col-span-8 space-y-6">
-            
+
             {/* Scenario 7: Alert when no payable items remain */}
             {hasNoPayableItems && !hasUnresolved && (
               <div className="p-5 border border-red-500/20 bg-red-500/5 rounded-2xl flex items-start gap-3.5 text-red-600">
@@ -369,12 +369,12 @@ function CheckoutPageContent() {
                     const name = locale === "ar" ? line.productNameAr : line.productName;
                     const allocated = line.allocatedQty;
                     const isPending = line.resolution === "pending";
-                    
+
                     // Detailed check for substitute choices in partials
                     const isAcceptedPartialOnly = line.resolution === "accepted_partial";
                     const isAcceptedPartialWithSub = line.resolution === "accepted_partial_and_substitute";
                     const isRemoved = line.resolution === "removed";
-                    
+
                     const subList = line.substitutes || [];
                     const remainingQty = line.requestedQty - (typeof allocated === "number" ? allocated : parseInt(String(allocated), 10) || 0);
 
@@ -396,8 +396,8 @@ function CheckoutPageContent() {
                               <Image src={line.image} alt={name} fill className="object-contain p-1 rounded-lg" />
                             </div>
                             <div className="min-w-0">
-                                <h4 className="font-semibold text-foreground truncate">{name}</h4>
-                                <Price amount={line.price} className="text-xs text-muted-foreground font-normal" iconClassName="text-muted-foreground" />
+                              <h4 className="font-semibold text-foreground truncate">{name}</h4>
+                              <Price amount={line.price} className="text-xs text-muted-foreground font-normal" iconClassName="text-muted-foreground" />
                             </div>
                           </div>
                           <div className="text-end shrink-0 pl-3">
@@ -548,13 +548,13 @@ function CheckoutPageContent() {
                               <Image src={line.image} alt={name} fill className="object-contain p-1 rounded-lg" />
                             </div>
                             <div className="min-w-0">
-                               <h4 className="font-semibold text-foreground line-through truncate">{name}</h4>
-                               <Price amount={line.price} className="text-xs text-muted-foreground font-normal" iconClassName="text-muted-foreground" />
+                              <h4 className="font-semibold text-foreground line-through truncate">{name}</h4>
+                              <Price amount={line.price} className="text-xs text-muted-foreground font-normal" iconClassName="text-muted-foreground" />
                             </div>
                           </div>
                           <div className="text-end shrink-0 pl-3">
-                             <Price amount={line.price} className="font-bold text-muted-foreground line-through block text-right" iconClassName="text-muted-foreground" />
-                             <span className="text-xs text-muted-foreground">Qty: {line.requestedQty}</span>
+                            <Price amount={line.price} className="font-bold text-muted-foreground line-through block text-right" iconClassName="text-muted-foreground" />
+                            <span className="text-xs text-muted-foreground">Qty: {line.requestedQty}</span>
                           </div>
                         </div>
 
@@ -661,7 +661,7 @@ function CheckoutPageContent() {
           <div className="lg:col-span-4">
             <Card className="rounded-2xl border p-5 space-y-5 sticky top-36 shadow-none">
               <h3 className="font-bold text-base text-foreground">{t("orderSummary")}</h3>
-              
+
               {/* Dynamic summary rows */}
               <div className="space-y-3 text-xs">
                 <div className="flex justify-between text-muted-foreground">
@@ -670,7 +670,7 @@ function CheckoutPageContent() {
                 </div>
                 {isPromoApplied && (
                   <div className="flex justify-between text-destructive">
-                     <span>{t("additionalDiscount")}</span>
+                    <span>{t("additionalDiscount")}</span>
                     <span className="inline-flex items-center gap-1 font-semibold text-destructive">-<Price amount={promoDiscount} className="text-destructive font-semibold" iconClassName="text-destructive" /></span>
                   </div>
                 )}
@@ -730,12 +730,12 @@ function CheckoutPageContent() {
     const unAvailableItems = getUnavailableItems(receiptLines);
 
     return (
-      <div className="container-marketplace py-8 max-w-xl mx-auto text-center space-y-6">
+      <div className="container-marketplace py-8 max-w-2xl mx-auto text-center space-y-6">
         {/* Receipt Details Dialog */}
         <Dialog open={receiptOpen} onOpenChange={setReceiptOpen}>
-          <DialogContent className="sm:max-w-md p-6 rounded-2xl bg-card">
+          <DialogContent className="sm:max-w-lg p-6 rounded-2xl bg-card">
             <DialogHeader className="pb-2 border-b">
-              <DialogTitle className="text-lg font-bold text-center text-foreground">{t("electronicInvoice")}</DialogTitle>
+              <DialogTitle className="text-lg font-bold text-foreground">{t("electronicInvoice")}</DialogTitle>
             </DialogHeader>
             <div className="py-4 space-y-3 text-xs">
               <div className="flex justify-between">
@@ -798,7 +798,7 @@ function CheckoutPageContent() {
 
         {/* Cancellation and Refund Choice Modal (Flowchart gap) */}
         <Dialog open={cancelModalOpen} onOpenChange={setCancelModalOpen}>
-          <DialogContent 
+          <DialogContent
             className="sm:max-w-md p-6 rounded-3xl bg-card border space-y-5"
             onPointerDownOutside={(e) => e.preventDefault()}
             onEscapeKeyDown={(e) => e.preventDefault()}
@@ -859,8 +859,8 @@ function CheckoutPageContent() {
         <div className="flex justify-center pt-4">
           <div className={cn(
             "flex h-20 w-20 items-center justify-center rounded-full border-4",
-            cancelledByUser 
-              ? "bg-red-500/10 border-red-500/20" 
+            cancelledByUser
+              ? "bg-red-500/10 border-red-500/20"
               : "bg-primary/10 border-primary/20"
           )}>
             {cancelledByUser ? (
@@ -935,26 +935,26 @@ function CheckoutPageContent() {
           )}
 
           {/* Final Total */}
-          <div className="flex justify-between items-center p-4 border-t border-b">
+          <div className="flex justify-between items-center py-3 border-t">
             <span className="font-bold text-foreground">{t("total")}</span>
             <Price amount={receiptTotal} className="text-xl font-bold text-primary" />
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center gap-2 pt-4">
-          {!cancelledByUser && (
+        <div className="flex flex-col sm:flex-row items-center gap-2">
+          {/* {!cancelledByUser && (
             <Button
               className="w-full py-5 rounded-2xl text-base font-medium bg-destructive hover:bg-destructive/90 text-white"
               onClick={() => setCancelModalOpen(true)}
             >
               {t("cancelOrder")}
             </Button>
-          )}
+          )} */}
+          <Button variant="default" className="w-full py-5 rounded-2xl text-base font-medium" onClick={() => router.push("/orders")}>
+            {t("viewOrderStatus")}
+          </Button>
           <Button variant="outline" className="w-full py-5 rounded-2xl text-base font-medium" onClick={() => setReceiptOpen(true)}>
             {t("viewReceipt")}
-          </Button>
-          <Button variant="ghost" className="w-full py-5 rounded-2xl text-base font-medium text-muted-foreground" onClick={() => router.push("/orders")}>
-            {t("viewOrderStatus")}
           </Button>
         </div>
       </div>
@@ -967,8 +967,8 @@ function CheckoutPageContent() {
   return (
     <div className="container-marketplace py-6 lg:py-6 relative">
       {/* 3. Preparing Payment Session Loader (Phase 3) */}
-      <Dialog open={showPaymentLoading} onOpenChange={() => {}}>
-        <DialogContent 
+      <Dialog open={showPaymentLoading} onOpenChange={() => { }}>
+        <DialogContent
           className="sm:max-w-xs p-6 rounded-3xl bg-card border text-center flex flex-col items-center justify-center space-y-4"
           onPointerDownOutside={(e) => e.preventDefault()}
           onEscapeKeyDown={(e) => e.preventDefault()}
@@ -1090,12 +1090,12 @@ function CheckoutPageContent() {
                   disabled={showPaymentLoading}
                   className="w-full h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-secondary"
                 />
-                 <p className="text-[10px] text-muted-foreground leading-normal">
-                   {t.rich("redemptionRate", {
-                     pts: redeemPoints,
-                     amount: () => <Price amount={redeemPoints * 0.01} className="font-semibold text-muted-foreground" iconClassName="text-muted-foreground" />
-                   })}
-                 </p>
+                <p className="text-[10px] text-muted-foreground leading-normal">
+                  {t.rich("redemptionRate", {
+                    pts: redeemPoints,
+                    amount: () => <Price amount={redeemPoints * 0.01} className="font-semibold text-muted-foreground" iconClassName="text-muted-foreground" />
+                  })}
+                </p>
               </div>
             )}
           </Card>

@@ -219,17 +219,17 @@ export function ProductDetailPage({ slug }: { slug: string }) {
                       if (found) setSelectedVendor(found);
                     }}
                   >
-                    <SelectTrigger className="w-full bg-white text-sm h-10 border-slate-200/80 rounded-lg focus:ring-0">
+                    <SelectTrigger className="w-full">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-white rounded-xl">
+                    <SelectContent>
                       {mockVendors.map((vendor) => {
                         const vName = locale === "ar" ? vendor.nameAr : vendor.name;
                         return (
                           <SelectItem key={vendor.id} value={vendor.id} className="text-xs">
                             <div className="flex items-center gap-2">
                               {/* Round avatar showing first letter */}
-                              <div className="h-6 w-6 rounded-full border border-slate-200 bg-white flex items-center justify-center font-bold text-primary text-[10px] shrink-0">
+                              <div className="h-6 w-6 rounded-full border border-border bg-surface flex items-center justify-center font-bold text-primary text-[10px] shrink-0">
                                 {vendor.logo}
                               </div>
                               <span className="font-semibold">{vName}</span>

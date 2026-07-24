@@ -214,7 +214,7 @@ export function SiteHeader() {
               </Link>
             </Button>
             {isAuthenticated ? (
-              <Button variant="ghost" size="sm" className="hidden sm:flex gap-2 w-10 h-10 rounded-full" asChild>
+              <Button variant="ghost" size="sm" className="hidden sm:flex gap-2 w-11 h-11 p-1 rounded-full" asChild>
                 <Link href="/profile">
                   <User className="size-5" />
                   {/* <span className="max-w-[100px] truncate">{user?.name.split(" ")[0]}</span> */}
