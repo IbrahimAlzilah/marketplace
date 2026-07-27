@@ -1,1 +1,1 @@
-export * from "./components/categories-page";
+export * from "./screens/categories-screen";

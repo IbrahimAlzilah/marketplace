@@ -1,4 +1,4 @@
-export * from "./components/products-page";
-export * from "./components/product-detail-page";
+export * from "./screens/products-screen";
+export * from "./screens/product-detail-screen";
 export * from "./components/product-card";
 export * from "./store/recently-viewed-store";

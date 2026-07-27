@@ -1,6 +1,5 @@
 ﻿"use client";
 
-import * as React from "react";
 import Image from "next/image";
 import { useLocale } from "next-intl";
 import { ArrowLeft, ArrowRight, XIcon } from "lucide-react";

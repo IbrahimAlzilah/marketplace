@@ -1,13 +1,23 @@
-export * from "./components/auth-modal";
-export * from "./components/login-page";
-export * from "./components/register-page";
-export * from "./components/otp-page";
-export * from "./components/forgot-password-page";
-export * from "./components/LoginForm";
-export * from "./components/RegisterForm";
-export * from "./components/ForgotPasswordForm";
-export * from "./components/OtpForm";
-export * from "./components/ResetPasswordForm";
+export * from "./screens/auth-modal";
+export { LoginForm } from "./components/LoginForm";
+export { RegisterForm } from "./components/RegisterForm";
+export { ForgotPasswordForm } from "./components/ForgotPasswordForm";
+export { OtpForm } from "./components/OtpForm";
+export { ResetPasswordForm } from "./components/ResetPasswordForm";
 export * from "./hooks/use-auth";
-export * from "@/stores/auth-store";
-export * from "@/stores/auth-modal-store";
+export type {
+  LoginFormValues,
+  RegisterFormValues,
+  OtpFormValues,
+  ForgotPasswordFormValues,
+  ResetPasswordFormValues,
+} from "./schemas/auth-schema";
+export {
+  loginSchema,
+  registerSchema,
+  otpSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+} from "./schemas/auth-schema";
+export * from "./store/auth-store";
+export * from "./store/auth-modal-store";

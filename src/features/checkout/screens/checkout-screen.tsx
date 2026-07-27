@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, Suspense } from "react";
 import { useLocale, useTranslations } from "next-intl";
@@ -417,7 +417,7 @@ function CheckoutPageContent() {
                               <div className="space-y-2">
                                 <p className="text-xs font-bold text-foreground">{t("selectSubstituteLabel")}</p>
                                 <div className="grid gap-2">
-                                  {subList.map((sub) => {
+                                  {subList.map((sub: any) => {
                                     const subName = locale === "ar" ? sub.nameAr : sub.name;
                                     const isChosen = chosenSubstitutes[line.productId]?.productId === sub.productId;
 
@@ -569,7 +569,7 @@ function CheckoutPageContent() {
                               <div className="space-y-2">
                                 <p className="text-xs font-bold text-foreground">{t("selectSubstituteLabel")}</p>
                                 <div className="grid gap-2">
-                                  {subList.map((sub) => {
+                                  {subList.map((sub: any) => {
                                     const subName = locale === "ar" ? sub.nameAr : sub.name;
                                     const isChosen = chosenSubstitutes[line.productId]?.productId === sub.productId;
 

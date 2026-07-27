@@ -1,2 +1,2 @@
-export * from "./components/orders-page";
-export * from "./components/order-detail-page";
+export * from "./screens/orders-screen";
+export * from "./screens/order-detail-screen";

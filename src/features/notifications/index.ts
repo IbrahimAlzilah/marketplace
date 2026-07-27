@@ -1,1 +1,1 @@
-export * from "./components/notifications-page";
+export * from "./screens/notifications-screen";
