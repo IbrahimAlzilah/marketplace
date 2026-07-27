@@ -1,11 +1,11 @@
-import { NextIntlClientProvider } from "next-intl";
+﻿import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
-import { ThemeProvider } from "@/components/providers/theme-provider";
-import { QueryProvider } from "@/components/providers/query-provider";
-import { ToastContainer } from "@/components/providers/toast-provider";
-import { AppShell } from "@/components/layout/app-shell";
+import { ThemeProvider } from "@/providers/theme-provider";
+import { QueryProvider } from "@/providers/query-provider";
+import { ToastContainer } from "@/providers/toast-provider";
+import { AppShell } from "@/shared/components/layout/app-shell";
 import { coHeadline, arabKufi } from "@/styles/fonts";
 import "@/app/globals.css";
 

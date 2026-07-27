@@ -1,21 +1,21 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { Clock, Trash2, Loader2, CheckCircle, XCircle } from "lucide-react";
 import { Link, useRouter } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { OrderSummary } from "@/components/marketplace/order-summary";
-import { QuantityStepper } from "@/components/marketplace/product-card";
+import { Button } from "@/shared/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
+import { Separator } from "@/shared/components/ui/separator";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared/components/ui/dialog";
+import { RadioGroup, RadioGroupItem } from "@/shared/components/ui/radio-group";
+import { OrderSummary } from "@/shared/components/marketplace/order-summary";
+import { QuantityStepper } from "@/features/products";
 import { getProductById, getPharmacyById } from "@/lib/mock-data";
 import { useCartStore } from "@/stores/cart-store";
 import { cn } from "@/lib/utils";
-import { Price } from "@/components/ui/currency";
+import { Price } from "@/shared/components/ui/currency";
 import { getMockAllocations, AllocationStatus, AllocationItem, SCENARIOS } from "@/lib/allocation-evaluator";
 
 const mockAddresses = [
@@ -179,7 +179,7 @@ export function CartPage() {
         </div>
 
         <div className="p-5 border rounded-2xl bg-card space-y-3 text-start">
-          <h3 className="font-bold text-sm text-foreground">{locale === "ar" ? "تفاصيل الطلب النشط:" : "Active Checkout Details:"}</h3>
+          <h3 className="font-bold text-sm text-foreground">{locale === "ar" ? "ØªÙØ§ØµÙŠÙ„ Ø§Ù„Ø·Ù„Ø¨ Ø§Ù„Ù†Ø´Ø·:" : "Active Checkout Details:"}</h3>
           <div className="divide-y text-xs text-muted-foreground">
             {checkoutLines.map((line, idx) => {
               const name = locale === "ar" ? line.productNameAr : line.productName;
@@ -278,7 +278,7 @@ export function CartPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
                       <div className="h-6 w-6 bg-primary/10 rounded-lg flex items-center justify-center font-bold text-primary text-[10px]">
-                        🏥
+                        ðŸ¥
                       </div>
                       <CardTitle className="text-base font-bold text-primary">
                         {pharmacyName}
@@ -343,7 +343,7 @@ export function CartPage() {
                   <Separator className="mb-1" />
                   <div className="flex justify-between text-sm pt-2">
                     <span className="text-muted-foreground">
-                      {locale === "ar" ? "المجموع الفرعي للصيدلية:" : "Pharmacy Subtotal:"}
+                      {locale === "ar" ? "Ø§Ù„Ù…Ø¬Ù…ÙˆØ¹ Ø§Ù„ÙØ±Ø¹ÙŠ Ù„Ù„ØµÙŠØ¯Ù„ÙŠØ©:" : "Pharmacy Subtotal:"}
                     </span>
                     <Price amount={groupSubtotal} className="font-bold text-foreground" />
                   </div>
@@ -586,7 +586,7 @@ export function CartPage() {
                   <div className="space-y-1.5 text-[11px] text-foreground/80">
                     {pharm.products.map((p, pIdx) => (
                       <div key={pIdx} className="flex justify-between">
-                        <span>{getProductTranslation(p.name)} × {p.qty}</span>
+                        <span>{getProductTranslation(p.name)} Ã— {p.qty}</span>
                         <Price amount={p.price} className="font-semibold text-foreground" iconClassName="text-foreground" />
                       </div>
                     ))}
@@ -742,3 +742,4 @@ export function CartPage() {
     </div>
   );
 }
+

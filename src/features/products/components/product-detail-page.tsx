@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -6,19 +6,19 @@ import { useLocale, useTranslations } from "next-intl";
 import { Clock, Heart, MapPin, Shield, ShoppingCart, Star, Truck, Loader2 } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import { Card, CardContent } from "@/shared/components/ui/card";
+import { Separator } from "@/shared/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { ProductCard, QuantityStepper } from "@/components/marketplace/product-card";
+} from "@/shared/components/ui/select";
+import { ProductCard, QuantityStepper } from "@/features/products";
 import {
   getProductBySlug,
   getPharmacyById,
@@ -30,7 +30,7 @@ import { useCartStore } from "@/stores/cart-store";
 import { useWishlistStore } from "@/stores/wishlist-store";
 import { useRecentlyViewedStore } from "@/stores/recently-viewed-store";
 import { cn, formatRating } from "@/lib/utils";
-import { Price } from "@/components/ui/currency";
+import { Price } from "@/shared/components/ui/currency";
 
 export function ProductDetailPage({ slug }: { slug: string }) {
   const product = getProductBySlug(slug);
@@ -135,7 +135,7 @@ export function ProductDetailPage({ slug }: { slug: string }) {
           <div>
             {/* Pharmacy Vendor Tag above Title */}
             <div className="flex items-center gap-2 text-xs font-semibold text-primary mb-1">
-              <span>🏥</span>
+              <span>ðŸ¥</span>
               <Link href={`/pharmacies/${selectedVendor.slug}`} className="hover:underline">
                 {locale === "ar" ? selectedVendor.nameAr : selectedVendor.name}
               </Link>
@@ -169,7 +169,7 @@ export function ProductDetailPage({ slug }: { slug: string }) {
               iconClassName="text-muted-foreground"
             />
             <span className="text-xs bg-red-100 text-red-600 font-bold px-2.5 py-1 rounded-lg border border-red-200">
-              {locale === "ar" ? "%13 خصم" : "13% OFF"}
+              {locale === "ar" ? "%13 Ø®ØµÙ…" : "13% OFF"}
             </span>
           </div>
 
@@ -199,7 +199,7 @@ export function ProductDetailPage({ slug }: { slug: string }) {
             <CardContent className="space-y-3 p-6">
               <div>
                 <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-1">
-                  {locale === "ar" ? "الإجمالي / PRICE" : "PRICE / الإجمالي"}
+                  {locale === "ar" ? "Ø§Ù„Ø¥Ø¬Ù…Ø§Ù„ÙŠ / PRICE" : "PRICE / Ø§Ù„Ø¥Ø¬Ù…Ø§Ù„ÙŠ"}
                 </p>
                 <Price amount={selectedVendor.price} className="text-2xl text-primary font-extrabold" />
               </div>
@@ -265,12 +265,12 @@ export function ProductDetailPage({ slug }: { slug: string }) {
                       <MapPin className="size-3.5 text-muted-foreground" />
                       <span>{selectedVendor.distance}</span>
                     </div>
-                    <span className="text-muted-foreground/30">•</span>
+                    <span className="text-muted-foreground/30">â€¢</span>
                     <div className="flex items-center gap-1">
                       <Clock className="size-3.5 text-muted-foreground" />
                       <span>{locale === "ar" ? selectedVendor.etaAr : selectedVendor.eta}</span>
                     </div>
-                    <span className="text-muted-foreground/30">•</span>
+                    <span className="text-muted-foreground/30">â€¢</span>
                     <div className="flex items-center gap-1">
                       <Truck className="size-3.5 text-muted-foreground" />
                       {selectedVendor.deliveryFee === 0 ? (
@@ -305,7 +305,7 @@ export function ProductDetailPage({ slug }: { slug: string }) {
                     asChild
                   >
                     <Link href="/cart">
-                      View Cart / عرض السلة
+                      View Cart / Ø¹Ø±Ø¶ Ø§Ù„Ø³Ù„Ø©
                     </Link>
                   </Button>
                 ) : (
@@ -351,3 +351,4 @@ export function ProductDetailPage({ slug }: { slug: string }) {
     </div>
   );
 }
+

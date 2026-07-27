@@ -1,12 +1,12 @@
-"use client";
+﻿"use client";
 
 import { useTranslations } from "next-intl";
-import { ProfileLayout } from "@/components/layout/profile-sidebar";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ProfileLayout } from "@/shared/components/layout/profile-sidebar";
+import { Card, CardContent } from "@/shared/components/ui/card";
+import { Badge } from "@/shared/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { loyaltyTransactions } from "@/lib/mock-data";
-import { Price } from "@/components/ui/currency";
+import { Price } from "@/shared/components/ui/currency";
 import { Star } from "lucide-react";
 
 export function LoyaltyPage() {
@@ -67,12 +67,12 @@ export function LoyaltyPage() {
           <Card>
             <CardContent className="p-5 space-y-2 text-sm text-muted-foreground">
               <p className="flex items-center gap-1 flex-wrap">
-                <span>• Earn 1 point for every</span>
+                <span>â€¢ Earn 1 point for every</span>
                 <Price amount={1} className="font-normal text-muted-foreground text-sm" iconClassName="text-muted-foreground" />
                 <span>spent</span>
               </p>
-              <p>• Bonus points on wellness bundles</p>
-              <p>• Double points during promotional periods</p>
+              <p>â€¢ Bonus points on wellness bundles</p>
+              <p>â€¢ Double points during promotional periods</p>
             </CardContent>
           </Card>
         </TabsContent>
@@ -80,12 +80,12 @@ export function LoyaltyPage() {
           <Card>
             <CardContent className="p-5 space-y-2 text-sm text-muted-foreground">
               <p className="flex items-center gap-1 flex-wrap">
-                <span>• 100 points =</span>
+                <span>â€¢ 100 points =</span>
                 <Price amount={1} className="font-normal text-muted-foreground text-sm" iconClassName="text-muted-foreground" />
                 <span>discount</span>
               </p>
-              <p>• Minimum 100 points to redeem</p>
-              <p>• Redeem at checkout</p>
+              <p>â€¢ Minimum 100 points to redeem</p>
+              <p>â€¢ Redeem at checkout</p>
             </CardContent>
           </Card>
         </TabsContent>
@@ -93,3 +93,4 @@ export function LoyaltyPage() {
     </ProfileLayout>
   );
 }
+

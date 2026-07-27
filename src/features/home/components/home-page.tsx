@@ -1,13 +1,13 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { ProductCard } from "@/components/marketplace/product-card";
-import { PharmacyCard } from "@/components/marketplace/pharmacy-card";
-import { SectionCarousel } from "@/components/marketplace/section-carousel";
-import { Price } from "@/components/ui/currency";
+import { ProductCard } from "@/features/products";
+import { PharmacyCard } from "@/features/pharmacies";
+import { SectionCarousel } from "@/shared/components/marketplace/section-carousel";
+import { Price } from "@/shared/components/ui/currency";
 import { banners, categories, pharmacies, products } from "@/lib/mock-data";
 import { useRecentlyViewedStore } from "@/stores/recently-viewed-store";
 import { getProductById } from "@/lib/mock-data";
@@ -18,7 +18,7 @@ import {
   CarouselContent,
   CarouselItem,
   type CarouselApi,
-} from "@/components/ui/carousel";
+} from "@/shared/components/ui/carousel";
 
 export function HomePage() {
   const t = useTranslations("home");
@@ -316,3 +316,4 @@ export function HomePage() {
     </div>
   );
 }
+

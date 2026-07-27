@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 
 import { useTranslations } from "next-intl";
-import { ProfileLayout } from "@/components/layout/profile-sidebar";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { ProfileLayout } from "@/shared/components/layout/profile-sidebar";
+import { Card, CardContent } from "@/shared/components/ui/card";
+import { Button } from "@/shared/components/ui/button";
+import { Badge } from "@/shared/components/ui/badge";
 import { addresses } from "@/lib/mock-data";
 import { MapPin, Plus } from "lucide-react";
 
@@ -41,3 +41,4 @@ export function AddressesPage() {
     </ProfileLayout>
   );
 }
+

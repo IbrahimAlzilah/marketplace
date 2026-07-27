@@ -1,9 +1,9 @@
-"use client";
+﻿"use client";
 
 import { useTranslations } from "next-intl";
-import { ProfileLayout } from "@/components/layout/profile-sidebar";
-import { ProductCard } from "@/components/marketplace/product-card";
-import { Button } from "@/components/ui/button";
+import { ProfileLayout } from "@/shared/components/layout/profile-sidebar";
+import { ProductCard } from "@/features/products";
+import { Button } from "@/shared/components/ui/button";
 import { getProductById } from "@/lib/mock-data";
 import { useWishlistStore } from "@/stores/wishlist-store";
 import { Link } from "@/i18n/navigation";
@@ -34,3 +34,4 @@ export function WishlistPage() {
     </ProfileLayout>
   );
 }
+

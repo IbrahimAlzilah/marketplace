@@ -1,14 +1,14 @@
-"use client";
+﻿"use client";
 
 import { useLocale, useTranslations } from "next-intl";
 import { notFound } from "next/navigation";
 import { Check } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/shared/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
+import { Separator } from "@/shared/components/ui/separator";
 import { orders, getPharmacyById } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
-import { Price } from "@/components/ui/currency";
+import { Price } from "@/shared/components/ui/currency";
 
 const timelineSteps = ["pending", "confirmed", "preparing", "shipped", "delivered"] as const;
 
@@ -106,3 +106,4 @@ export function OrderDetailPage({ id }: { id: string }) {
     </div>
   );
 }
+

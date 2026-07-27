@@ -1,11 +1,11 @@
-"use client";
+﻿"use client";
 
 import { useTranslations } from "next-intl";
-import { ProfileLayout } from "@/components/layout/profile-sidebar";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { ProfileLayout } from "@/shared/components/layout/profile-sidebar";
+import { Card, CardContent } from "@/shared/components/ui/card";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
 import { Link } from "@/i18n/navigation";
 import { useAuthStore } from "@/stores/auth-store";
 import { formatPrice } from "@/lib/utils";
@@ -68,3 +68,4 @@ export function ProfilePage() {
     </ProfileLayout>
   );
 }
+

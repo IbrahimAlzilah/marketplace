@@ -1,14 +1,14 @@
-"use client";
+﻿"use client";
 
 import { useLocale, useTranslations } from "next-intl";
 import { Package } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import { Card, CardContent } from "@/shared/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { orders, getPharmacyById } from "@/lib/mock-data";
-import { Price } from "@/components/ui/currency";
+import { Price } from "@/shared/components/ui/currency";
 
 export function OrdersPage() {
   const t = useTranslations("orders");
@@ -46,7 +46,7 @@ export function OrdersPage() {
               </div>
               <p className="mt-1 text-sm text-muted-foreground">{pharmacyNames}</p>
               <p className="text-sm text-muted-foreground">
-                {new Date(order.createdAt).toLocaleDateString(locale === "ar" ? "ar-SA" : "en-SA")} · {order.itemCount} items
+                {new Date(order.createdAt).toLocaleDateString(locale === "ar" ? "ar-SA" : "en-SA")} Â· {order.itemCount} items
               </p>
             </div>
           </div>
@@ -90,3 +90,4 @@ export function OrdersPage() {
     </div>
   );
 }
+

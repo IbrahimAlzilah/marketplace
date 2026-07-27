@@ -1,9 +1,9 @@
-"use client";
+﻿"use client";
 
 import { useTranslations } from "next-intl";
 import { Bell, Package, Tag } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/shared/components/ui/badge";
+import { Card, CardContent } from "@/shared/components/ui/card";
 
 const notifications = [
   {
@@ -77,3 +77,4 @@ export function NotificationsPage() {
     </div>
   );
 }
+

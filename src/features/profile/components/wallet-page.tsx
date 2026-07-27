@@ -1,11 +1,11 @@
-"use client";
+﻿"use client";
 
 import { useTranslations } from "next-intl";
-import { ProfileLayout } from "@/components/layout/profile-sidebar";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { ProfileLayout } from "@/shared/components/layout/profile-sidebar";
+import { Card, CardContent } from "@/shared/components/ui/card";
+import { Badge } from "@/shared/components/ui/badge";
 import { walletTransactions } from "@/lib/mock-data";
-import { Price } from "@/components/ui/currency";
+import { Price } from "@/shared/components/ui/currency";
 import { Wallet } from "lucide-react";
 
 export function WalletPage() {
@@ -56,3 +56,4 @@ export function WalletPage() {
     </ProfileLayout>
   );
 }
+

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, Suspense } from "react";
 import { useLocale, useTranslations } from "next-intl";
@@ -16,18 +16,18 @@ import {
   Clock,
   AlertTriangle
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Separator } from "@/components/ui/separator";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/shared/components/ui/button";
+import { Card } from "@/shared/components/ui/card";
+import { Input } from "@/shared/components/ui/input";
+import { RadioGroup, RadioGroupItem } from "@/shared/components/ui/radio-group";
+import { Separator } from "@/shared/components/ui/separator";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import { Price } from "@/components/ui/currency";
+import { Price } from "@/shared/components/ui/currency";
 import { useCartStore, CheckoutLine } from "@/stores/cart-store";
 import { AllocationStatus } from "@/lib/allocation-evaluator";
 import { getProductById, pharmacies } from "@/lib/mock-data";
-import { PharmacyHeader } from "@/components/marketplace/pharmacy-header";
+import { PharmacyHeader } from "@/features/pharmacies";
 
 // Helpers for line price calculations
 function getLineTotalPrice(line: CheckoutLine): number {
@@ -504,7 +504,7 @@ function CheckoutPageContent() {
                                 useCartStore.getState().setCheckoutLines(updated);
                               }}
                             >
-                              {locale === "ar" ? "تغيير" : "Change"}
+                              {locale === "ar" ? "ØªØºÙŠÙŠØ±" : "Change"}
                             </Button>
                           </div>
                         )}
@@ -645,7 +645,7 @@ function CheckoutPageContent() {
                                 useCartStore.getState().setCheckoutLines(updated);
                               }}
                             >
-                              {locale === "ar" ? "تغيير" : "Change"}
+                              {locale === "ar" ? "ØªØºÙŠÙŠØ±" : "Change"}
                             </Button>
                           </div>
                         )}
@@ -714,7 +714,7 @@ function CheckoutPageContent() {
 
               {hasUnresolved && (
                 <p className="text-[10px] text-center font-semibold text-destructive mt-1">
-                  {locale === "ar" ? "يرجى حل جميع القرارات المعلقة للمتابعة للدفع" : "Please resolve all pending decisions to continue to payment"}
+                  {locale === "ar" ? "ÙŠØ±Ø¬Ù‰ Ø­Ù„ Ø¬Ù…ÙŠØ¹ Ø§Ù„Ù‚Ø±Ø§Ø±Ø§Øª Ø§Ù„Ù…Ø¹Ù„Ù‚Ø© Ù„Ù„Ù…ØªØ§Ø¨Ø¹Ø© Ù„Ù„Ø¯ÙØ¹" : "Please resolve all pending decisions to continue to payment"}
                 </p>
               )}
             </Card>
@@ -775,7 +775,7 @@ function CheckoutPageContent() {
                         const pName = locale === "ar" ? item.nameAr : item.name;
                         return (
                           <p key={pIdx} className="flex items-center flex-wrap gap-1">
-                            <span>• {pName} ({item.qty} {t("item")}) -</span>
+                            <span>â€¢ {pName} ({item.qty} {t("item")}) -</span>
                             <Price amount={item.price * item.qty} className="font-medium text-muted-foreground" iconClassName="text-muted-foreground" />
                           </p>
                         );
@@ -843,7 +843,7 @@ function CheckoutPageContent() {
                   setCancelModalOpen(false);
                 }}
               >
-                {t("viewAlternatives").includes("Alternatives") ? "Confirm" : "تأكيد"}
+                {t("viewAlternatives").includes("Alternatives") ? "Confirm" : "ØªØ£ÙƒÙŠØ¯"}
               </Button>
               <Button
                 variant="outline"
@@ -1223,3 +1223,4 @@ export function CheckoutPage() {
     </Suspense>
   );
 }
+

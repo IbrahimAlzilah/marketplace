@@ -1,15 +1,15 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
 import { forgotPasswordSchema, type ForgotPasswordForm } from "@/lib/validations/auth";
-import { AuthLayout } from "@/components/layout/auth-layout";
+import { AuthLayout } from "@/shared/components/layout/auth-layout";
 
 export function ForgotPasswordPage() {
   const t = useTranslations("auth");
@@ -56,3 +56,4 @@ export function ForgotPasswordPage() {
     </AuthLayout>
   );
 }
+

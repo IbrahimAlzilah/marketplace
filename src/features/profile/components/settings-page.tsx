@@ -1,15 +1,15 @@
-"use client";
+﻿"use client";
 
 import { useTranslations, useLocale } from "next-intl";
-import { ProfileLayout } from "@/components/layout/profile-sidebar";
-import { Card, CardContent } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import { ProfileLayout } from "@/shared/components/layout/profile-sidebar";
+import { Card, CardContent } from "@/shared/components/ui/card";
+import { Label } from "@/shared/components/ui/label";
+import { Switch } from "@/shared/components/ui/switch";
 import { useRouter, usePathname } from "@/i18n/navigation";
 import { useAuthStore } from "@/stores/auth-store";
 import { useTheme } from "next-themes";
 import { Globe, Moon } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/shared/components/ui/button";
 
 export function SettingsPage() {
   const t = useTranslations("common");
@@ -38,12 +38,12 @@ export function SettingsPage() {
               <div>
                 <Label>{t("language")}</Label>
                 <p className="text-sm text-muted-foreground">
-                  {locale === "en" ? "English" : "العربية"}
+                  {locale === "en" ? "English" : "Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©"}
                 </p>
               </div>
             </div>
             <Button variant="outline" onClick={switchLocale}>
-              {locale === "en" ? "العربية" : "English"}
+              {locale === "en" ? "Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©" : "English"}
             </Button>
           </CardContent>
         </Card>
@@ -76,3 +76,4 @@ export function SettingsPage() {
     </ProfileLayout>
   );
 }
+

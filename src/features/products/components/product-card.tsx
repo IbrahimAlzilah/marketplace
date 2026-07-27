@@ -1,19 +1,19 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { Heart, MapPin, Minus, Plus, ShoppingCart, Loader2, Trash2 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import { Card, CardContent } from "@/shared/components/ui/card";
 import { cn } from "@/lib/utils";
-import { Price } from "@/components/ui/currency";
+import { Price } from "@/shared/components/ui/currency";
 import type { Product } from "@/lib/mock-data";
 import { useCartStore } from "@/stores/cart-store";
 import { useWishlistStore } from "@/stores/wishlist-store";
-import { useToast } from "@/components/providers/toast-provider";
+import { useToast } from "@/providers/toast-provider";
 
 type ProductCardProps = {
   product: Product;
@@ -153,7 +153,8 @@ export function ProductCardSkeleton() {
   );
 }
 
-import { QuantityStepper } from "@/components/marketplace/quantity-stepper";
+import { QuantityStepper } from "@/shared/components/marketplace/quantity-stepper";
 
 export { QuantityStepper };
+
 

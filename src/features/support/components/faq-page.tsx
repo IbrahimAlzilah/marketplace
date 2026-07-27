@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useTranslations } from "next-intl";
 import {
@@ -6,7 +6,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion";
+} from "@/shared/components/ui/accordion";
 
 const faqs = [
   { q: "How do I place an order?", a: "Browse products, add to cart, and proceed to checkout. Select your address, delivery option, and payment method." },
@@ -40,3 +40,4 @@ export function FaqPage() {
     </div>
   );
 }
+

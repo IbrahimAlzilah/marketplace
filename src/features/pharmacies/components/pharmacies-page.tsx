@@ -1,9 +1,9 @@
-"use client";
+﻿"use client";
 
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
-import { PharmacyCard } from "@/components/marketplace/pharmacy-card";
-import { Button } from "@/components/ui/button";
+import { PharmacyCard } from "@/features/pharmacies";
+import { Button } from "@/shared/components/ui/button";
 import { pharmacies } from "@/lib/mock-data";
 import { ChevronDown, SlidersHorizontal } from "lucide-react";
 import {
@@ -12,7 +12,7 @@ import {
   DropdownMenuContent,
   DropdownMenuCheckboxItem,
   DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
+} from "@/shared/components/ui/dropdown-menu";
 
 export function PharmaciesPage() {
   const t = useTranslations("pharmacies");
@@ -110,3 +110,4 @@ export function PharmaciesPage() {
     </div>
   );
 }
+

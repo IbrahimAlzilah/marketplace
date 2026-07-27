@@ -1,8 +1,8 @@
-"use client";
+﻿"use client";
 
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/shared/components/ui/card";
 import { categories } from "@/lib/mock-data";
 
 export function CategoriesPage() {
@@ -21,7 +21,7 @@ export function CategoriesPage() {
                 <h2 className="font-semibold text-lg">
                   {locale === "ar" ? cat.nameAr : cat.name}
                 </h2>
-                <p className="text-sm text-primary">Browse products →</p>
+                <p className="text-sm text-primary">Browse products â†’</p>
               </CardContent>
             </Card>
           </Link>
@@ -30,3 +30,4 @@ export function CategoriesPage() {
     </div>
   );
 }
+

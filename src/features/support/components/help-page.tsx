@@ -1,8 +1,8 @@
-"use client";
+﻿"use client";
 
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/shared/components/ui/card";
 import { HelpCircle, MessageSquare, FileText } from "lucide-react";
 
 export function HelpPage() {
@@ -37,3 +37,4 @@ export function HelpPage() {
     </div>
   );
 }
+

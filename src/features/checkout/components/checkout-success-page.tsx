@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 
 import { useTranslations } from "next-intl";
 import { CheckCircle } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/shared/components/ui/button";
+import { Card, CardContent } from "@/shared/components/ui/card";
 
 export function CheckoutSuccessPage() {
   const t = useTranslations("checkout");
@@ -36,3 +36,4 @@ export function CheckoutSuccessPage() {
     </div>
   );
 }
+

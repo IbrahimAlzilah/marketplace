@@ -1,11 +1,11 @@
-"use client";
+﻿"use client";
 
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
-import { ProductCard } from "@/components/marketplace/product-card";
-import { PharmacyCard } from "@/components/marketplace/pharmacy-card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ProductCard } from "@/features/products";
+import { PharmacyCard } from "@/features/pharmacies";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { products, pharmacies } from "@/lib/mock-data";
 
 function SearchResults() {
@@ -86,3 +86,4 @@ export function SearchPage() {
     </Suspense>
   );
 }
+

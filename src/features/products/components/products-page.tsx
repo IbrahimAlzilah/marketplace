@@ -1,20 +1,20 @@
-"use client";
+﻿"use client";
 
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
-import { ProductCard } from "@/components/marketplace/product-card";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
+import { ProductCard } from "@/features/products";
+import { Button } from "@/shared/components/ui/button";
+import { Checkbox } from "@/shared/components/ui/checkbox";
+import { Label } from "@/shared/components/ui/label";
+import { Separator } from "@/shared/components/ui/separator";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/shared/components/ui/select";
 import { categories, products, getCategoryBySlug } from "@/lib/mock-data";
 
 type SortOption = "popular" | "price-low" | "price-high" | "rating";
@@ -166,3 +166,4 @@ export function ProductsPage() {
     </div>
   );
 }
+

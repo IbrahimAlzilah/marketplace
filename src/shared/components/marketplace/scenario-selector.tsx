@@ -1,0 +1,141 @@
+﻿"use client";
+
+import { useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
+import { Beaker, ChevronRight, Play, RefreshCw, X } from "lucide-react";
+import { Button } from "@/shared/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/shared/components/ui/dialog";
+import { useCartStore } from "@/stores/cart-store";
+import { SCENARIOS } from "@/lib/allocation-evaluator";
+import { cn } from "@/lib/utils";
+
+export function ScenarioSelector() {
+  const router = useRouter();
+  const locale = useLocale();
+  const t = useTranslations("checkout");
+  const { activeScenarioId, setActiveScenarioId, setCheckoutLines, resetCheckout } = useCartStore();
+  const [open, setOpen] = useState(false);
+
+  const handleSelectScenario = (scenarioId: string) => {
+    const scenario = SCENARIOS.find((s) => s.id === scenarioId);
+    if (!scenario) return;
+
+    // Reset checkout state
+    resetCheckout();
+
+    // Populate store cart items
+    useCartStore.setState({
+      items: scenario.items.map((it) => ({
+        productId: it.productId,
+        quantity: it.quantity,
+      })),
+      activeScenarioId: scenario.id,
+    });
+
+    // Close selector and redirect to cart to begin flow
+    setOpen(false);
+    router.push("/cart");
+  };
+
+  const handleReset = () => {
+    resetCheckout();
+    useCartStore.setState({
+      items: [],
+      activeScenarioId: null,
+    });
+    setOpen(false);
+    router.push("/cart");
+  };
+
+  return (
+    <div className="fixed bottom-8 end-6 z-50">
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <Button
+            size="lg"
+            title={locale === "ar" ? "Ø³ÙŠÙ†Ø§Ø±ÙŠÙˆÙ‡Ø§Øª Ø§Ù„Ø§Ø®ØªØ¨Ø§Ø±" : "Test Scenarios"}
+            className="rounded-full shadow-2xl bg-gradient-to-r from-primary to-secondary text-white hover:opacity-90 flex items-center gap-2 border border-white/20 h-12 w-12 px-3 hover:scale-105 transition-transform"
+          >
+            <Beaker className="size-6 animate-pulse" />
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-hidden flex flex-col p-6 rounded-3xl bg-card border">
+          <DialogHeader className="pb-3 border-b">
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-lg font-bold text-foreground flex items-center gap-2">
+                {locale === "ar" ? "Ø£Ø¯Ø§Ø© Ù…Ø­Ø§ÙƒØ§Ø© Ø³ÙŠÙ†Ø§Ø±ÙŠÙˆÙ‡Ø§Øª Ø§Ù„Ø´Ø±Ø§Ø¡" : "Checkout Scenario Simulator"}
+              </DialogTitle>
+            </div>
+          </DialogHeader>
+
+          <div className="flex-1 overflow-y-auto py-4 pr-1 space-y-4 text-xs leading-normal">
+            <p className="text-muted-foreground text-xs leading-relaxed">
+              {locale === "ar"
+                ? "Ø§Ø®ØªØ± Ø£Ø­Ø¯ Ø§Ù„Ø³ÙŠÙ†Ø§Ø±ÙŠÙˆÙ‡Ø§Øª Ø§Ù„Ù€ 8 Ø§Ù„ØªØ§Ù„ÙŠØ© Ù„ØªØ­Ù…ÙŠÙ„ Ø§Ù„Ù…Ù†ØªØ¬Ø§Øª ÙˆØ­Ø§Ù„Ø§Øª Ø§Ù„Ù…ÙˆØ§ÙÙ‚Ø© ÙÙŠ Ø³Ù„ØªÙƒ ØªÙ„Ù‚Ø§Ø¦ÙŠØ§Ù‹ ÙˆØ§Ø®ØªØ¨Ø§Ø± ØªØ¯ÙÙ‚ Ø§Ù„Ø´Ø±Ø§Ø¡ Ø®Ø·ÙˆØ© Ø¨Ø®Ø·ÙˆØ©."
+                : "Select one of the 8 business approval scenarios below to instantly load the required products and allocation outcomes into your cart."}
+            </p>
+
+            <div className="grid gap-3.5">
+              {SCENARIOS.map((sc) => {
+                const isActive = activeScenarioId === sc.id;
+                const scName = locale === "ar" ? sc.nameAr : sc.name;
+
+                return (
+                  <button
+                    key={sc.id}
+                    onClick={() => handleSelectScenario(sc.id)}
+                    className={cn(
+                      "w-full text-start p-3.5 rounded-2xl border transition-all duration-200 hover:bg-primary/5 flex items-center justify-between gap-4",
+                      isActive
+                        ? "border-primary bg-primary/5 shadow-sm"
+                        : "border-border hover:border-primary/30"
+                    )}
+                  >
+                    <div className="space-y-1 flex-1 min-w-0">
+                      <h4 className="font-bold text-sm text-foreground flex items-center gap-2 truncate">
+                        {isActive && (
+                          <span className="h-2.5 w-2.5 rounded-full bg-primary animate-ping shrink-0" />
+                        )}
+                        {scName}
+                      </h4>
+                      <p className="text-muted-foreground text-[11px]">
+                        {locale === "ar"
+                          ? `ØªØ­ØªÙˆÙŠ Ø¹Ù„Ù‰: ${sc.items.length} Ù…Ù†ØªØ¬Ø§Øª Â· ${sc.allocations.filter(a => a.status === "APPROVED").length} Ù…Ø¹ØªÙ…Ø¯Ø©`
+                          : `Loads: ${sc.items.length} items Â· ${sc.allocations.filter(a => a.status === "APPROVED").length} approved`}
+                      </p>
+                    </div>
+                    <div className={cn(
+                      "h-8 w-8 rounded-full flex items-center justify-center border text-muted-foreground shrink-0 transition-colors",
+                      isActive ? "bg-primary border-primary text-white" : "bg-card border-border hover:bg-primary/10 hover:text-primary"
+                    )}>
+                      <Play className="h-3.5 w-3.5 fill-current" />
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="flex gap-3 pt-3 border-t">
+            <Button
+              variant="outline"
+              className="flex-1 py-5 rounded-xl text-xs font-bold flex items-center justify-center gap-2"
+              onClick={handleReset}
+            >
+              <RefreshCw className="h-3.5 w-3.5" />
+              {locale === "ar" ? "Ø¥Ø¹Ø§Ø¯Ø© ØªØ¹ÙŠÙŠÙ† Ø§Ù„Ø³Ù„Ø©" : "Reset Cart & Demo"}
+            </Button>
+            <Button
+              className="flex-1 py-5 rounded-xl text-xs font-bold"
+              onClick={() => setOpen(false)}
+            >
+              {locale === "ar" ? "Ø¥ØºÙ„Ø§Ù‚" : "Close"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+

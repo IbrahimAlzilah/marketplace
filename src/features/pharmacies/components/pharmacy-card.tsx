@@ -1,11 +1,11 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { Clock, MapPin } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/shared/components/ui/badge";
+import { Card, CardContent } from "@/shared/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { Pharmacy } from "@/lib/mock-data";
 
@@ -81,7 +81,7 @@ export function PharmacyCard({ pharmacy, className, variant = "grid" }: Pharmacy
                   <MapPin className="size-3" />
                   {pharmacy.distance} {t("km")}
                 </span>
-                <span>·</span>
+                <span>Â·</span>
                 <span className="flex items-center gap-1">
                   <Clock className="size-3" />
                   {pharmacy.eta} {t("min")}
@@ -94,3 +94,4 @@ export function PharmacyCard({ pharmacy, className, variant = "grid" }: Pharmacy
     </Link>
   );
 }
+
