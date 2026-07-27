@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useTranslations } from "next-intl";
 import { ProfileLayout } from "@/shared/components/layout/profile-sidebar";
@@ -67,12 +67,12 @@ export function LoyaltyPage() {
           <Card>
             <CardContent className="p-5 space-y-2 text-sm text-muted-foreground">
               <p className="flex items-center gap-1 flex-wrap">
-                <span>â€¢ Earn 1 point for every</span>
+                <span>• Earn 1 point for every</span>
                 <Price amount={1} className="font-normal text-muted-foreground text-sm" iconClassName="text-muted-foreground" />
                 <span>spent</span>
               </p>
-              <p>â€¢ Bonus points on wellness bundles</p>
-              <p>â€¢ Double points during promotional periods</p>
+              <p>• Bonus points on wellness bundles</p>
+              <p>• Double points during promotional periods</p>
             </CardContent>
           </Card>
         </TabsContent>
@@ -80,12 +80,12 @@ export function LoyaltyPage() {
           <Card>
             <CardContent className="p-5 space-y-2 text-sm text-muted-foreground">
               <p className="flex items-center gap-1 flex-wrap">
-                <span>â€¢ 100 points =</span>
+                <span>• 100 points =</span>
                 <Price amount={1} className="font-normal text-muted-foreground text-sm" iconClassName="text-muted-foreground" />
                 <span>discount</span>
               </p>
-              <p>â€¢ Minimum 100 points to redeem</p>
-              <p>â€¢ Redeem at checkout</p>
+              <p>• Minimum 100 points to redeem</p>
+              <p>• Redeem at checkout</p>
             </CardContent>
           </Card>
         </TabsContent>
@@ -93,4 +93,3 @@ export function LoyaltyPage() {
     </ProfileLayout>
   );
 }
-

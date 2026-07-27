@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
@@ -72,7 +72,7 @@ export function PharmacyDetailPage({ slug }: { slug: string }) {
               <TabsTrigger value="offers">{t("offers")}</TabsTrigger>
               <TabsTrigger value="reviews">{tc("reviews")}</TabsTrigger>
               <TabsTrigger value="branches">{t("branches")}</TabsTrigger>
-              <TabsTrigger value="info">{locale === "ar" ? "Ù…Ø¹Ù„ÙˆÙ…Ø§Øª" : "Info"}</TabsTrigger>
+              <TabsTrigger value="info">{locale === "ar" ? "معلومات" : "Info"}</TabsTrigger>
             </TabsList>
             <TabsContent value="products" className="mt-6">
               <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
@@ -92,28 +92,28 @@ export function PharmacyDetailPage({ slug }: { slug: string }) {
                 <p className="font-medium">{address}</p>
                 <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
                   <Clock className="h-4 w-4" />
-                  {pharmacy.eta} {tc("min")} Â· {pharmacy.distance} {tc("km")}
+                  {pharmacy.eta} {tc("min")} · {pharmacy.distance} {tc("km")}
                 </p>
               </div>
             </TabsContent>
             <TabsContent value="info" className="mt-6">
               <div className="grid gap-6 sm:grid-cols-2">
                 <div className="rounded-xl border p-5 space-y-4 bg-card">
-                  <h3 className="font-semibold text-lg">{locale === "ar" ? "Ù…Ø¹Ù„ÙˆÙ…Ø§Øª Ø§Ù„ØªÙˆØµÙŠÙ„" : "Delivery Info"}</h3>
+                  <h3 className="font-semibold text-lg">{locale === "ar" ? "معلومات التوصيل" : "Delivery Info"}</h3>
                   <div className="space-y-3 text-sm text-muted-foreground">
                     <p className="flex items-center gap-2">
                       <Clock className="h-4 w-4 text-primary" />
-                      <span>{locale === "ar" ? "ÙˆÙ‚Øª Ø§Ù„ØªÙˆØµÙŠÙ„ Ø§Ù„Ù…ØªÙˆÙ‚Ø¹" : "Est. delivery"}: {pharmacy.eta} {tc("min")}</span>
+                      <span>{locale === "ar" ? "وقت التوصيل المتوقع" : "Est. delivery"}: {pharmacy.eta} {tc("min")}</span>
                     </p>
                     <p className="flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-primary" />
-                      <span>{pharmacy.distance} {tc("km")} {locale === "ar" ? "Ø¨Ø¹ÙŠØ¯" : "away"}</span>
+                      <span>{pharmacy.distance} {tc("km")} {locale === "ar" ? "بعيد" : "away"}</span>
                     </p>
                   </div>
                 </div>
 
                 <div className="rounded-xl border p-5 space-y-4 bg-card">
-                  <h3 className="font-semibold text-lg">{locale === "ar" ? "ØªÙØ§ØµÙŠÙ„ Ø§Ù„ØµÙŠØ¯Ù„ÙŠØ©" : "Pharmacy Details"}</h3>
+                  <h3 className="font-semibold text-lg">{locale === "ar" ? "تفاصيل الصيدلية" : "Pharmacy Details"}</h3>
                   <div className="space-y-3 text-sm text-muted-foreground">
                     <p className="flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-primary" />
@@ -123,7 +123,7 @@ export function PharmacyDetailPage({ slug }: { slug: string }) {
                       <Clock className="h-4 w-4 text-primary" />
                       <span>
                         {pharmacy.isOpen ? tc("open") : tc("closed")}
-                        {!pharmacy.isOpen && pharmacy.opensAt && ` Â· ${tc("opensAt", { time: pharmacy.opensAt })}`}
+                        {!pharmacy.isOpen && pharmacy.opensAt && ` · ${tc("opensAt", { time: pharmacy.opensAt })}`}
                       </span>
                     </p>
                   </div>
@@ -136,4 +136,3 @@ export function PharmacyDetailPage({ slug }: { slug: string }) {
     </div>
   );
 }
-

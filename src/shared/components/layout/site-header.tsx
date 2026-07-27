@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
@@ -17,8 +17,7 @@ import {
   User,
 } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useEffect, useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -30,26 +29,10 @@ import { useAuthStore } from "@/stores/auth-store";
 import { LocationSelector } from "@/shared/components/marketplace/location-selector";
 import { cn } from "@/lib/utils";
 
-function CategorySearchParamListener({
-  onCategoryChange,
-}: {
-  onCategoryChange: (cat: string | null) => void;
-}) {
-  const searchParams = useSearchParams();
-  const cat = searchParams ? searchParams.get("category") : null;
-
-  useEffect(() => {
-    onCategoryChange(cat);
-  }, [cat, onCategoryChange]);
-
-  return null;
-}
-
 export function SiteHeader() {
   const t = useTranslations("common");
   const locale = useLocale();
   const pathname = usePathname();
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const router = useRouter();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -60,6 +43,43 @@ export function SiteHeader() {
   const itemCount = useCartStore((s) => s.getItemCount());
   const { city, district } = useLocationStore();
   const { isAuthenticated, user, openAuthModal } = useAuthStore();
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const getCategoryFromUrl = () => {
+        const params = new URLSearchParams(window.location.search);
+        return params.get("category");
+      };
+
+      setActiveCategory(getCategoryFromUrl());
+
+      const originalPush = window.history.pushState;
+      const originalReplace = window.history.replaceState;
+
+      window.history.pushState = function (...args) {
+        originalPush.apply(this, args);
+        setActiveCategory(getCategoryFromUrl());
+      };
+
+      window.history.replaceState = function (...args) {
+        originalReplace.apply(this, args);
+        setActiveCategory(getCategoryFromUrl());
+      };
+
+      const handlePopState = () => {
+        setActiveCategory(getCategoryFromUrl());
+      };
+
+      window.addEventListener("popstate", handlePopState);
+
+      return () => {
+        window.history.pushState = originalPush;
+        window.history.replaceState = originalReplace;
+        window.removeEventListener("popstate", handlePopState);
+      };
+    }
+  }, [pathname]);
 
   const matchedAddress = addresses.find(
     (addr) => addr.district === district && addr.city === city
@@ -98,9 +118,6 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50 border-b bg-card">
-      <Suspense fallback={null}>
-        <CategorySearchParamListener onCategoryChange={setActiveCategory} />
-      </Suspense>
       {/* Main header */}
       <div className="container-marketplace">
         <div className="flex h-16 items-center gap-4 lg:gap-8">
@@ -385,7 +402,7 @@ export function SiteHeader() {
             </Link>
             <button onClick={switchLocale} className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-primary/5">
               <Globe className="size-4" />
-              {locale === "en" ? "Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©" : "English"}
+              {locale === "en" ? "العربية" : "English"}
             </button>
           </nav>
         </div>
@@ -395,8 +412,63 @@ export function SiteHeader() {
   );
 }
 
-// MobileBottomNav has been extracted to its own file.
-// Re-exported here for backward compatibility with imports from "@/shared/components/layout/site-header".
-export { MobileBottomNav } from "@/shared/components/layout/mobile-bottom-nav";
+export function MobileBottomNav() {
+  const t = useTranslations("common");
+  const pathname = usePathname();
+  const itemCount = useCartStore((s) => s.getItemCount());
+  const { isAuthenticated, openAuthModal } = useAuthStore();
 
+  const links = [
+    { href: "/", icon: Home, label: t("home"), match: (p: string) => p === "/" },
+    { href: "/pharmacies", icon: MapPin, label: t("pharmacies"), match: (p: string) => p.startsWith("/pharmacies") },
+    { href: "/cart", icon: ShoppingCart, label: t("cart"), match: (p: string) => p.startsWith("/cart"), badge: itemCount },
+    { href: "/orders", icon: Package, label: t("orders"), match: (p: string) => p.startsWith("/orders") },
+    { href: "/profile", icon: User, label: t("profile"), match: (p: string) => p.startsWith("/profile") },
+  ];
 
+  return (
+    <nav className="fixed inset-x-0 bottom-0 z-50 border-t bg-card/95 backdrop-blur md:hidden">
+      <div className="flex h-16 items-center justify-around">
+        {links.map((link) => {
+          const Icon = link.icon;
+          const active = link.match(pathname);
+          const isProfileLink = link.href === "/profile";
+
+          if (isProfileLink && !isAuthenticated) {
+            return (
+              <button
+                key={link.href}
+                onClick={() => openAuthModal("login")}
+                className={cn(
+                  "relative flex flex-col items-center gap-0.5 px-3 py-1 text-[10px] text-muted-foreground cursor-pointer"
+                )}
+              >
+                <Icon className="size-5 text-muted-foreground" />
+                <span>{link.label}</span>
+              </button>
+            );
+          }
+
+          return (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={cn(
+                "relative flex flex-col items-center gap-0.5 px-3 py-1 text-[10px]",
+                active ? "text-primary" : "text-muted-foreground"
+              )}
+            >
+              <Icon className={cn("size-5", active && "text-primary")} />
+              <span>{link.label}</span>
+              {link.badge && link.badge > 0 ? (
+                <Badge className="absolute -end-0 -top-0 flex size-4 items-center justify-center p-0 text-[9px]">
+                  {link.badge}
+                </Badge>
+              ) : null}
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}

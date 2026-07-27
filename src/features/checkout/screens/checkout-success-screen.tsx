@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useTranslations } from "next-intl";
 import { CheckCircle } from "lucide-react";
@@ -36,4 +36,3 @@ export function CheckoutSuccessPage() {
     </div>
   );
 }
-

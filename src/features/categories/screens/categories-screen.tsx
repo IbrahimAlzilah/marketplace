@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
@@ -21,7 +21,7 @@ export function CategoriesPage() {
                 <h2 className="font-semibold text-lg">
                   {locale === "ar" ? cat.nameAr : cat.name}
                 </h2>
-                <p className="text-sm text-primary">Browse products â†’</p>
+                <p className="text-sm text-primary">Browse products →</p>
               </CardContent>
             </Card>
           </Link>
@@ -30,4 +30,3 @@ export function CategoriesPage() {
     </div>
   );
 }
-

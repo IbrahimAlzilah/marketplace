@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
@@ -81,7 +81,7 @@ export function PharmacyCard({ pharmacy, className, variant = "grid" }: Pharmacy
                   <MapPin className="size-3" />
                   {pharmacy.distance} {t("km")}
                 </span>
-                <span>Â·</span>
+                <span>·</span>
                 <span className="flex items-center gap-1">
                   <Clock className="size-3" />
                   {pharmacy.eta} {t("min")}
@@ -94,4 +94,3 @@ export function PharmacyCard({ pharmacy, className, variant = "grid" }: Pharmacy
     </Link>
   );
 }
-

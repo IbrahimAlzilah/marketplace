@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useTranslations, useLocale } from "next-intl";
 import { ProfileLayout } from "@/shared/components/layout/profile-sidebar";
@@ -38,12 +38,12 @@ export function SettingsPage() {
               <div>
                 <Label>{t("language")}</Label>
                 <p className="text-sm text-muted-foreground">
-                  {locale === "en" ? "English" : "Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©"}
+                  {locale === "en" ? "English" : "العربية"}
                 </p>
               </div>
             </div>
             <Button variant="outline" onClick={switchLocale}>
-              {locale === "en" ? "Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©" : "English"}
+              {locale === "en" ? "العربية" : "English"}
             </Button>
           </CardContent>
         </Card>
@@ -76,4 +76,3 @@ export function SettingsPage() {
     </ProfileLayout>
   );
 }
-
