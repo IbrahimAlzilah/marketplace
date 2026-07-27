@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/shared/components/ui/card";
 import { Label } from "@/shared/components/ui/label";
 import { Switch } from "@/shared/components/ui/switch";
 import { useRouter, usePathname } from "@/i18n/navigation";
-import { useAuthStore } from "@/stores/auth-store";
+import { useAuthStore } from "@/features/auth";
 import { useTheme } from "next-themes";
 import { Globe, Moon } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useTranslations } from "next-intl";
 import { ProfileLayout } from "@/shared/components/layout/profile-sidebar";
@@ -7,7 +7,7 @@ import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Link } from "@/i18n/navigation";
-import { useAuthStore } from "@/stores/auth-store";
+import { useAuthStore } from "@/features/auth";
 import { formatPrice } from "@/lib/utils";
 import { Star, Wallet } from "lucide-react";
 

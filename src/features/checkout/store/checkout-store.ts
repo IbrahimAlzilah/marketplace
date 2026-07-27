@@ -1,4 +1,4 @@
-import { useCartStore } from "@/stores/cart-store";
+import { useCartStore } from "@/features/cart";
 
 export const useCheckoutStore = useCartStore;
-export type { CheckoutLine } from "@/stores/cart-store";
+export type { CheckoutLine } from "@/features/cart";

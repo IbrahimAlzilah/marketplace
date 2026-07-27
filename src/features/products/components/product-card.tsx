@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import Image from "next/image";
@@ -10,9 +10,10 @@ import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent } from "@/shared/components/ui/card";
 import { cn } from "@/lib/utils";
 import { Price } from "@/shared/components/ui/currency";
-import type { Product } from "@/lib/mock-data";
-import { useCartStore } from "@/stores/cart-store";
-import { useWishlistStore } from "@/stores/wishlist-store";
+import type { Product } from "@/shared/types/domain";
+import { useCartStore } from "@/features/cart";
+import { QuantityStepper } from "@/shared/components/marketplace";
+import { useWishlistStore } from "@/features/profile";
 import { useToast } from "@/providers/toast-provider";
 
 type ProductCardProps = {
@@ -100,7 +101,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
           {cartItem ? (
             <QuantityStepper
               value={cartItem.quantity}
-              onChange={(q) => updateQuantity(product.id, q)}
+              onChange={(q: number) => updateQuantity(product.id, q)}
               max={product.stockCount}
               className="w-full h-10 flex justify-between p-1"
             />
@@ -152,9 +153,3 @@ export function ProductCardSkeleton() {
     </Card>
   );
 }
-
-import { QuantityStepper } from "@/shared/components/marketplace/quantity-stepper";
-
-export { QuantityStepper };
-
-

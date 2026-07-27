@@ -1,2 +1,3 @@
+export * from "./components/location-selector";
 export * from "./store/location-store";
-export * from "@/shared/components/marketplace/location-selector";
+export * from "./types/location.types";

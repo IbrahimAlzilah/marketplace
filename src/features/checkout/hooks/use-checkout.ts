@@ -5,7 +5,7 @@
  */
 "use client";
 
-import { useCheckoutStore } from "@/stores/checkout-store";
+import { useCheckoutStore } from "../store/checkout-store";
 
 export function useCheckout() {
   const checkoutAddressId = useCheckoutStore((s) => s.checkoutAddressId);

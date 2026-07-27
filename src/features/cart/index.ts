@@ -1,3 +1,14 @@
 export * from "./screens/cart-screen";
+export { CartItem } from "./components/CartItem";
+export { CartList } from "./components/CartList";
+export { CartSummary } from "./components/CartSummary";
+export { CartFooter } from "./components/CartFooter";
+export { Coupon } from "./components/Coupon";
+export { Shipping } from "./components/Shipping";
+export { Totals } from "./components/Totals";
+export { EmptyCart } from "./components/EmptyCart";
+export { MiniCart } from "./components/MiniCart";
 export * from "./hooks/use-cart";
 export * from "./store/cart-store";
+export * from "./types/cart.types";
+export * from "./api/cart-api";

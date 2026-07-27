@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,7 +8,7 @@ import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Card, CardContent } from "@/shared/components/ui/card";
-import { contactSchema, type ContactForm } from "@/lib/validations/contact";
+import { contactSchema, type ContactForm } from "../schemas/contact-schema";
 import { Mail, MessageCircle, Phone } from "lucide-react";
 
 export function ContactPage() {

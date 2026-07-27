@@ -18,7 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
-import { ProductCard, QuantityStepper } from "@/features/products";
+import { ProductCard } from "@/features/products";
+import { QuantityStepper } from "@/shared/components/marketplace";
 import {
   getProductBySlug,
   getPharmacyById,
@@ -26,9 +27,9 @@ import {
   getProductsByCategory,
   mockVendors,
 } from "@/lib/mock-data";
-import { useCartStore } from "@/stores/cart-store";
-import { useWishlistStore } from "@/stores/wishlist-store";
-import { useRecentlyViewedStore } from "@/stores/recently-viewed-store";
+import { useCartStore } from "@/features/cart";
+import { useWishlistStore } from "@/features/profile";
+import { useRecentlyViewedStore } from "../store/recently-viewed-store";
 import { cn, formatRating } from "@/lib/utils";
 import { Price } from "@/shared/components/ui/currency";
 

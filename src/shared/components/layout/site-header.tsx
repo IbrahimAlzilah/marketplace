@@ -23,10 +23,10 @@ import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Badge } from "@/shared/components/ui/badge";
 import { categories, addresses } from "@/lib/mock-data";
-import { useCartStore } from "@/stores/cart-store";
-import { useLocationStore } from "@/stores/location-store";
-import { useAuthStore } from "@/stores/auth-store";
-import { LocationSelector } from "@/shared/components/marketplace/location-selector";
+import { useCartStore } from "@/features/cart";
+import { useLocationStore, LocationSelector } from "@/features/location";
+import { useAuthStore } from "@/features/auth";
+import type { Category } from "@/features/categories";
 import { cn } from "@/lib/utils";
 
 export function SiteHeader() {
@@ -349,7 +349,7 @@ export function SiteHeader() {
                             </Link>
                             {cat.subcategories && (
                               <ul className="space-y-2">
-                                {cat.subcategories.map((sub) => {
+                                {cat.subcategories.map((sub: Category) => {
                                   const subName = locale === "ar" ? sub.nameAr : sub.name;
                                   return (
                                     <li key={sub.id}>

@@ -1,11 +1,11 @@
-﻿"use client";
+"use client";
 
 import { Home, MapPin, Package, ShoppingCart, User } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { Badge } from "@/shared/components/ui/badge";
-import { useCartStore } from "@/stores/cart-store";
-import { useAuthStore } from "@/stores/auth-store";
+import { useCartStore } from "@/features/cart";
+import { useAuthStore } from "@/features/auth";
 import { cn } from "@/lib/utils";
 
 export function MobileBottomNav() {

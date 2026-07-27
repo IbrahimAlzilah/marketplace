@@ -1,16 +1,16 @@
-﻿"use client";
+"use client";
 
 import Image from "next/image";
 import { useLocale } from "next-intl";
 import { ArrowLeft, ArrowRight, XIcon } from "lucide-react";
 import { Dialog, DialogClose, DialogContent } from "@/shared/components/ui/dialog";
 import { Button } from "@/shared/components/ui/button";
-import { useAuthModalStore } from "@/stores/auth-modal-store";
-import { LoginForm } from "@/features/auth/components/LoginForm";
-import { RegisterForm } from "@/features/auth/components/RegisterForm";
-import { ForgotPasswordForm } from "@/features/auth/components/ForgotPasswordForm";
-import { OtpForm } from "@/features/auth/components/OtpForm";
-import { ResetPasswordForm } from "@/features/auth/components/ResetPasswordForm";
+import { useAuthModalStore } from "../store/auth-modal-store";
+import { LoginForm } from "../components/LoginForm";
+import { RegisterForm } from "../components/RegisterForm";
+import { ForgotPasswordForm } from "../components/ForgotPasswordForm";
+import { OtpForm } from "../components/OtpForm";
+import { ResetPasswordForm } from "../components/ResetPasswordForm";
 
 export function AuthModal() {
   const locale = useLocale();

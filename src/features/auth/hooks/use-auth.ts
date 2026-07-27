@@ -6,8 +6,8 @@
  */
 "use client";
 
-import { useAuthStore } from "@/stores/auth-store";
-import { useAuthModalStore } from "@/stores/auth-modal-store";
+import { useAuthStore } from "../store/auth-store";
+import { useAuthModalStore } from "../store/auth-modal-store";
 
 export function useAuth() {
   const user = useAuthStore((s) => s.user);

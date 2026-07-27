@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useTranslations } from "next-intl";
 import { MapPin, Navigation } from "lucide-react";
@@ -10,7 +10,7 @@ import {
 } from "@/shared/components/ui/dialog";
 import { Button } from "@/shared/components/ui/button";
 import { addresses } from "@/lib/mock-data";
-import { useLocationStore } from "@/stores/location-store";
+import { useLocationStore } from "@/features/location";
 import { cn } from "@/lib/utils";
 
 type LocationSelectorProps = {

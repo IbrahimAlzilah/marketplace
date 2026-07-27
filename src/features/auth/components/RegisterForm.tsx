@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import Image from "next/image";
@@ -11,8 +11,8 @@ import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Checkbox } from "@/shared/components/ui/checkbox";
-import { registerSchema, type RegisterForm as RegisterFormValues } from "@/lib/validations/auth";
-import { useAuthModalStore } from "@/stores/auth-modal-store";
+import { registerSchema, type RegisterForm as RegisterFormValues } from "../schemas/auth-schema";
+import { useAuthModalStore } from "../store/auth-modal-store";
 
 export function RegisterForm() {
   const t = useTranslations("auth");
@@ -192,4 +192,3 @@ export function RegisterForm() {
     </div>
   );
 }
-

@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import { Beaker, ChevronRight, Play, RefreshCw, X } from "lucide-react";
+import { Beaker, Play, RefreshCw } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/shared/components/ui/dialog";
-import { useCartStore } from "@/stores/cart-store";
-import { SCENARIOS } from "@/lib/allocation-evaluator";
+import { useCartStore } from "@/features/cart";
+import { SCENARIOS } from "@/features/checkout/lib/allocation-evaluator";
 import { cn } from "@/lib/utils";
 
 export function ScenarioSelector() {

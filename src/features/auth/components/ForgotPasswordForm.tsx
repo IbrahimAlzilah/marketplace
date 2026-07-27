@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import Image from "next/image";
@@ -9,8 +9,8 @@ import { DialogHeader, DialogTitle, DialogDescription } from "@/shared/component
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
-import { forgotPasswordSchema, type ForgotPasswordForm as ForgotPasswordFormValues } from "@/lib/validations/auth";
-import { useAuthModalStore } from "@/stores/auth-modal-store";
+import { forgotPasswordSchema, type ForgotPasswordForm as ForgotPasswordFormValues } from "../schemas/auth-schema";
+import { useAuthModalStore } from "../store/auth-modal-store";
 
 export function ForgotPasswordForm() {
   const t = useTranslations("auth");
@@ -100,4 +100,3 @@ export function ForgotPasswordForm() {
     </div>
   );
 }
-

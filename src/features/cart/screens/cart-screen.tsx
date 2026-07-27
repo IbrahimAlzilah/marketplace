@@ -1,22 +1,24 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
-import { Clock, Trash2, Loader2, CheckCircle, XCircle } from "lucide-react";
-import { Link, useRouter } from "@/i18n/navigation";
+import { Clock, Loader2, CheckCircle, XCircle } from "lucide-react";
+import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/shared/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
+import { Card } from "@/shared/components/ui/card";
 import { Separator } from "@/shared/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared/components/ui/dialog";
-import { RadioGroup, RadioGroupItem } from "@/shared/components/ui/radio-group";
-import { OrderSummary } from "@/shared/components/marketplace/order-summary";
-import { QuantityStepper } from "@/features/products";
-import { getProductById, getPharmacyById } from "@/lib/mock-data";
-import { useCartStore } from "@/stores/cart-store";
-import { cn } from "@/lib/utils";
 import { Price } from "@/shared/components/ui/currency";
-import { getMockAllocations, AllocationStatus, AllocationItem, SCENARIOS } from "@/lib/allocation-evaluator";
+import { getProductById } from "@/lib/mock-data";
+import { useCartStore } from "../store/cart-store";
+import { cn } from "@/lib/utils";
+import { getMockAllocations, AllocationStatus, AllocationItem, SCENARIOS } from "@/features/checkout/lib/allocation-evaluator";
+
+import { EmptyCart } from "../components/EmptyCart";
+import { CartList } from "../components/CartList";
+import { CartSummary } from "../components/CartSummary";
+import { CartFooter } from "../components/CartFooter";
+import { Shipping } from "../components/Shipping";
 
 const mockAddresses = [
   { id: "addr-1", label: "the home", isMain: true, address: "Samaya Furnished Apartments, Room 260, Al Quds, Riyadh, Saudi Arabia" },
@@ -24,7 +26,6 @@ const mockAddresses = [
   { id: "addr-3", label: "the job", isMain: false, address: "Samaya Furnished Apartments, Room 260, Al Quds, Riyadh, Saudi Arabia" }
 ];
 
-// Mock approvals structure
 const mockApprovedPharmacies = [
   {
     name: "Nahdi Pharmacy",
@@ -58,23 +59,19 @@ const mockRejectedPharmacies = [
 
 export function CartPage() {
   const t = useTranslations("cart");
-  const tc = useTranslations("common");
   const tCheckout = useTranslations("checkout");
   const locale = useLocale();
   const router = useRouter();
-  const { items, removeItem, updateQuantity, checkoutLines, setCheckoutLines, setCheckoutAddressId, resetCheckout, activeScenarioId } = useCartStore();
+  const { items, checkoutLines, setCheckoutLines, setCheckoutAddressId, resetCheckout, activeScenarioId } = useCartStore();
 
   // Address dialog state
   const [addressModalOpen, setAddressModalOpen] = useState(false);
   const [selectedAddrId, setSelectedAddrId] = useState("addr-1");
 
-  // Simulated pharmacy approvals states inside Cart Page
+  // Simulated pharmacy approvals states
   const [processingOpen, setProcessingOpen] = useState(false);
   const [statusOpen, setStatusOpen] = useState(false);
   const [timeLeft, setTimeLeft] = useState(60);
-  const [nahdiStatus, setNahdiStatus] = useState<"Pending" | "Approve" | "Reject">("Pending");
-  const [avnzorStatus, setAvnzorStatus] = useState<"Pending" | "Approve" | "Reject">("Pending");
-  const [whitesStatus, setWhitesStatus] = useState<"Pending" | "Approve" | "Reject">("Pending");
 
   // Flowchart Substitute State Gaps
   const [approvedPharmacies, setApprovedPharmacies] = useState(mockApprovedPharmacies);
@@ -83,13 +80,6 @@ export function CartPage() {
 
   // Allocation Simulation
   const [finalAllocations, setFinalAllocations] = useState<AllocationItem[]>([]);
-
-  // Translators helpers for mock details
-  const getAddressLabelTranslation = (label: string) => {
-    if (label.includes("home")) return tCheckout("addressHome");
-    if (label.includes("job")) return tCheckout("addressJob");
-    return label;
-  };
 
   const getPharmacyTranslation = (name: string) => {
     if (name.includes("Nahdi")) return tCheckout("nahdiPharmacy");
@@ -109,7 +99,6 @@ export function CartPage() {
     return name;
   };
 
-  // Accelerated timer tick logic for review simulation
   useEffect(() => {
     if (!processingOpen) return;
 
@@ -124,14 +113,13 @@ export function CartPage() {
           return 0;
         }
 
-        // Transition allocations
         let pharmacyIdToUnlock = "";
         if (nextTime === 50) {
-          pharmacyIdToUnlock = "p1"; // Nahdi
+          pharmacyIdToUnlock = "p1";
         } else if (nextTime === 30) {
-          pharmacyIdToUnlock = "p4"; // United / Avnzor equivalents
+          pharmacyIdToUnlock = "p4";
         } else if (nextTime === 10) {
-          pharmacyIdToUnlock = "ALL_REMAINING"; // Whites etc.
+          pharmacyIdToUnlock = "ALL_REMAINING";
         }
 
         if (pharmacyIdToUnlock) {
@@ -160,14 +148,10 @@ export function CartPage() {
     return () => clearInterval(interval);
   }, [processingOpen, finalAllocations, router, setCheckoutLines]);
 
-  // If checkout is in progress, lock the cart screen
   if (checkoutLines && checkoutLines.length > 0) {
     return (
       <div className="container-marketplace py-12 max-w-2xl mx-auto text-center space-y-6">
         <div className="flex justify-center">
-          {/* <div className="flex h-20 w-20 items-center justify-center rounded-full bg-yellow-500/10 border-4 border-yellow-500/20 text-yellow-500">
-            <Clock className="h-10 w-10 animate-pulse" />
-          </div> */}
           <div className="bg-secondary/12 relative flex size-20 items-center justify-center rounded-full">
             <div className="border-secondary/40 border-t-secondary border-r-secondary absolute inset-4.5 animate-spin rounded-full border-[3.5px]" />
           </div>
@@ -214,232 +198,70 @@ export function CartPage() {
     );
   }
 
-  const cartGroups = items.reduce<
-    Record<string, { pharmacyId: string; lines: { productId: string; quantity: number }[] }>
-  >((acc, item) => {
-    const product = getProductById(item.productId);
-    if (!product) return acc;
-    if (!acc[product.pharmacyId]) {
-      acc[product.pharmacyId] = { pharmacyId: product.pharmacyId, lines: [] };
-    }
-    acc[product.pharmacyId].lines.push(item);
-    return acc;
-  }, {});
+  if (items.length === 0) {
+    return <EmptyCart />;
+  }
 
-  const groups = Object.values(cartGroups);
   const subtotal = items.reduce((sum, item) => {
     const product = getProductById(item.productId);
     return sum + (product ? product.price * item.quantity : 0);
   }, 0);
-  const deliveryFees = groups.reduce((sum, group) => {
-    const pharmacy = getPharmacyById(group.pharmacyId);
-    return sum + (pharmacy?.deliveryFee ?? 0);
-  }, 0);
-
-  if (items.length === 0) {
-    return (
-      <div className="container-marketplace flex flex-col items-center justify-center py-20 text-center">
-        <h1 className="text-2xl font-bold">{t("empty")}</h1>
-        <p className="mt-2 text-muted-foreground">{t("emptyDescription")}</p>
-        <Button asChild className="mt-6" size="lg">
-          <Link href="/products">{tc("continueShopping")}</Link>
-        </Button>
-      </div>
-    );
-  }
+  const deliveryFees = 20; // Standard estimated delivery fee
 
   return (
-    <div className="container-marketplace py-6 lg:py-6 relative">
-      <h1 className="mb-6 text-xl font-bold">
-        {t("title")} ({t("items", { count: items.length })})
-      </h1>
+    <div className="container-marketplace py-6 lg:py-6 relative space-y-8">
+      <div>
+        <h1 className="mb-6 text-xl font-bold">
+          {t("title")} ({t("items", { count: items.length })})
+        </h1>
 
-      <div className="grid gap-8 lg:grid-cols-12">
-        {/* Left: Cart items */}
-        <div className="space-y-6 lg:col-span-8">
-          {groups.map((group) => {
-            const pharmacy = getPharmacyById(group.pharmacyId);
-            if (!pharmacy) return null;
-            const pharmacyName = locale === "ar" ? pharmacy.nameAr : pharmacy.name;
-            const groupSubtotal = group.lines.reduce((sum, line) => {
-              const product = getProductById(line.productId);
-              return sum + (product ? product.price * line.quantity : 0);
-            }, 0);
+        <div className="grid gap-8 lg:grid-cols-12">
+          {/* Left: Cart items */}
+          <div className="space-y-6 lg:col-span-8">
+            <CartList items={items} />
+          </div>
 
-            // Free Delivery Goal Calculations
-            const freeDeliveryThreshold = 200; // SAR threshold for free delivery
-            const isFreeDeliveryUnlocked = groupSubtotal >= freeDeliveryThreshold;
-            const remainingForFree = Math.max(0, freeDeliveryThreshold - groupSubtotal);
-            const freeDeliveryPercent = Math.min(100, Math.round((groupSubtotal / freeDeliveryThreshold) * 100));
-
-            return (
-              <Card key={group.pharmacyId} className="shadow-none border rounded-2xl overflow-hidden">
-                <CardHeader className="pb-3 border-b bg-card">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <div className="h-6 w-6 bg-primary/10 rounded-lg flex items-center justify-center font-bold text-primary text-[10px]">
-                        🏥
-                      </div>
-                      <CardTitle className="text-base font-bold text-primary">
-                        {pharmacyName}
-                      </CardTitle>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-5 space-y-4">
-                  {/* Items List */}
-                  <div className="space-y-3">
-                    {group.lines.map((line) => {
-                      const product = getProductById(line.productId);
-                      if (!product) return null;
-                      const name = locale === "ar" ? product.nameAr : product.name;
-                      return (
-                        <div key={line.productId} className="border rounded-xl p-3 flex items-center justify-between gap-4 bg-card">
-                          <div className="flex items-center gap-3.5 min-w-0">
-                            <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border bg-white flex items-center justify-center">
-                              <Image src={product.image} alt={name} fill className="object-contain p-1 rounded-lg" />
-                            </div>
-                            <div className="min-w-0">
-                              <h4 className="font-semibold text-sm text-foreground line-clamp-1 truncate">{name}</h4>
-                              <Price amount={product.price} className="text-sm font-bold text-primary mt-0.5" />
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-1.5 shrink-0">
-                            <QuantityStepper
-                              value={line.quantity}
-                              onChange={(q) => updateQuantity(line.productId, q)}
-                              max={product.stockCount}
-                            />
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {/* Delivery Threshold Indicator */}
-                  {isFreeDeliveryUnlocked ? (
-                    <div className="p-2.5 rounded-lg border border-green-500/10 bg-green-500/5 text-xs text-green-600 font-medium text-start">
-                      {t("freeDeliveryUnlocked")}
-                    </div>
-                  ) : (
-                    <div className="p-3 rounded-lg border bg-muted/10 space-y-2">
-                      <div className="flex justify-between text-xs font-medium text-muted-foreground">
-                        <span className="inline-flex items-center gap-1">
-                          {t.rich("addMoreForFree", {
-                            amount: () => <Price amount={remainingForFree} className="font-semibold text-muted-foreground" iconClassName="text-muted-foreground" />
-                          })}
-                        </span>
-                        <span>{freeDeliveryPercent}%</span>
-                      </div>
-                      <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-primary transition-all duration-300"
-                          style={{ width: `${freeDeliveryPercent}%` }}
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  <Separator className="mb-1" />
-                  <div className="flex justify-between text-sm pt-2">
-                    <span className="text-muted-foreground">
-                      {locale === "ar" ? "المجموع الفرعي للصيدلية:" : "Pharmacy Subtotal:"}
-                    </span>
-                    <Price amount={groupSubtotal} className="font-bold text-foreground" />
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-
-        {/* Right: Sticky summary */}
-        <div className="lg:col-span-4">
-          <OrderSummary
-            subtotal={subtotal}
-            deliveryFees={deliveryFees}
-            showCoupon={false}
-            showWallet={false}
-            showLoyalty={false}
-            className="sticky top-36"
-            onCheckout={() => setAddressModalOpen(true)}
-          />
+          {/* Right: Sticky summary */}
+          <div className="lg:col-span-4">
+            <CartSummary
+              subtotal={subtotal}
+              deliveryFees={deliveryFees}
+              onCheckout={() => setAddressModalOpen(true)}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Address Selection Modal - Wireframe 5 */}
-      <Dialog open={addressModalOpen} onOpenChange={setAddressModalOpen}>
-        <DialogContent className="sm:max-w-lg p-6 rounded-2xl bg-card">
-          <DialogHeader className="pb-2 border-b">
-            <DialogTitle className="text-lg font-bold text-foreground">{tCheckout("chooseAddress")}</DialogTitle>
-          </DialogHeader>
-          <div className="py-4 space-y-4">
-            <Button variant="outline" className="w-full justify-center gap-2 border-dashed border-2 py-6 rounded-xl hover:bg-primary/5">
-              <span className="text-xl font-bold">+</span> {tCheckout("addNewTitle")}
-            </Button>
+      <CartFooter />
 
-            <RadioGroup value={selectedAddrId} onValueChange={setSelectedAddrId} className="space-y-3">
-              {mockAddresses.map((addr) => (
-                <label
-                  key={addr.id}
-                  className={cn(
-                    "flex items-start gap-3 rounded-xl border p-4 cursor-pointer transition-all hover:bg-muted/40",
-                    selectedAddrId === addr.id ? "border-primary bg-primary/5" : "border-border"
-                  )}
-                >
-                  <RadioGroupItem value={addr.id} className="mt-1" />
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-sm text-foreground">{getAddressLabelTranslation(addr.label)}</span>
-                      {addr.isMain && (
-                        <span className="text-[10px] bg-primary/10 text-primary font-semibold px-2 py-0.5 rounded-full">
-                          {tCheckout("main")}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground leading-normal">{addr.address}</p>
-                  </div>
-                </label>
-              ))}
-            </RadioGroup>
-          </div>
-          <div className="flex flex-col gap-2 pt-2 border-t">
-            <Button
-              className="w-full py-6 rounded-xl text-base font-bold text-white bg-primary hover:bg-primary/95"
-              onClick={() => {
-                // Simulate checkoutSubmit mutation success
-                const activeScenario = activeScenarioId ? SCENARIOS.find(s => s.id === activeScenarioId) : null;
-                const allocations = activeScenario ? activeScenario.allocations : getMockAllocations(items);
-                setFinalAllocations(allocations);
+      {/* Address Selection Modal */}
+      <Shipping
+        open={addressModalOpen}
+        onOpenChange={setAddressModalOpen}
+        addresses={mockAddresses}
+        selectedAddressId={selectedAddrId}
+        onSelectAddress={setSelectedAddrId}
+        onConfirm={() => {
+          const activeScenario = activeScenarioId ? SCENARIOS.find(s => s.id === activeScenarioId) : null;
+          const allocations = activeScenario ? activeScenario.allocations : getMockAllocations(items);
+          setFinalAllocations(allocations);
 
-                const initialLines = allocations.map(line => ({
-                  ...line,
-                  allocatedQty: "?",
-                  status: AllocationStatus.PENDING,
-                  resolution: "pending" as const,
-                }));
+          const initialLines = allocations.map(line => ({
+            ...line,
+            allocatedQty: "?",
+            status: AllocationStatus.PENDING,
+            resolution: "pending" as const,
+          }));
 
-                setCheckoutLines(initialLines);
-                setCheckoutAddressId(selectedAddrId);
-                setAddressModalOpen(false);
-                setTimeLeft(60);
-                setProcessingOpen(true);
-              }}
-            >
-              {tCheckout("select")}
-            </Button>
-            <Button
-              variant="ghost"
-              className="w-full py-6 rounded-xl text-base font-bold text-muted-foreground"
-              onClick={() => setAddressModalOpen(false)}
-            >
-              {tCheckout("cancel")}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+          setCheckoutLines(initialLines);
+          setCheckoutAddressId(selectedAddrId);
+          setAddressModalOpen(false);
+          setTimeLeft(60);
+          setProcessingOpen(true);
+        }}
+      />
 
-      {/* 1. Processing Your Order Dialog Popup (Wireframe 4) */}
+      {/* 1. Processing Your Order Dialog Popup */}
       <Dialog open={processingOpen} onOpenChange={() => { }}>
         <DialogContent
           className="sm:max-w-lg p-6 rounded-3xl bg-card border text-center space-y-6"
@@ -478,7 +300,6 @@ export function CartPage() {
           <div className="space-y-3 pt-4 border-t text-start">
             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{tCheckout("pendingApprovalFrom")}</p>
 
-            {/* Group checkoutLines by pharmacy */}
             {Object.values(
               checkoutLines.reduce<Record<string, { pharmacyId: string; name: string; nameAr: string; lines: typeof checkoutLines }>>((acc, line) => {
                 if (!acc[line.pharmacyId]) {
@@ -493,11 +314,6 @@ export function CartPage() {
                 return acc;
               }, {})
             ).map((group) => {
-              // Determine group status:
-              // - "Pending" if any line is PENDING
-              // - "Reject" if any line is REJECTED
-              // - "Partial" if any line is PARTIAL
-              // - "Approve" otherwise
               let groupStatus: "Pending" | "Approve" | "Partial" | "Reject" = "Approve";
               if (group.lines.some(l => l.status === AllocationStatus.PENDING)) {
                 groupStatus = "Pending";
@@ -548,7 +364,7 @@ export function CartPage() {
         </DialogContent>
       </Dialog>
 
-      {/* 2. Order Approval Status Dialog Popup (Wireframe 3) */}
+      {/* 2. Order Approval Status Dialog Popup */}
       <Dialog open={statusOpen} onOpenChange={setStatusOpen}>
         <DialogContent
           className="sm:max-w-3xl max-h-[90vh] overflow-y-auto p-6 rounded-3xl bg-card border space-y-6"
@@ -560,7 +376,6 @@ export function CartPage() {
           </DialogHeader>
 
           <div className="space-y-6">
-            {/* Approved Orders */}
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-green-600">
                 <CheckCircle className="h-5 w-5 fill-green-100" />
@@ -595,7 +410,6 @@ export function CartPage() {
               ))}
             </div>
 
-            {/* Rejected Orders */}
             {rejectedPharmacies.length > 0 && (
               <div className="space-y-3">
                 <div className="flex items-center gap-2 text-red-600">
@@ -633,7 +447,6 @@ export function CartPage() {
               </div>
             )}
 
-            {/* Footer Buttons */}
             <div className="flex flex-col gap-2 pt-2 border-t">
               <Button
                 className="w-full py-5 rounded-full text-sm font-medium bg-primary hover:bg-primary/95 text-white"
@@ -652,7 +465,7 @@ export function CartPage() {
         </DialogContent>
       </Dialog>
 
-      {/* 2b. Marketplace Alternatives Modal Dialog (Flowchart substitution path) */}
+      {/* 2b. Marketplace Alternatives Modal Dialog */}
       <Dialog open={alternativesOpen} onOpenChange={setAlternativesOpen}>
         <DialogContent
           className="sm:max-w-xl max-h-[85vh] overflow-y-auto p-6 rounded-3xl bg-card border space-y-6"
@@ -664,7 +477,6 @@ export function CartPage() {
           </DialogHeader>
 
           <div className="space-y-4">
-            {/* Substitute item 1 */}
             <div className="p-4 rounded-2xl border space-y-3 bg-muted/20">
               <div className="flex justify-between text-xs">
                 <span className="text-muted-foreground">{tCheckout("originalItem")}:</span>
@@ -679,7 +491,6 @@ export function CartPage() {
               </div>
             </div>
 
-            {/* Substitute item 2 */}
             <div className="p-4 rounded-2xl border space-y-3 bg-muted/20">
               <div className="flex justify-between text-xs">
                 <span className="text-muted-foreground">{tCheckout("originalItem")}:</span>
@@ -699,7 +510,6 @@ export function CartPage() {
             <Button
               className="w-full py-5 rounded-xl text-sm font-bold bg-primary hover:bg-primary/95 text-white"
               onClick={() => {
-                // Merge Whites Pharmacy as Approved
                 setApprovedPharmacies([
                   ...mockApprovedPharmacies,
                   {

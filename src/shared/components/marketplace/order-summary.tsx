@@ -9,7 +9,7 @@ import { Slider } from "@/shared/components/ui/slider";
 import { Checkbox } from "@/shared/components/ui/checkbox";
 import { Label } from "@/shared/components/ui/label";
 import { Price } from "@/shared/components/ui/currency";
-import { useCartStore } from "@/stores/cart-store";
+import { useCartStore } from "@/features/cart";
 
 type OrderSummaryProps = {
   subtotal: number;

@@ -1,11 +1,11 @@
-﻿"use client";
+"use client";
 
 import { useTranslations } from "next-intl";
 import { ProfileLayout } from "@/shared/components/layout/profile-sidebar";
 import { ProductCard } from "@/features/products";
 import { Button } from "@/shared/components/ui/button";
 import { getProductById } from "@/lib/mock-data";
-import { useWishlistStore } from "@/stores/wishlist-store";
+import { useWishlistStore } from "../store/wishlist-store";
 import { Link } from "@/i18n/navigation";
 import { Heart } from "lucide-react";
 

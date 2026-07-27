@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import Image from "next/image";
@@ -10,8 +10,8 @@ import { DialogHeader, DialogTitle, DialogDescription } from "@/shared/component
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
-import { resetPasswordSchema, type ResetPasswordForm as ResetPasswordFormValues } from "@/lib/validations/auth";
-import { useAuthModalStore } from "@/stores/auth-modal-store";
+import { resetPasswordSchema, type ResetPasswordForm as ResetPasswordFormValues } from "../schemas/auth-schema";
+import { useAuthModalStore } from "../store/auth-modal-store";
 
 export function ResetPasswordForm() {
   const t = useTranslations("auth");
@@ -129,4 +129,3 @@ export function ResetPasswordForm() {
     </div>
   );
 }
-

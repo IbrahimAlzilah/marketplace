@@ -7,7 +7,7 @@
  */
 "use client";
 
-import { useCartStore } from "@/stores/cart-store";
+import { useCartStore } from "../store/cart-store";
 
 export function useCart() {
   const items = useCartStore((s) => s.items);

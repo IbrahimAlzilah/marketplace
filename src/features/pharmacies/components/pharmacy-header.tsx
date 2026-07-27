@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { Clock, MapPin, ShieldCheck } from "lucide-react";
-import { AllocationStatus } from "@/lib/allocation-evaluator";
+import { AllocationStatus } from "@/features/checkout/lib/allocation-evaluator";
 import { cn } from "@/lib/utils";
 
 type PharmacyHeaderProps = {

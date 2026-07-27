@@ -1,1 +1,1 @@
-export { ProductCard, ProductCardSkeleton, QuantityStepper } from "@/features/products/components/product-card";
+export { ProductCard, ProductCardSkeleton } from "@/features/products/components/product-card";

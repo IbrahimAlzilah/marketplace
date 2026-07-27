@@ -24,8 +24,8 @@ import { Separator } from "@/shared/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { Price } from "@/shared/components/ui/currency";
-import { useCartStore, CheckoutLine } from "@/stores/cart-store";
-import { AllocationStatus } from "@/lib/allocation-evaluator";
+import { useCartStore, CheckoutLine } from "@/features/cart";
+import { AllocationStatus } from "../lib/allocation-evaluator";
 import { getProductById, pharmacies } from "@/lib/mock-data";
 import { PharmacyHeader } from "@/features/pharmacies";
 

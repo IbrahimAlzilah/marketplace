@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import Image from "next/image";
@@ -9,9 +9,9 @@ import { DialogHeader, DialogTitle, DialogDescription } from "@/shared/component
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
-import { otpSchema, type OtpForm as OtpFormValues } from "@/lib/validations/auth";
-import { useAuthStore } from "@/stores/auth-store";
-import { useAuthModalStore } from "@/stores/auth-modal-store";
+import { otpSchema, type OtpForm as OtpFormValues } from "../schemas/auth-schema";
+import { useAuthStore } from "../store/auth-store";
+import { useAuthModalStore } from "../store/auth-modal-store";
 
 export function OtpForm() {
   const t = useTranslations("auth");
@@ -133,4 +133,3 @@ export function OtpForm() {
     </div>
   );
 }
-
