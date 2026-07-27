@@ -1,6 +1,11 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+// Re-export modal store types and hook so existing consumers importing from
+// "@/stores/auth-store" continue to work without modification.
+export type { AuthModalStep } from "./auth-modal-store";
+export { useAuthModalStore } from "./auth-modal-store";
+
 export type User = {
   id: string;
   name: string;
@@ -8,47 +13,76 @@ export type User = {
   phone: string;
 };
 
-export type AuthModalStep = "login" | "register" | "forgot-password" | "otp" | "reset-password";
-
 type AuthState = {
   user: User | null;
   isAuthenticated: boolean;
   login: (user: User) => void;
   logout: () => void;
-  
-  // Modal State
+
+  // ---------------------------------------------------------------------------
+  // Backward-compat shims — these delegate to useAuthModalStore.
+  // Kept here so that components using `useAuthStore()` destructuring
+  // (e.g. `const { openAuthModal } = useAuthStore()`) continue working
+  // without any code changes.
+  // ---------------------------------------------------------------------------
   isAuthModalOpen: boolean;
-  authModalStep: AuthModalStep;
+  authModalStep: import("./auth-modal-store").AuthModalStep;
   authModalResetMode: boolean;
   authModalPhone: string;
-  openAuthModal: (step?: AuthModalStep) => void;
+  openAuthModal: (step?: import("./auth-modal-store").AuthModalStep) => void;
   closeAuthModal: () => void;
-  setAuthModalStep: (step: AuthModalStep) => void;
+  setAuthModalStep: (step: import("./auth-modal-store").AuthModalStep) => void;
   setAuthModalPhone: (phone: string) => void;
   setAuthModalResetMode: (resetMode: boolean) => void;
 };
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, _get) => ({
+      // ── Auth domain state ──────────────────────────────────────────────────
       user: null,
       isAuthenticated: false,
       login: (user) => set({ user, isAuthenticated: true }),
       logout: () => set({ user: null, isAuthenticated: false }),
-      
-      // Modal Implementation
+
+      // ── Modal UI shims (delegate to auth-modal-store) ─────────────────────
+      // These initial values are overridden at runtime by the modal store
+      // subscriptions in components that use both stores.
+      // The shims exist purely for backward compatibility.
       isAuthModalOpen: false,
-      authModalStep: "login",
+      authModalStep: "login" as const,
       authModalResetMode: false,
       authModalPhone: "",
-      openAuthModal: (step = "login") => set({ isAuthModalOpen: true, authModalStep: step }),
-      closeAuthModal: () => set({ isAuthModalOpen: false }),
-      setAuthModalStep: (step) => set({ authModalStep: step }),
-      setAuthModalPhone: (phone) => set({ authModalPhone: phone }),
-      setAuthModalResetMode: (resetMode) => set({ authModalResetMode: resetMode }),
+      openAuthModal: (step = "login") => {
+        // Delegate to the dedicated modal store
+        import("./auth-modal-store").then(({ useAuthModalStore }) => {
+          useAuthModalStore.getState().openAuthModal(step);
+        });
+      },
+      closeAuthModal: () => {
+        import("./auth-modal-store").then(({ useAuthModalStore }) => {
+          useAuthModalStore.getState().closeAuthModal();
+        });
+      },
+      setAuthModalStep: (step) => {
+        import("./auth-modal-store").then(({ useAuthModalStore }) => {
+          useAuthModalStore.getState().setAuthModalStep(step);
+        });
+      },
+      setAuthModalPhone: (phone) => {
+        import("./auth-modal-store").then(({ useAuthModalStore }) => {
+          useAuthModalStore.getState().setAuthModalPhone(phone);
+        });
+      },
+      setAuthModalResetMode: (resetMode) => {
+        import("./auth-modal-store").then(({ useAuthModalStore }) => {
+          useAuthModalStore.getState().setAuthModalResetMode(resetMode);
+        });
+      },
     }),
     {
       name: "yusur-auth",
+      // Only persist auth domain state — never modal UI state
       partialize: (state) => ({
         user: state.user,
         isAuthenticated: state.isAuthenticated,

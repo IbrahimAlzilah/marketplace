@@ -49,16 +49,11 @@ export const resetPasswordSchema = z
     path: ["confirmPassword"],
   });
 
-export const contactSchema = z.object({
-  name: z.string().min(2, "Name is required"),
-  email: z.string().email("Invalid email"),
-  subject: z.string().min(3, "Subject is required"),
-  message: z.string().min(10, "Message must be at least 10 characters"),
-});
+
 
 export type LoginForm = z.infer<typeof loginSchema>;
 export type RegisterForm = z.infer<typeof registerSchema>;
 export type OtpForm = z.infer<typeof otpSchema>;
 export type ForgotPasswordForm = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordForm = z.infer<typeof resetPasswordSchema>;
-export type ContactForm = z.infer<typeof contactSchema>;
+

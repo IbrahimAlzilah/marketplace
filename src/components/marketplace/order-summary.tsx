@@ -15,6 +15,8 @@ type OrderSummaryProps = {
   subtotal: number;
   deliveryFees: number;
   discount?: number;
+  walletBalance?: number;
+  loyaltyPointsBalance?: number;
   showCoupon?: boolean;
   showWallet?: boolean;
   showLoyalty?: boolean;
@@ -23,14 +25,16 @@ type OrderSummaryProps = {
   className?: string;
 };
 
-const WALLET_BALANCE = 125.5;
-const LOYALTY_POINTS = 2400;
+const DEFAULT_WALLET_BALANCE = 125.5;
+const DEFAULT_LOYALTY_POINTS = 2400;
 const POINTS_TO_SAR = 0.01;
 
 export function OrderSummary({
   subtotal,
   deliveryFees,
   discount = 0,
+  walletBalance = DEFAULT_WALLET_BALANCE,
+  loyaltyPointsBalance = DEFAULT_LOYALTY_POINTS,
   showCoupon = true,
   showWallet = true,
   showLoyalty = true,
@@ -75,12 +79,12 @@ export function OrderSummary({
               <Checkbox
                 id="wallet"
                 checked={walletAmount > 0}
-                onCheckedChange={(checked) => setWalletAmount(checked ? Math.min(WALLET_BALANCE, subtotal) : 0)}
+                onCheckedChange={(checked) => setWalletAmount(checked ? Math.min(walletBalance, subtotal) : 0)}
               />
               <Label htmlFor="wallet" className="flex-1 cursor-pointer">
                 {tc("useWallet")}
               </Label>
-              <Price amount={WALLET_BALANCE} className="text-sm text-primary font-medium" />
+              <Price amount={walletBalance} className="text-sm text-primary font-medium" />
             </div>
           </div>
         )}
@@ -89,12 +93,12 @@ export function OrderSummary({
           <div className="space-y-3 rounded-lg border p-3">
             <div className="flex items-center justify-between text-sm">
               <span>{tc("useLoyalty")}</span>
-              <span className="font-medium">{LOYALTY_POINTS} pts</span>
+              <span className="font-medium">{loyaltyPointsBalance} pts</span>
             </div>
             <Slider
               value={[loyaltyPoints]}
               onValueChange={([v]) => setLoyaltyPoints(v)}
-              max={Math.min(LOYALTY_POINTS, Math.floor(subtotal / POINTS_TO_SAR))}
+              max={Math.min(loyaltyPointsBalance, Math.floor(subtotal / POINTS_TO_SAR))}
               step={100}
             />
             <p className="text-xs text-muted-foreground flex items-center gap-1">

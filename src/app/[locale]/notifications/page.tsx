@@ -1,5 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
-import { NotificationsPage } from "@/components/pages/notifications-page";
+import { NotificationsPage } from "@/features/notifications/components/notifications-page";
 
 export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;

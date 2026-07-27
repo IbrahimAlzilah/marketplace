@@ -1,5 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
-import { OrderDetailPage } from "@/components/pages/order-detail-page";
+import { OrderDetailPage } from "@/features/orders/components/order-detail-page";
 
 export default async function Page({
   params,

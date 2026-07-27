@@ -1,4 +1,7 @@
+"use client";
+
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 
 type AuthLayoutProps = {
@@ -8,6 +11,9 @@ type AuthLayoutProps = {
 };
 
 export function AuthLayout({ title, subtitle, children }: AuthLayoutProps) {
+  const t = useTranslations("home");
+  const tc = useTranslations("common");
+
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
       {/* Brand panel - desktop */}
@@ -25,13 +31,13 @@ export function AuthLayout({ title, subtitle, children }: AuthLayoutProps) {
         </Link>
         <div>
           <h2 className="text-3xl font-bold leading-tight">
-            Your Trusted Healthcare Marketplace
+            {t("heroTitle")}
           </h2>
           <p className="mt-4 text-primary-foreground/80 text-lg">
-            Shop from licensed pharmacies across Saudi Arabia. Fast delivery, secure payments, and expert care.
+            {t("heroSubtitle")}
           </p>
         </div>
-        <p className="text-sm text-primary-foreground/60">© 2026 YUSUR Marketplace</p>
+        <p className="text-sm text-primary-foreground/60">© 2026 {tc("appName") || "YUSUR Marketplace"}</p>
       </div>
 
       {/* Form panel */}

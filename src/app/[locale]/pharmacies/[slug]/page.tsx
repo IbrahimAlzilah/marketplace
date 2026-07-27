@@ -1,5 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
-import { PharmacyDetailPage } from "@/components/pages/pharmacy-detail-page";
+import { PharmacyDetailPage } from "@/features/pharmacies/components/pharmacy-detail-page";
 
 export default async function Page({
   params,

@@ -6,8 +6,8 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { ToastContainer } from "@/components/providers/toast-provider";
 import { AppShell } from "@/components/layout/app-shell";
-import { coHeadline, arabKufi } from "@/app/fonts";
-import "../globals.css";
+import { coHeadline, arabKufi } from "@/styles/fonts";
+import "@/app/globals.css";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));

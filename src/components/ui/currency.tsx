@@ -55,8 +55,7 @@ export function Price({
 }: PriceProps) {
   const locale = useLocale();
 
-  // const formattedAmount = new Intl.NumberFormat(locale === "ar" ? "ar-SA" : "en-US", {
-  const formattedAmount = new Intl.NumberFormat(locale === "ar" ? "en-US" : "en-US", {
+  const formattedAmount = new Intl.NumberFormat(locale === "ar" ? "ar-SA" : "en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(amount);

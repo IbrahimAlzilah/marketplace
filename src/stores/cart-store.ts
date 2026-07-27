@@ -1,48 +1,14 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { AllocationStatus } from "@/lib/allocation-evaluator";
+
+// Re-export CheckoutLine and useCheckoutStore so existing consumers importing
+// from "@/stores/cart-store" continue to work without modification.
+export type { CheckoutLine } from "./checkout-store";
+export { useCheckoutStore } from "./checkout-store";
 
 export type CartLine = {
   productId: string;
   quantity: number;
-};
-
-export type CheckoutLine = {
-  productId: string;
-  productName: string;
-  productNameAr: string;
-  price: number;
-  image: string;
-  pharmacyId: string;
-  pharmacyName: string;
-  pharmacyNameAr: string;
-  requestedQty: number;
-  allocatedQty: string | number; // "?", "*", or number
-  status: AllocationStatus;
-  resolution: "pending" | "accepted_partial" | "accepted_substitute" | "accepted_partial_and_substitute" | "removed" | "approved";
-  substitute?: {
-    productId: string;
-    name: string;
-    nameAr: string;
-    price: number;
-    image: string;
-  } | null;
-  substitutes?: Array<{
-    productId: string;
-    name: string;
-    nameAr: string;
-    price: number;
-    image: string;
-  }>;
-  selectedSubstitute?: {
-    productId: string;
-    name: string;
-    nameAr: string;
-    price: number;
-    image: string;
-  } | null;
-  rejectionReason?: string;
-  rejectionReasonAr?: string;
 };
 
 type CartState = {
@@ -50,8 +16,7 @@ type CartState = {
   couponCode: string | null;
   walletAmount: number;
   loyaltyPoints: number;
-  checkoutAddressId: string | null;
-  checkoutLines: CheckoutLine[];
+
   addItem: (productId: string, quantity?: number) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
@@ -60,12 +25,21 @@ type CartState = {
   setWalletAmount: (amount: number) => void;
   setLoyaltyPoints: (points: number) => void;
   getItemCount: () => number;
+
+  // ---------------------------------------------------------------------------
+  // Backward-compat shims: checkout fields that components still destructure
+  // from useCartStore(). They delegate to useCheckoutStore.
+  // ---------------------------------------------------------------------------
+  checkoutAddressId: string | null;
+  checkoutLines: import("./checkout-store").CheckoutLine[];
   setCheckoutAddressId: (id: string | null) => void;
-  setCheckoutLines: (lines: CheckoutLine[]) => void;
+  setCheckoutLines: (lines: import("./checkout-store").CheckoutLine[]) => void;
   resolvePartialLine: (productId: string, accept: boolean) => void;
-  resolveRejectedLine: (productId: string, substitute: CheckoutLine["selectedSubstitute"]) => void;
-  resolvePartialWithSubstituteLine: (productId: string, substitute: CheckoutLine["selectedSubstitute"]) => void;
+  resolveRejectedLine: (productId: string, substitute: import("./checkout-store").CheckoutLine["selectedSubstitute"]) => void;
+  resolvePartialWithSubstituteLine: (productId: string, substitute: import("./checkout-store").CheckoutLine["selectedSubstitute"]) => void;
   resetCheckout: () => void;
+
+  // Dev-only: scenario selector state
   activeScenarioId: string | null;
   setActiveScenarioId: (id: string | null) => void;
 };
@@ -73,14 +47,12 @@ type CartState = {
 export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
+      // ── Cart domain state ──────────────────────────────────────────────────
       items: [],
       couponCode: null,
       walletAmount: 0,
       loyaltyPoints: 0,
-      checkoutAddressId: null,
-      checkoutLines: [],
-      activeScenarioId: null,
-      setActiveScenarioId: (id) => set({ activeScenarioId: id }),
+
       addItem: (productId, quantity = 1) => {
         const items = get().items;
         const existing = items.find((i) => i.productId === productId);
@@ -96,9 +68,11 @@ export const useCartStore = create<CartState>()(
           set({ items: [...items, { productId, quantity }] });
         }
       },
+
       removeItem: (productId) => {
         set({ items: get().items.filter((i) => i.productId !== productId) });
       },
+
       updateQuantity: (productId, quantity) => {
         if (quantity <= 0) {
           get().removeItem(productId);
@@ -110,64 +84,68 @@ export const useCartStore = create<CartState>()(
           ),
         });
       },
-      clearCart: () => set({ items: [], couponCode: null, walletAmount: 0, loyaltyPoints: 0, checkoutAddressId: null, checkoutLines: [] }),
+
+      clearCart: () => {
+        set({ items: [], couponCode: null, walletAmount: 0, loyaltyPoints: 0 });
+        // Also reset checkout state in the checkout store
+        import("./checkout-store").then(({ useCheckoutStore }) => {
+          useCheckoutStore.getState().resetCheckout();
+        });
+      },
+
       setCoupon: (code) => set({ couponCode: code }),
       setWalletAmount: (amount) => set({ walletAmount: amount }),
       setLoyaltyPoints: (points) => set({ loyaltyPoints: points }),
       getItemCount: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
-      setCheckoutAddressId: (id) => set({ checkoutAddressId: id }),
-      setCheckoutLines: (lines) => set({ checkoutLines: lines }),
-      resolvePartialLine: (productId, accept) => {
-        const lines = get().checkoutLines.map((line) => {
-          if (line.productId !== productId) return line;
-          return {
-            ...line,
-            resolution: accept ? ("accepted_partial" as const) : ("removed" as const),
-          };
+
+      // ── Checkout shims (delegate to checkout-store) ────────────────────────
+      checkoutAddressId: null,
+      checkoutLines: [],
+      setCheckoutAddressId: (id) => {
+        import("./checkout-store").then(({ useCheckoutStore }) => {
+          useCheckoutStore.getState().setCheckoutAddressId(id);
         });
-        set({ checkoutLines: lines });
+      },
+      setCheckoutLines: (lines) => {
+        import("./checkout-store").then(({ useCheckoutStore }) => {
+          useCheckoutStore.getState().setCheckoutLines(lines);
+        });
+      },
+      resolvePartialLine: (productId, accept) => {
+        import("./checkout-store").then(({ useCheckoutStore }) => {
+          useCheckoutStore.getState().resolvePartialLine(productId, accept);
+        });
       },
       resolveRejectedLine: (productId, substitute) => {
-        const lines = get().checkoutLines.map((line) => {
-          if (line.productId !== productId) return line;
-          if (substitute) {
-            return {
-              ...line,
-              selectedSubstitute: substitute,
-              resolution: "accepted_substitute" as const,
-            };
-          } else {
-            return {
-              ...line,
-              selectedSubstitute: null,
-              resolution: "removed" as const,
-            };
-          }
+        import("./checkout-store").then(({ useCheckoutStore }) => {
+          useCheckoutStore.getState().resolveRejectedLine(productId, substitute);
         });
-        set({ checkoutLines: lines });
       },
       resolvePartialWithSubstituteLine: (productId, substitute) => {
-        const lines = get().checkoutLines.map((line) => {
-          if (line.productId !== productId) return line;
-          if (substitute) {
-            return {
-              ...line,
-              selectedSubstitute: substitute,
-              resolution: "accepted_partial_and_substitute" as const,
-            };
-          } else {
-            return {
-              ...line,
-              selectedSubstitute: null,
-              resolution: "accepted_partial" as const,
-            };
-          }
+        import("./checkout-store").then(({ useCheckoutStore }) => {
+          useCheckoutStore.getState().resolvePartialWithSubstituteLine(productId, substitute);
         });
-        set({ checkoutLines: lines });
       },
-      resetCheckout: () => set({ checkoutLines: [], checkoutAddressId: null }),
+      resetCheckout: () => {
+        import("./checkout-store").then(({ useCheckoutStore }) => {
+          useCheckoutStore.getState().resetCheckout();
+        });
+      },
+
+      // ── Dev-only scenario state ────────────────────────────────────────────
+      activeScenarioId: null,
+      setActiveScenarioId: (id) => set({ activeScenarioId: id }),
     }),
-    { name: "yusur-cart" }
+    {
+      name: "yusur-cart",
+      // Only persist cart domain state
+      partialize: (state) => ({
+        items: state.items,
+        couponCode: state.couponCode,
+        walletAmount: state.walletAmount,
+        loyaltyPoints: state.loyaltyPoints,
+        activeScenarioId: state.activeScenarioId,
+      }),
+    }
   )
 );
-

@@ -3,8 +3,18 @@
 import { usePathname } from "@/i18n/navigation";
 import { SiteHeader, MobileBottomNav } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
-import { ScenarioSelector } from "@/components/marketplace/scenario-selector";
-import { AuthModal } from "@/components/auth/auth-modal";
+import dynamic from "next/dynamic";
+
+const AuthModal = dynamic(
+  () => import("@/components/auth/auth-modal").then((m) => m.AuthModal),
+  { ssr: false }
+);
+
+// Dev-only: import ScenarioSelector only in non-production builds
+const ScenarioSelector =
+  process.env.NODE_ENV !== "production"
+    ? require("@/components/marketplace/scenario-selector").ScenarioSelector
+    : () => null;
 
 const AUTH_ROUTES = ["/login", "/register", "/otp", "/forgot-password", "/reset-password"];
 
@@ -22,8 +32,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <main className="flex-1 pb-20 md:pb-0">{children}</main>
       <SiteFooter />
       <MobileBottomNav />
-      <ScenarioSelector />
+      {process.env.NODE_ENV !== "production" && <ScenarioSelector />}
       <AuthModal />
     </>
   );
 }
+

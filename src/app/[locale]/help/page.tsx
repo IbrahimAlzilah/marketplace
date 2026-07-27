@@ -1,5 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
-import { HelpPage } from "@/components/pages/help-page";
+import { HelpPage } from "@/features/support/components/help-page";
 
 export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
